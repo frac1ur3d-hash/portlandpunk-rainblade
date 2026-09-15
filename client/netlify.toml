@@ -1,0 +1,13 @@
+[build]
+command = ""
+publish = "dist"
+
+[[redirects]]
+from = "/game"
+to = "/rain-blade.html"
+status = 200
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200

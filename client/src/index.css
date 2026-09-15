@@ -1,0 +1,262 @@
+@import "leaflet/dist/leaflet.css";
+
+/* ── 8-BIT CYBERPUNK BASE THEME ─────────────────────────────────────────── */
+:root {
+  --neon-cyan:    #00f5ff;
+  --neon-pink:    #ff2d55;
+  --neon-green:   #30d158;
+  --neon-purple:  #bf5af2;
+  --neon-orange:  #ff9500;
+  --neon-yellow:  #ffd60a;
+  --dark-bg:      #05050a;
+  --dark-panel:   #0d0d16;
+  --dark-border:  #252538;
+  --text-primary: #f0f0ff;
+  --text-muted:   #757599;
+  --hp-color:     #ff3b30;
+  --mp-color:     #0a84ff;
+  --xp-color:     #30d158;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--dark-bg);
+  color: var(--text-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* ── Utility Classes (Zero Tailwind Dependency) ── */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-around { justify-content: space-around; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+.max-w-\[900px\] { max-width: 900px; }
+.max-w-\[760px\] { max-width: 760px; }
+.max-w-\[700px\] { max-width: 700px; }
+.max-w-\[680px\] { max-width: 680px; }
+.max-w-\[640px\] { max-width: 640px; }
+.max-w-\[480px\] { max-width: 480px; }
+.max-w-\[460px\] { max-width: 460px; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+.top-3 { top: 12px; }
+.left-4 { left: 16px; }
+.bottom-4 { bottom: 16px; }
+.right-4 { right: 16px; }
+.overflow-hidden { overflow: hidden; }
+.text-center { text-align: center; }
+.font-bold { font-weight: bold; }
+.uppercase { text-transform: uppercase; }
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+.px-2 { padding-left: 8px; padding-right: 8px; }
+.py-1 { padding-top: 4px; padding-bottom: 4px; }
+.px-3 { padding-left: 12px; padding-right: 12px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.px-6 { padding-left: 24px; padding-right: 24px; }
+.py-3 { padding-top: 12px; padding-bottom: 12px; }
+.m-0 { margin: 0; }
+.mb-2 { margin-bottom: 8px; }
+.mb-6 { margin-bottom: 24px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.z-50 { z-index: 50; }
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+/* ── 8-Bit Retro Box Borders ── */
+.pixel-box {
+  background: var(--dark-panel);
+  border: 4px solid #000;
+  box-shadow: 
+    -4px 0 0 0 #000,
+    4px 0 0 0 #000,
+    0 -4px 0 0 #000,
+    0 4px 0 0 #000,
+    inset -4px -4px 0 0 #151522,
+    inset 4px 4px 0 0 #3a3a55;
+  position: relative;
+}
+
+.pixel-box-cyan {
+  background: #090e17;
+  border: 4px solid #000;
+  box-shadow: 
+    -4px 0 0 0 var(--neon-cyan),
+    4px 0 0 0 var(--neon-cyan),
+    0 -4px 0 0 var(--neon-cyan),
+    0 4px 0 0 var(--neon-cyan),
+    0 0 12px rgba(0, 245, 255, 0.4);
+}
+
+.pixel-box-pink {
+  background: #170910;
+  border: 4px solid #000;
+  box-shadow: 
+    -4px 0 0 0 var(--neon-pink),
+    4px 0 0 0 var(--neon-pink),
+    0 -4px 0 0 var(--neon-pink),
+    0 4px 0 0 var(--neon-pink),
+    0 0 12px rgba(255, 45, 85, 0.4);
+}
+
+/* ── 8-Bit Push Button ── */
+.pixel-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  padding: 8px 14px;
+  background: #1e1e2f;
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 3px 3px 0px #000;
+  cursor: pointer;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.pixel-btn:hover {
+  background: #2a2a44;
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000;
+}
+.pixel-btn-pink {
+  background: #2f121d;
+  border-color: var(--neon-pink);
+  color: var(--neon-pink);
+}
+.pixel-btn-pink:hover {
+  background: #441829;
+  box-shadow: 0 0 8px var(--neon-pink);
+}
+
+/* ── CRT Scanline & Curved Arcade Effect ── */
+.crt-overlay::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.crt-vignette::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.8);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* ── 8-Bit Health & Energy Bars ── */
+.bar-track-8bit {
+  background: #111;
+  border: 2px solid #333;
+  box-shadow: inset 2px 2px 0 #000;
+  height: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.bar-fill-8bit {
+  height: 100%;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Floating Damage Text ── */
+@keyframes float-damage {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-24px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+}
+.floating-damage {
+  animation: float-damage 0.8s forwards;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  text-shadow: 2px 2px 0 #000, -2px -2px 0 #000;
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ── Leaflet 8-Bit Dark Overrides ── */
+.leaflet-container {
+  background: #06070e !important;
+  font-family: 'Press Start 2P', monospace !important;
+}
+
+.dark-matter-tiles {
+  filter: contrast(120%) brightness(95%) !important;
+}
+
+.cyber-tiles {
+  filter: brightness(75%) contrast(140%) hue-rotate(180deg) invert(100%) !important;
+}
+
+.leaflet-control-zoom a {
+  background: #121422 !important;
+  color: var(--neon-cyan) !important;
+  border: 2px solid #000 !important;
+  box-shadow: 2px 2px 0 #000 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 10px !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0b0c16 !important;
+  border: 3px solid #000 !important;
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.5) !important;
+  color: #fff !important;
+  border-radius: 0px !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 9px !important;
+}
+
+.leaflet-popup-tip {
+  background: #0b0c16 !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(5, 5, 10, 0.85) !important;
+  color: #757599 !important;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 6px !important;
+}
+.leaflet-control-attribution a {
+  color: var(--neon-cyan) !important;
+}

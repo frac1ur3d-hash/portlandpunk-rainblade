@@ -1,0 +1,18 @@
+{
+  "name": "portlandpunk-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "ethers": "^6.13.4",
+    "express": "^4.22.2",
+    "socket.io": "^4.8.1"
+  }
+}

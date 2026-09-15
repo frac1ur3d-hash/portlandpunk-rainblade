@@ -1,0 +1,11 @@
+﻿node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+apply_patch*.mjs
+patch_*.mjs
+full_loot_pool.json
+test_*.js
