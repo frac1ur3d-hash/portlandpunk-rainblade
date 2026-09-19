@@ -343,138 +343,167 @@
     <div id="toastContainer" class="absolute top-14 right-4 z-30 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
   </main>
 
-  <!-- Inventory Modal -->
-  <div id="inventoryModal" style="z-index: 60;" class="fixed inset-0 z-60 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="glass-panel w-full max-w-2xl rounded-3xl border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col max-h-[88vh]">
-      <div class="px-6 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/70">
+  <!-- Diablo 4 Style Paperdoll & Inventory Modal -->
+  <div id="inventoryModal" style="z-index: 60;" class="fixed inset-0 z-60 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-cyan-500/40 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] flex flex-col max-h-[92vh]">
+      <!-- Header -->
+      <div class="px-6 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
         <div class="flex items-center gap-3">
-          <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-            </svg>
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-lg font-bold">
+            ⚔️
           </div>
           <div>
-            <h2 class="font-display font-bold text-base text-white">EQUIPMENT & BACKPACK</h2>
-            <p class="text-[11px] text-slate-400 font-mono">Portland Street Blades & Relics</p>
+            <h2 class="font-display font-black text-sm sm:text-base text-white tracking-wider flex items-center gap-2">
+              HERO ARMORY & INVENTORY MATRIX
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800">D4 ARMORED</span>
+            </h2>
+            <p class="text-[11px] text-slate-400 font-mono">Paperdoll loadout, gear masteries & grid cache</p>
           </div>
         </div>
-        <button onclick="toggleModal('inventoryModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
-          ✕
-        </button>
-      </div>
-
-      <div class="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Equipped Slots -->
-        <div class="space-y-3">
-          <h3 class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">Active Loadout</h3>
-
-          <!-- Primary Blade Slot -->
-          <div id="slotWeapon" class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col gap-2 transition-all">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-xl">🗡️</div>
-                <div>
-                  <div class="text-[10px] font-mono text-emerald-400 uppercase flex items-center gap-1.5">
-                    <span>Primary Blade</span>
-                    <span id="eqWeaponStars" class="text-amber-400 font-bold">★</span>
-                    <span id="eqWeaponLvlBadge" class="bg-emerald-950 text-emerald-300 px-1 py-0.2 rounded border border-emerald-800 text-[9px]">Lv.1</span>
-                  </div>
-                  <div id="eqWeaponName" class="font-semibold text-xs sm:text-sm text-slate-100">Barista Straight-Razor</div>
-                  <div id="eqWeaponStats" class="text-[11px] font-mono text-slate-400">+16 Attack Power</div>
-                </div>
-              </div>
-              <button id="btnReforgeWeapon" onclick="reforgeGear('weapon')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 text-xs font-mono font-bold transition-all flex flex-col items-center">
-                <span>REFORGE</span>
-                <span id="reforgeWeaponCost" class="text-[9px] font-normal">45 ☕</span>
-              </button>
-            </div>
-            <!-- Weapon XP Bar -->
-            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
-              <div id="eqWeaponXpBar" class="bg-gradient-to-r from-emerald-500 to-amber-400 h-full w-0 transition-all duration-300"></div>
-            </div>
-            <div class="flex justify-between text-[9px] font-mono text-slate-400 px-0.5">
-              <span>Mastery Progress</span>
-              <span id="eqWeaponXpText">0 / 120 XP</span>
-            </div>
+        <div class="flex items-center gap-3">
+          <div class="px-3 py-1 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 font-mono text-xs font-bold flex items-center gap-1.5">
+            <span>STASH BEANS:</span>
+            <span id="invBeansDisplay">0 ☕</span>
           </div>
-
-          <!-- Body Apparel Slot -->
-          <div id="slotArmor" class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col gap-2 transition-all">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-cyan-950/60 border border-cyan-500/40 flex items-center justify-center text-xl">🧥</div>
-                <div>
-                  <div class="text-[10px] font-mono text-cyan-400 uppercase flex items-center gap-1.5">
-                    <span>Body Apparel</span>
-                    <span id="eqArmorStars" class="text-amber-400 font-bold">★</span>
-                    <span id="eqArmorLvlBadge" class="bg-cyan-950 text-cyan-300 px-1 py-0.2 rounded border border-cyan-800 text-[9px]">Lv.1</span>
-                  </div>
-                  <div id="eqArmorName" class="font-semibold text-xs sm:text-sm text-slate-100">Waxed Canvas Duster</div>
-                  <div id="eqArmorStats" class="text-[11px] font-mono text-slate-400">+45 HP, +8 Armor</div>
-                </div>
-              </div>
-              <button id="btnReforgeArmor" onclick="reforgeGear('armor')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 text-xs font-mono font-bold transition-all flex flex-col items-center">
-                <span>REFORGE</span>
-                <span id="reforgeArmorCost" class="text-[9px] font-normal">45 ☕</span>
-              </button>
-            </div>
-            <!-- Armor XP Bar -->
-            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
-              <div id="eqArmorXpBar" class="bg-gradient-to-r from-cyan-500 to-amber-400 h-full w-0 transition-all duration-300"></div>
-            </div>
-            <div class="flex justify-between text-[9px] font-mono text-slate-400 px-0.5">
-              <span>Mastery Progress</span>
-              <span id="eqArmorXpText">0 / 120 XP</span>
-            </div>
-          </div>
-
-          <!-- Urban Trinket Slot -->
-          <div id="slotRelic" class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col gap-2 transition-all">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-950/60 border border-amber-500/40 flex items-center justify-center text-xl">🍩</div>
-                <div>
-                  <div class="text-[10px] font-mono text-amber-400 uppercase flex items-center gap-1.5">
-                    <span>Urban Trinket</span>
-                    <span id="eqRelicStars" class="text-amber-400 font-bold">★</span>
-                    <span id="eqRelicLvlBadge" class="bg-amber-950 text-amber-300 px-1 py-0.2 rounded border border-amber-800 text-[9px]">Lv.1</span>
-                  </div>
-                  <div id="eqRelicName" class="font-semibold text-xs sm:text-sm text-slate-100">Voodoo Bacon Maple Talisman</div>
-                  <div id="eqRelicStats" class="text-[11px] font-mono text-slate-400">+12% Speed, +5% Crit</div>
-                </div>
-              </div>
-              <button id="btnReforgeRelic" onclick="reforgeGear('relic')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 text-xs font-mono font-bold transition-all flex flex-col items-center">
-                <span>REFORGE</span>
-                <span id="reforgeRelicCost" class="text-[9px] font-normal">45 ☕</span>
-              </button>
-            </div>
-            <!-- Relic XP Bar -->
-            <div class="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden border border-slate-800">
-              <div id="eqRelicXpBar" class="bg-gradient-to-r from-amber-500 to-rose-400 h-full w-0 transition-all duration-300"></div>
-            </div>
-            <div class="flex justify-between text-[9px] font-mono text-slate-400 px-0.5">
-              <span>Mastery Progress</span>
-              <span id="eqRelicXpText">0 / 150 XP</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Inventory List -->
-        <div class="flex flex-col">
-          <h3 class="text-xs font-mono uppercase tracking-wider text-slate-300 font-bold mb-3 flex items-center justify-between">
-            <span>District Backpack</span>
-            <span id="bagCapacityText" class="text-[10px] text-slate-400 font-mono">0 / 16 SLOTS</span>
-          </h3>
-
-          <div id="inventoryBagList" class="flex-1 space-y-2 pr-1 max-h-64 overflow-y-auto"></div>
+          <button onclick="toggleModal('inventoryModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+            ✕
+          </button>
         </div>
       </div>
 
-      <div class="px-6 py-3 bg-slate-900/80 border-t border-slate-800 flex items-center justify-between">
-        <span class="text-[11px] font-mono text-slate-400">Equip or dismantle items for Stumptown Beans.</span>
-        <button onclick="scrapAllJunk()" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-rose-950/60 border border-slate-700 hover:border-rose-500/40 text-xs font-mono text-rose-300 transition-all">
-          Scrap Bag Loot
-        </button>
+      <!-- Main Body: 2 Columns (Left: D4 Paperdoll Silhouette, Right: Grid Bag & Item Inspection) -->
+      <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- LEFT: Diablo 4 Paperdoll Character Silhouette & Sockets (5 Columns) -->
+        <div class="lg:col-span-6 flex flex-col items-center bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 relative">
+          <div class="w-full flex justify-between items-center mb-3">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Character Paperdoll Loadout</span>
+            <span class="text-[9px] font-mono text-slate-400">Equipped Gear Sockets</span>
+          </div>
+
+          <!-- Paperdoll Visual Layout Container -->
+          <div class="relative w-full max-w-[340px] h-[360px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2">
+            <!-- Center Hero 8-Bit Silhouette -->
+            <div class="absolute flex flex-col items-center justify-center opacity-75 pointer-events-none">
+              <div class="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">🥷</div>
+              <div class="text-[10px] font-mono text-cyan-400 font-bold mt-1 tracking-widest" id="d4HeroNameDisplay">RAIN-WALKER</div>
+              <div class="text-[9px] font-mono text-slate-500">OPERATIVE LVL <span id="d4HeroLvlDisplay">1</span></div>
+            </div>
+
+            <!-- Top Row: Head / Mask Slot -->
+            <div class="absolute top-3 flex justify-center">
+              <div class="w-14 h-14 rounded-xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-all shadow-md group" title="Headgear Slot">
+                <span class="text-2xl group-hover:scale-110 transition-transform">🥽</span>
+                <span class="text-[8px] font-mono text-slate-400">MASK</span>
+              </div>
+            </div>
+
+            <!-- Mid Row Left: Primary Weapon (Left Hand) -->
+            <div class="absolute left-3 top-28 flex flex-col items-center">
+              <div id="d4SlotWeapon" onclick="inspectEquipSlot('weapon')" class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-emerald-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all">
+                <span class="text-xs font-mono text-emerald-400 font-bold">WEAPON</span>
+                <span id="d4WeaponIcon" class="text-2xl">🗡️</span>
+                <span id="d4WeaponLvl" class="text-[9px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-1">MAIN HAND</span>
+            </div>
+
+            <!-- Mid Row Center: Body Armor / Duster -->
+            <div class="absolute top-24 flex flex-col items-center">
+              <div id="d4SlotArmor" onclick="inspectEquipSlot('armor')" class="w-16 h-22 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
+                <span class="text-xs font-mono text-cyan-400 font-bold">CHEST</span>
+                <span id="d4ArmorIcon" class="text-2xl">🧥</span>
+                <span id="d4ArmorLvl" class="text-[9px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-1">TORSO</span>
+            </div>
+
+            <!-- Mid Row Right: Off Hand / Tact Shield -->
+            <div class="absolute right-3 top-28 flex flex-col items-center">
+              <div class="w-16 h-20 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-slate-500 transition-all opacity-80" title="Off-Hand Aegis">
+                <span class="text-xs font-mono text-slate-400 font-bold">OFF-HAND</span>
+                <span class="text-2xl">🛡️</span>
+                <span class="text-[8px] font-mono text-slate-500">KINETIC</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-1">SHIELD</span>
+            </div>
+
+            <!-- Bottom Left: Urban Relic (Trinket 1) -->
+            <div class="absolute left-6 bottom-3 flex flex-col items-center">
+              <div id="d4SlotRelic" onclick="inspectEquipSlot('relic')" class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-amber-400 font-bold">RELIC</span>
+                <span id="d4RelicIcon" class="text-xl">🍩</span>
+                <span id="d4RelicLvl" class="text-[8px] font-mono text-amber-300 bg-slate-950 px-1 rounded">Lv.1</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">TRINKET</span>
+            </div>
+
+            <!-- Bottom Right: Leyline Ring / Charm -->
+            <div class="absolute right-6 bottom-3 flex flex-col items-center">
+              <div class="w-14 h-14 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-rose-400 transition-all opacity-80">
+                <span class="text-[9px] font-mono text-rose-400 font-bold">RING</span>
+                <span class="text-xl">💍</span>
+                <span class="text-[8px] font-mono text-slate-500">LEYLINE</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">FINGER</span>
+            </div>
+          </div>
+
+          <!-- Equipped Gear Mastery & Reforge Panel below paperdoll -->
+          <div id="d4InspectionCard" class="w-full mt-3 p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div id="inspectItemIcon" class="w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center text-xl">🗡️</div>
+                <div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span id="inspectItemName">Barista Straight-Razor</span>
+                    <span id="inspectItemStars" class="text-amber-400 font-bold">★</span>
+                  </div>
+                  <div id="inspectItemStats" class="text-[10px] font-mono text-emerald-400">+16 Attack Power</div>
+                </div>
+              </div>
+              <button id="btnInspectReforge" onclick="reforgeInspectedSlot()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-mono font-bold shadow-glow-amber transition-all flex flex-col items-center">
+                <span>REFORGE</span>
+                <span id="inspectReforgeCost" class="text-[9px] font-normal">45 ☕</span>
+              </button>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
+              <div id="inspectItemXpBar" class="bg-gradient-to-r from-emerald-500 to-amber-400 h-full w-0 transition-all duration-300"></div>
+            </div>
+            <div class="flex justify-between text-[9px] font-mono text-slate-400 px-0.5">
+              <span>Combat Mastery XP</span>
+              <span id="inspectItemXpText">0 / 120 XP (0%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Diablo-Style Tactile Grid Inventory (24 Slots 6x4) & Bag Actions (6 Columns) -->
+        <div class="lg:col-span-6 flex flex-col justify-between bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">GRID INVENTORY STASH</span>
+                <span id="bagGridSlotsText" class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">0 / 24 SLOTS</span>
+              </div>
+              <span class="text-[9px] font-mono text-cyan-400">Click item to inspect / equip</span>
+            </div>
+
+            <!-- 6 Columns x 4 Rows Tactile Grid (24 Slots) -->
+            <div id="d4InventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 rounded-2xl bg-slate-950 border border-slate-800/90 min-h-[220px]">
+              <!-- Generated dynamically by renderInventoryBag() -->
+            </div>
+          </div>
+
+          <!-- Stash Actions Footer -->
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+            <span class="text-[10px] font-mono text-slate-400">Right-click or tap to equip / dismantle.</span>
+            <button onclick="scrapAllJunk()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/80 border border-slate-700 hover:border-rose-500/50 text-xs font-mono text-rose-300 transition-all shadow-md">
+              Scrap Bag Loot ♻️
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -4070,37 +4099,112 @@
       }
     }
 
-    function renderInventoryBag() {
-      const container = document.getElementById('inventoryBagList');
-      container.innerHTML = '';
-
-      document.getElementById('bagCapacityText').textContent = `${gameState.inventory.length} / 16 SLOTS`;
-
-      gameState.inventory.forEach((item, index) => {
-        const itemEl = document.createElement('div');
-        itemEl.className = "p-3 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 flex items-center justify-between cursor-pointer transition-all";
-        itemEl.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="text-xl">${item.icon}</span>
-            <div>
-              <div class="text-xs font-semibold text-white">${item.name}</div>
-              <div class="text-[11px] font-mono text-slate-400">${item.bonus}</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="equipItem(${index})" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-slate-950 rounded-lg text-xs font-mono font-bold">Equip</button>
-            <button onclick="scrapItem(${index})" class="px-2 py-1 bg-slate-800 hover:bg-rose-900/60 text-rose-400 rounded-lg text-xs font-mono">Sell</button>
-          </div>
-        `;
-        container.appendChild(itemEl);
-      });
-    }
+    let activeInspectSlot = 'weapon';
 
     function inspectEquipSlot(slot) {
+      activeInspectSlot = slot;
       const item = gameState.equipped[slot];
-      if (item) {
-        showToast(`${item.name} (${item.tier}): ${item.bonus}`, "info");
+      if (!item) return;
+
+      const nameEl = document.getElementById('inspectItemName');
+      const iconEl = document.getElementById('inspectItemIcon');
+      const statsEl = document.getElementById('inspectItemStats');
+      const starsEl = document.getElementById('inspectItemStars');
+      const xpBarEl = document.getElementById('inspectItemXpBar');
+      const xpTextEl = document.getElementById('inspectItemXpText');
+      const costEl = document.getElementById('inspectReforgeCost');
+      const btnReforge = document.getElementById('btnInspectReforge');
+
+      const lvl = item.level || 1;
+      const stars = item.stars || 1;
+      const xp = item.xp || 0;
+      const xpMax = item.xpMax || (100 * lvl);
+      const cost = 45 * lvl;
+
+      if (nameEl) nameEl.textContent = `${item.name} (Lv.${lvl})`;
+      if (iconEl) iconEl.textContent = item.icon || '🗡️';
+      if (statsEl) statsEl.textContent = item.bonus || '';
+      if (starsEl) starsEl.textContent = '★'.repeat(stars);
+      if (costEl) costEl.textContent = `${cost} ☕`;
+
+      const pct = Math.min(100, Math.round((xp / xpMax) * 100));
+      if (xpBarEl) xpBarEl.style.width = `${pct}%`;
+      if (xpTextEl) xpTextEl.textContent = lvl >= 10 ? 'MAX MASTERWORK (LVL 10)' : `${xp} / ${xpMax} XP (${pct}%)`;
+
+      if (btnReforge) {
+        if (lvl >= 10) {
+          btnReforge.classList.add('opacity-40', 'pointer-events-none');
+          btnReforge.textContent = 'MAXED';
+        } else if (xp >= xpMax && gameState.player.beans >= cost) {
+          btnReforge.classList.remove('opacity-40', 'pointer-events-none');
+          btnReforge.classList.add('animate-pulse', 'bg-amber-500', 'text-slate-950');
+        } else {
+          btnReforge.classList.remove('animate-pulse');
+        }
       }
+    }
+
+    function reforgeInspectedSlot() {
+      reforgeGear(activeInspectSlot);
+      inspectEquipSlot(activeInspectSlot);
+    }
+
+    function renderInventoryBag() {
+      const container = document.getElementById('d4InventoryGrid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const totalCapacity = 24;
+      const bagCount = gameState.inventory.length;
+      const capEl = document.getElementById('bagGridSlotsText');
+      if (capEl) capEl.textContent = `${bagCount} / ${totalCapacity} SLOTS`;
+
+      const beansEl = document.getElementById('invBeansDisplay');
+      if (beansEl) beansEl.textContent = `${gameState.player.beans} ☕`;
+
+      // Render items in grid slots
+      for (let i = 0; i < totalCapacity; i++) {
+        const item = gameState.inventory[i];
+        const slotEl = document.createElement('div');
+
+        if (item) {
+          const tierBorder = item.tier === 'Legendary' ? 'border-amber-500 bg-amber-950/30' :
+                             item.tier === 'Epic' ? 'border-purple-500 bg-purple-950/30' :
+                             item.tier === 'Rare' ? 'border-cyan-500 bg-cyan-950/30' :
+                             'border-slate-700 bg-slate-900/80';
+          
+          slotEl.className = `w-full aspect-square rounded-xl border-2 ${tierBorder} flex flex-col items-center justify-between p-1 cursor-pointer hover:scale-105 hover:shadow-[0_0_12px_rgba(0,245,255,0.4)] transition-all relative group`;
+          slotEl.onclick = () => equipItem(i);
+          slotEl.innerHTML = `
+            <span class="text-[8px] font-mono font-bold text-slate-400 self-start">${item.type.slice(0,3).toUpperCase()}</span>
+            <span class="text-2xl my-auto">${item.icon}</span>
+            <span class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950/80 px-1 rounded">${'★'.repeat(item.stars || 1)}</span>
+
+            <!-- D4 Tactile Item Hover Tooltip -->
+            <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2.5 rounded-xl bg-slate-950/95 border border-cyan-500 shadow-2xl pointer-events-none hidden group-hover:flex flex-col gap-1 z-50">
+              <div class="font-bold text-xs text-white flex items-center justify-between">
+                <span>${item.name}</span>
+                <span class="text-[9px] text-cyan-400 font-mono">${item.tier}</span>
+              </div>
+              <div class="text-[10px] font-mono text-emerald-400">${item.bonus}</div>
+              <div class="text-[9px] font-mono text-slate-400 flex justify-between border-t border-slate-800 pt-1">
+                <span>Value: ${item.value || 50} ☕</span>
+                <span class="text-cyan-300 font-bold">CLICK TO EQUIP</span>
+              </div>
+            </div>
+          `;
+        } else {
+          // Empty tactile grid slot
+          slotEl.className = "w-full aspect-square rounded-xl border border-slate-800/60 bg-slate-950/40 flex items-center justify-center text-slate-800 text-sm select-none hover:border-slate-700 transition-colors";
+          slotEl.innerHTML = '<span>•</span>';
+        }
+
+        container.appendChild(slotEl);
+      }
+
+      // Keep paperdoll equipped slots updated
+      updateEquippedUI();
+      inspectEquipSlot(activeInspectSlot);
     }
 
     function equipItem(index) {
@@ -4151,49 +4255,34 @@
 
     function updateEquippedUI() {
       const eq = gameState.equipped;
-      ['weapon', 'armor', 'relic'].forEach(slot => {
-        const item = eq[slot];
-        if (!item) return;
+      const hero = gameState.player;
 
-        const capitalized = slot.charAt(0).toUpperCase() + slot.slice(1);
-        const nameEl = document.getElementById(`eq${capitalized}Name`);
-        const statsEl = document.getElementById(`eq${capitalized}Stats`);
-        const starsEl = document.getElementById(`eq${capitalized}Stars`);
-        const lvlEl = document.getElementById(`eq${capitalized}LvlBadge`);
-        const xpBarEl = document.getElementById(`eq${capitalized}XpBar`);
-        const xpTextEl = document.getElementById(`eq${capitalized}XpText`);
-        const costEl = document.getElementById(`reforge${capitalized}Cost`);
-        const btnReforge = document.getElementById(`btnReforge${capitalized}`);
+      const heroName = document.getElementById('d4HeroNameDisplay');
+      const heroLvl = document.getElementById('d4HeroLvlDisplay');
+      if (heroName) heroName.textContent = hero.name || 'RAIN-WALKER';
+      if (heroLvl) heroLvl.textContent = hero.level || 1;
 
-        if (nameEl) nameEl.textContent = item.name;
-        if (statsEl) statsEl.textContent = item.bonus;
+      // Update D4 Paperdoll Sockets
+      if (eq.weapon) {
+        const wIcon = document.getElementById('d4WeaponIcon');
+        const wLvl = document.getElementById('d4WeaponLvl');
+        if (wIcon) wIcon.textContent = eq.weapon.icon || '🗡️';
+        if (wLvl) wLvl.textContent = `Lv.${eq.weapon.level || 1}`;
+      }
+      if (eq.armor) {
+        const aIcon = document.getElementById('d4ArmorIcon');
+        const aLvl = document.getElementById('d4ArmorLvl');
+        if (aIcon) aIcon.textContent = eq.armor.icon || '🧥';
+        if (aLvl) aLvl.textContent = `Lv.${eq.armor.level || 1}`;
+      }
+      if (eq.relic) {
+        const rIcon = document.getElementById('d4RelicIcon');
+        const rLvl = document.getElementById('d4RelicLvl');
+        if (rIcon) rIcon.textContent = eq.relic.icon || '🍩';
+        if (rLvl) rLvl.textContent = `Lv.${eq.relic.level || 1}`;
+      }
 
-        const lvl = item.level || 1;
-        const stars = item.stars || 1;
-        const xp = item.xp || 0;
-        const xpMax = item.xpMax || (100 * lvl);
-        const cost = 45 * lvl;
-
-        if (starsEl) starsEl.textContent = '★'.repeat(stars);
-        if (lvlEl) lvlEl.textContent = `Lv.${lvl}`;
-        if (costEl) costEl.textContent = `${cost} ☕`;
-
-        const pct = Math.min(100, Math.round((xp / xpMax) * 100));
-        if (xpBarEl) xpBarEl.style.width = `${pct}%`;
-        if (xpTextEl) xpTextEl.textContent = lvl >= 10 ? 'MAX MASTERWORK' : `${xp} / ${xpMax} XP (${pct}%)`;
-
-        if (btnReforge) {
-          if (lvl >= 10) {
-            btnReforge.classList.add('opacity-40', 'pointer-events-none');
-            btnReforge.textContent = 'MAXED';
-          } else if (xp >= xpMax && gameState.player.beans >= cost) {
-            btnReforge.classList.remove('opacity-40', 'pointer-events-none');
-            btnReforge.classList.add('animate-pulse', 'bg-amber-500', 'text-slate-950');
-          } else {
-            btnReforge.classList.remove('animate-pulse', 'bg-amber-500', 'text-slate-950');
-          }
-        }
-      });
+      inspectEquipSlot(activeInspectSlot);
     }
 
     function grantGearXp(enemyXp) {
