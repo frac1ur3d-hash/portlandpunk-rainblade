@@ -856,6 +856,32 @@
             <span>RESTORE LAST CHECKPOINT</span>
           </button>
 
+          
+          <!-- Safe Game Save & Export/Import Backup Controls -->
+          <div class="grid grid-cols-2 gap-2 pt-1 font-mono text-[10px]">
+            <button onclick="exportSaveFile()" class="py-2 px-3 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/50 text-emerald-300 font-bold transition-all flex items-center justify-center gap-1.5" title="Download your game save to a safe .json file">
+              <span>📥</span>
+              <span>EXPORT SAVE (.JSON)</span>
+            </button>
+            <label class="py-2 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="Load your game save from a .json file">
+              <span>📤</span>
+              <span>IMPORT SAVE</span>
+              <input type="file" accept=".json" onchange="importSaveFile(event)" class="hidden">
+            </label>
+          </div>
+
+          <!-- Global High Scores & Class Selection -->
+          <div class="grid grid-cols-2 gap-2 font-mono text-[10px]">
+            <button onclick="openLeaderboard()" class="py-2 px-3 rounded-xl bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/50 text-amber-300 font-bold transition-all flex items-center justify-center gap-1.5">
+              <span>🏆</span>
+              <span>HIGH SCORES (L)</span>
+            </button>
+            <button onclick="openClassSelector()" class="py-2 px-3 rounded-xl bg-cyan-950/50 hover:bg-cyan-900/70 border border-cyan-500/50 text-cyan-300 font-bold transition-all flex items-center justify-center gap-1.5">
+              <span>🥷</span>
+              <span>CHANGE CLASS</span>
+            </button>
+          </div>
+
           <!-- Safehouse Retreat -->
           
           <!-- NEURAL SPONSOR BROADCAST STATION (Opt-in Reward) -->
@@ -900,6 +926,124 @@
   </div>
 
   <script>
+    
+    // === DIABLO-STYLE SET DEFINITIONS (EMERALD GREEN TIER) ===
+    const GEAR_SETS = {
+      stumptown_roaster: {
+        id: 'stumptown_roaster',
+        name: 'Stumptown Leyline Roaster',
+        color: '#22c55e',
+        pieces: [
+          "Roaster's Cyber-Visor",
+          "Steam-Spike Leyline Katana",
+          "Barista Reinforced Apron",
+          "Espresso Puddle Jumpers",
+          "Stumptown Leyline Signet",
+          "Espresso Quantum Core"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +30% Coffee Energy Regen & +15% Move Speed" },
+          { count: 4, text: "(4) Set: +40% Attack Speed & Slashes emit Espresso Shockwaves" },
+          { count: 6, text: "(6) Set: Overclocked Resonance (+100% Ricochet Dmg, +50% Beans dropped)" }
+        ]
+      },
+      rose_thornstalker: {
+        id: 'rose_thornstalker',
+        name: 'Rose City Thornstalker',
+        color: '#10b981',
+        pieces: [
+          "Briar Cryptid Mask",
+          "Rosewood Leyline Cleaver",
+          "Portlandia Spiked Aegis",
+          "Thorn-Woven Trench",
+          "Forest Park Briar Runners",
+          "Rose City Thorn Signet"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +100 Max HP & +25 Armor Rating" },
+          { count: 4, text: "(4) Set: Thorn Aegis (Reflects 40% Melee Damage to Attackers)" },
+          { count: 6, text: "(6) Set: Avatar of the Rose God (Summons rotating briar cyclones)" }
+        ]
+      },
+      burnside_anarchist: {
+        id: 'burnside_anarchist',
+        name: 'Burnside Street Anarchist',
+        color: '#34d399',
+        pieces: [
+          "Anarchist Gas Respirator",
+          "Burnside Anarchy Machete",
+          "Tanto Cyber-Wakizashi (Dual-Wield)",
+          "Kevlar Flannel Vest",
+          "Overclocked Doc Martens",
+          "Willamette River Obsidian Ring"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +15% Crit Chance & +20% Dash Distance" },
+          { count: 4, text: "(4) Set: Dual-Wield +50% Damage & Guaranteed Blade Ricochet" },
+          { count: 6, text: "(6) Set: Anarchy Overdrive (Enemy kills reset Dash, 5+ combo gives Invulnerability)" }
+        ]
+      }
+    };
+
+    // === 4 SELECTABLE CYBERPUNK HERO CLASSES ===
+    const HERO_CLASSES = {
+      stalker: {
+        id: 'stalker',
+        name: 'Rain Blade Stalker',
+        role: 'Agile Katana Specialist',
+        icon: '🥷',
+        desc: 'Master of the atmospheric katana. Excels at high-speed bullet ricochet and swift blade dashes.',
+        hpBonus: 0,
+        armorBonus: 0,
+        speedBonus: 0.10,
+        attackBonus: 4,
+        critBonus: 0.05,
+        ricochetBonus: 0.35,
+        passive: '+35% Blade Ricochet Speed & Extended Slash Arc'
+      },
+      enforcer: {
+        id: 'enforcer',
+        name: 'Burnside Heavy Enforcer',
+        role: 'Frontline Kinetic Tank',
+        icon: '🛡️',
+        desc: 'Urban brawler clad in heavy tactical plate. Wields kinetic riot shields with high damage absorption.',
+        hpBonus: 80,
+        armorBonus: 22,
+        speedBonus: -0.05,
+        attackBonus: 0,
+        critBonus: 0.0,
+        blockBonus: 0.25,
+        passive: '+80 Base HP, +22 Armor, +25% Shield Block Chance'
+      },
+      technomancer: {
+        id: 'technomancer',
+        name: 'Leyline Technomancer',
+        role: 'Coffee Plasma Caster',
+        icon: '⚡',
+        desc: 'Harnesses Portland anomaly leyline channels to unleash high-energy espresso shockwaves.',
+        hpBonus: -20,
+        armorBonus: -4,
+        speedBonus: 0.05,
+        attackBonus: 10,
+        energyBonus: 40,
+        critBonus: 0.10,
+        passive: '+40 Coffee Energy, +10 Attack, Slashes fire Plasma Bolts'
+      },
+      rogue: {
+        id: 'rogue',
+        name: 'Rose City Shadow Rogue',
+        role: 'Lethal Dual-Wield Assassin',
+        icon: '🗡️',
+        desc: 'Operates from the shadows with twin blades, landing devastating critical strikes and thorn bleeds.',
+        hpBonus: 10,
+        armorBonus: 4,
+        speedBonus: 0.20,
+        attackBonus: 6,
+        critBonus: 0.18,
+        passive: '+18% Crit Chance, +20% Move Speed, Slashes inflict Briar Bleed'
+      }
+    };
+
     const PORTLAND_DISTRICTS = [
       {
         id: 'burnside',
@@ -999,7 +1143,8 @@
       equipped: {
         head: {
           id: 'h1',
-          name: 'Rain-City AR Visor',
+          name: "Roaster's Cyber-Visor",
+          setId: 'stumptown_roaster',
           tier: 'Uncommon',
           hp: 25,
           critChance: 0.05,
@@ -1073,7 +1218,8 @@
         },
         ring1: {
           id: 'rg1',
-          name: 'Stumptown Leyline Band',
+          name: "Stumptown Leyline Signet",
+          setId: 'stumptown_roaster',
           tier: 'Rare',
           ricochetBonus: 0.20,
           bonus: '+20% Ricochet Bullet Damage',
@@ -3258,7 +3404,8 @@
           { name: 'Hawthorne Cryptid Cowl', type: 'head', icon: '🥷', tier: 'Rare', hp: 55, critChance: 0.10, bonus: '+55 HP, +10% Crit', value: 110 },
           { name: 'Stumptown Burlap Hood', type: 'head', icon: '🧢', tier: 'Epic', hp: 80, critChance: 0.14, bonus: '+80 HP, +14% Crit, Leyline Cloak', value: 160 },
           { name: 'Burnside Riot Deflector', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Rare', armor: 16, blockChance: 0.18, bonus: '+16 Armor, +18% Block Chance', value: 95 },
-          { name: 'Tanto Cyber-Wakizashi (Dual-Wield)', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 24, attackSpeedBonus: 0.25, bonus: '+24 Dual-Slash Dmg, +25% Speed', value: 155 },
+          { name: 'Tanto Cyber-Wakizashi (Dual-Wield)',
+          setId: 'burnside_anarchist', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 24, attackSpeedBonus: 0.25, bonus: '+24 Dual-Slash Dmg, +25% Speed', value: 155 },
           { name: 'Eastside Deflector Aegis', type: 'offhand', subType: 'shield', icon: '🔰', tier: 'Legendary', armor: 28, blockChance: 0.25, bonus: '+28 Armor, +25% Block, Kinetic Pulse', value: 210 },
           { name: "Powell's Puddle Jumpers", type: 'boots', icon: '👢', tier: 'Uncommon', speedBonus: 0.15, bonus: '+15% Move Speed', value: 70 },
           { name: 'Overclocked Doc Martens', type: 'boots', icon: '🥾', tier: 'Rare', speedBonus: 0.22, armor: 8, bonus: '+22% Speed, +8 Armor', value: 120 },
@@ -4522,9 +4669,45 @@
       const xpMax = item.xpMax || (100 * lvl);
       const cost = 45 * lvl;
 
-      if (nameEl) nameEl.textContent = `${item.name} (Lv.${lvl})`;
+      // Check if this item is part of a Diablo Set
+      let setDetailsHtml = '';
+      if (item.setId && GEAR_SETS[item.setId]) {
+        const setDef = GEAR_SETS[item.setId];
+        // Count equipped pieces of this set
+        let equippedCount = 0;
+        Object.values(gameState.equipped).forEach(eq => {
+          if (eq && eq.setId === item.setId) equippedCount++;
+        });
+
+        const piecesHtml = setDef.pieces.map(pName => {
+          const isPieceEquipped = Object.values(gameState.equipped).some(eq => eq && eq.name.includes(pName.split(' ')[0]));
+          return `<span class="${isPieceEquipped ? 'text-emerald-400 font-bold' : 'text-slate-500'} text-[9px] block">• ${pName}</span>`;
+        }).join('');
+
+        const bonusesHtml = setDef.bonuses.map(b => {
+          const active = equippedCount >= b.count;
+          return `<div class="${active ? 'text-emerald-300 font-bold' : 'text-slate-500'} text-[9px]">${b.text} ${active ? '✓ ACTIVE' : ''}</div>`;
+        }).join('');
+
+        setDetailsHtml = `
+          <div class="mt-2 pt-2 border-t border-emerald-900/60 font-mono">
+            <div class="text-emerald-400 font-bold text-xs flex justify-between">
+              <span>${setDef.name}</span>
+              <span>(${equippedCount}/${setDef.pieces.length} Equipped)</span>
+            </div>
+            <div class="my-1 pl-1">${piecesHtml}</div>
+            <div class="space-y-0.5 mt-1.5 pl-1">${bonusesHtml}</div>
+          </div>
+        `;
+      }
+
+      if (nameEl) {
+        nameEl.innerHTML = `<span class="${item.setId ? 'text-emerald-400' : 'text-white'}">${item.name} (Lv.${lvl})</span>`;
+      }
       if (iconEl) iconEl.textContent = item.icon || '🗡️';
-      if (statsEl) statsEl.textContent = item.bonus || '';
+      if (statsEl) {
+        statsEl.innerHTML = `<div>${item.bonus || ''}</div>${setDetailsHtml}`;
+      }
       if (starsEl) starsEl.textContent = '★'.repeat(stars);
       if (costEl) costEl.textContent = `${cost} ☕`;
 
@@ -4843,29 +5026,30 @@
     function recalcPlayerStats() {
       const p = gameState.player;
       const eq = gameState.equipped;
-      let totalAttack = 18 + (p.level * 4);
-      let totalArmor = 8 + (p.level * 2);
-      let extraHp = 0;
-      let speedMult = 1.0;
-      let critBonus = 0;
-      let blockBonus = 0;
 
-      // 1. Head
+      // 1. Base Class Stats
+      const classId = p.heroClass || 'stalker';
+      const cDef = HERO_CLASSES[classId] || HERO_CLASSES.stalker;
+
+      let totalAttack = 18 + (p.level * 4) + (cDef.attackBonus || 0);
+      let totalArmor = 8 + (p.level * 2) + (cDef.armorBonus || 0);
+      let extraHp = cDef.hpBonus || 0;
+      let speedMult = 1.0 + (cDef.speedBonus || 0);
+      let critBonus = cDef.critBonus || 0;
+      let blockBonus = cDef.blockBonus || 0;
+
+      // 2. Calculate Equipped Gear Stats (8 Sockets)
       if (eq.head) {
         extraHp += eq.head.hp || 0;
         critBonus += eq.head.critChance || 0;
         totalArmor += eq.head.armor || 0;
       }
-
-      // 2. Main-Hand Weapon
       if (eq.weapon) {
         totalAttack += eq.weapon.damage || eq.weapon.statVal || 0;
       }
-
-      // 3. Off-Hand (Shield vs Dual-Wield Blade)
       if (eq.offhand) {
         if (eq.offhand.subType === 'dualwield' || eq.offhand.damage) {
-          totalAttack += Math.round((eq.offhand.damage || eq.offhand.statVal || 0) * 0.75); // Off-hand slash damage
+          totalAttack += Math.round((eq.offhand.damage || eq.offhand.statVal || 0) * 0.75);
         }
         if (eq.offhand.armor) {
           totalArmor += eq.offhand.armor;
@@ -4874,38 +5058,77 @@
           blockBonus += eq.offhand.blockChance;
         }
       }
-
-      // 4. Chest Armor
       if (eq.armor) {
         extraHp += eq.armor.hp || 0;
         totalArmor += eq.armor.armor || 0;
       }
-
-      // 5. Boots
       if (eq.boots) {
         speedMult += eq.boots.speedBonus || 0;
         totalArmor += eq.boots.armor || 0;
       }
-
-      // 6. Ring 1
       if (eq.ring1) {
         totalAttack += eq.ring1.damage || 0;
         critBonus += eq.ring1.critChance || 0;
       }
-
-      // 7. Ring 2
       if (eq.ring2) {
         totalAttack += eq.ring2.damage || 0;
         critBonus += eq.ring2.critChance || 0;
       }
-
-      // 8. Relic
       if (eq.relic) {
         speedMult += eq.relic.speedBonus || 0;
         extraHp += eq.relic.hp || 0;
       }
 
-      p.maxHp = 120 + extraHp + (p.level * 20);
+      // 3. Compute Diablo Set Bonuses
+      const setCounts = {};
+      Object.values(eq).forEach(item => {
+        if (item && item.setId) {
+          setCounts[item.setId] = (setCounts[item.setId] || 0) + 1;
+        }
+      });
+
+      p.activeSetBonuses = {};
+
+      // Stumptown Roaster Set Bonuses
+      if ((setCounts['stumptown_roaster'] || 0) >= 2) {
+        speedMult += 0.15;
+        p.activeSetBonuses['stumptown_2'] = true;
+      }
+      if ((setCounts['stumptown_roaster'] || 0) >= 4) {
+        totalAttack += 15;
+        p.activeSetBonuses['stumptown_4'] = true;
+      }
+      if ((setCounts['stumptown_roaster'] || 0) >= 6) {
+        p.activeSetBonuses['stumptown_6'] = true;
+      }
+
+      // Rose Thornstalker Set Bonuses
+      if ((setCounts['rose_thornstalker'] || 0) >= 2) {
+        extraHp += 100;
+        totalArmor += 25;
+        p.activeSetBonuses['rose_2'] = true;
+      }
+      if ((setCounts['rose_thornstalker'] || 0) >= 4) {
+        p.activeSetBonuses['rose_4'] = true;
+      }
+      if ((setCounts['rose_thornstalker'] || 0) >= 6) {
+        p.activeSetBonuses['rose_6'] = true;
+      }
+
+      // Burnside Anarchist Set Bonuses
+      if ((setCounts['burnside_anarchist'] || 0) >= 2) {
+        critBonus += 0.15;
+        p.activeSetBonuses['anarchist_2'] = true;
+      }
+      if ((setCounts['burnside_anarchist'] || 0) >= 4) {
+        totalAttack += 20;
+        p.activeSetBonuses['anarchist_4'] = true;
+      }
+      if ((setCounts['burnside_anarchist'] || 0) >= 6) {
+        p.activeSetBonuses['anarchist_6'] = true;
+      }
+
+      p.maxHp = Math.max(80, 120 + extraHp + (p.level * 20));
       p.hp = Math.min(p.hp, p.maxHp);
       p.armor = totalArmor;
       p.baseAttack = totalAttack;
@@ -4919,6 +5142,9 @@
       if (statDmg) statDmg.textContent = totalAttack;
       if (statDef) statDef.textContent = totalArmor;
       if (statSpd) statSpd.textContent = `${Math.round(p.speed / p.baseSpeed * 100)}%`;
+
+      const hudClass = document.getElementById('hudClassTitle');
+      if (hudClass) hudClass.textContent = cDef.name;
 
       updateHUD();
     }
@@ -5473,6 +5699,180 @@
         showToast(`Portland Protocol Online. Welcome, ${welcomeName}!`, "info");
       }, 600);
     };
+  
+    // === SAFE LOCAL SAVE, EXPORT/IMPORT, & GLOBAL LEADERBOARD ===
+
+    function exportSaveFile() {
+      saveGameState();
+      const raw = localStorage.getItem('portland_protocol_save');
+      if (!raw) {
+        showToast("No save state found to export!", "warning");
+        return;
+      }
+      const blob = new Blob([raw], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `portland_rainblade_save_${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Safe save file downloaded (.json)! Keep it safe on your device.", "success");
+    }
+
+    function importSaveFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data && data.player && data.equipped) {
+            localStorage.setItem('portland_protocol_save', JSON.stringify(data));
+            loadGameState();
+            showToast("Character save loaded successfully from file!", "success");
+          } else {
+            showToast("Invalid save file format.", "rose");
+          }
+        } catch (err) {
+          showToast("Failed to parse save file: " + err.message, "rose");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Leaderboard Hall of Fame
+    let globalLeaderboardCache = [
+      { rank: 1, name: "ZeroCool_PDX", class: "Rain Blade Stalker", wave: 28, slain: 412, score: 98400 },
+      { rank: 2, name: "GoreTex_Viper", class: "Rose City Shadow Rogue", wave: 24, slain: 360, score: 79200 },
+      { rank: 3, name: "Benson_Tank", class: "Burnside Heavy Enforcer", wave: 21, slain: 310, score: 68100 },
+      { rank: 4, name: "Espresso_Overload", class: "Leyline Technomancer", wave: 18, slain: 275, score: 55900 },
+      { rank: 5, name: "Hawthorne_Hex", class: "Rain Blade Stalker", wave: 15, slain: 198, score: 42100 }
+    ];
+
+    function openLeaderboard() {
+      const modal = document.getElementById('leaderboardModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const p = gameState.player;
+      const curScore = (p.enemiesSlain * 150) + (gameState.currentWave * 2000);
+      const scoreEl = document.getElementById('playerHighScoreVal');
+      const waveEl = document.getElementById('playerPeakWaveVal');
+      if (scoreEl) scoreEl.textContent = `${curScore} PTS`;
+      if (waveEl) waveEl.textContent = `Wave ${gameState.currentWave}`;
+
+      renderLeaderboardRows();
+    }
+
+    function renderLeaderboardRows() {
+      const container = document.getElementById('leaderboardRowsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      globalLeaderboardCache.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition-colors";
+        tr.innerHTML = `
+          <td class="p-2.5 font-bold ${item.rank === 1 ? 'text-amber-400' : item.rank === 2 ? 'text-slate-300' : item.rank === 3 ? 'text-amber-600' : 'text-slate-500'}">#${item.rank}</td>
+          <td class="p-2.5 font-bold text-white">${item.name}</td>
+          <td class="p-2.5 text-cyan-300">${item.class}</td>
+          <td class="p-2.5 text-emerald-400">Wave ${item.wave}</td>
+          <td class="p-2.5 text-slate-400">${item.slain}</td>
+          <td class="p-2.5 text-right font-bold text-amber-300">${item.score.toLocaleString()}</td>
+        `;
+        container.appendChild(tr);
+      });
+    }
+
+    function submitHighScore() {
+      const p = gameState.player;
+      const score = (p.enemiesSlain * 150) + (gameState.currentWave * 2000);
+      const cDef = HERO_CLASSES[p.heroClass || 'stalker'];
+
+      const newRecord = {
+        rank: globalLeaderboardCache.length + 1,
+        name: p.name || 'Rain-Walker',
+        class: cDef ? cDef.name : 'Rain Blade Stalker',
+        wave: gameState.currentWave,
+        slain: p.enemiesSlain,
+        score: score
+      };
+
+      globalLeaderboardCache.push(newRecord);
+      globalLeaderboardCache.sort((a, b) => b.score - a.score);
+      globalLeaderboardCache.forEach((r, idx) => r.rank = idx + 1);
+      globalLeaderboardCache = globalLeaderboardCache.slice(0, 10);
+
+      renderLeaderboardRows();
+      playSound('coin');
+      showToast("High score synced to Hall of Fame!", "success");
+    }
+
+    // Class Selection UI
+    function openClassSelector() {
+      const modal = document.getElementById('classSelectModal');
+      const grid = document.getElementById('classCardsGrid');
+      if (!modal || !grid) return;
+
+      grid.innerHTML = '';
+      const curClass = gameState.player.heroClass || 'stalker';
+
+      Object.values(HERO_CLASSES).forEach(cls => {
+        const isCurrent = cls.id === curClass;
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-2.5 ${
+          isCurrent ? 'bg-cyan-950/60 border-cyan-400 shadow-[0_0_20px_rgba(0,245,255,0.3)]' : 'bg-slate-950/80 border-slate-800 hover:border-slate-700'
+        }`;
+        card.onclick = () => selectHeroClass(cls.id);
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-3xl">${cls.icon}</span>
+              <div>
+                <div class="font-display font-black text-sm text-white">${cls.name}</div>
+                <div class="text-[9px] text-cyan-400">${cls.role}</div>
+              </div>
+            </div>
+            ${isCurrent ? '<span class="px-2 py-0.5 rounded-full bg-cyan-500 text-slate-950 text-[9px] font-bold">ACTIVE</span>' : ''}
+          </div>
+          <p class="text-[10px] text-slate-400 leading-tight">${cls.desc}</p>
+          <div class="pt-2 border-t border-slate-800 text-[10px] text-emerald-400 font-bold">
+            ⚡ ${cls.passive}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      modal.classList.remove('hidden');
+    }
+
+    function selectHeroClass(classId) {
+      if (!HERO_CLASSES[classId]) return;
+      gameState.player.heroClass = classId;
+      const cDef = HERO_CLASSES[classId];
+      recalcPlayerStats();
+      updateHUD();
+      toggleModal('classSelectModal');
+      playSound('coin');
+      showToast(`Switched Operative Class to ${cDef.name}!`, "success");
+    }
+
+    // Add hotkey 'L' for leaderboard
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'l' || e.key === 'L') {
+        if (!e.repeat && !e.target.matches('input, textarea')) {
+          const lb = document.getElementById('leaderboardModal');
+          if (lb) {
+            if (lb.classList.contains('hidden')) openLeaderboard();
+            else lb.classList.add('hidden');
+          }
+        }
+      }
+    });
+
   </script>
 
   <!-- EMERGENCY SPONSOR REVIVE MODAL -->
@@ -5535,6 +5935,87 @@
       </div>
 
       <p class="text-[10px] text-slate-400">Synchronizing quantum coffee beans to neural stash...</p>
+    </div>
+  </div>
+
+
+  <!-- GLOBAL HIGH SCORE LEADERBOARD MODAL -->
+  <div id="leaderboardModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div class="max-w-xl w-full rounded-3xl bg-slate-900 border border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.3)] flex flex-col max-h-[85vh] overflow-hidden font-mono">
+      <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/60">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏆</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">PORTLAND LEYLINE LEGENDS</h2>
+            <p class="text-[10px] text-emerald-400">Global High Scores & Operative Records</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('leaderboardModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3">
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center text-xs">
+          <div>
+            <span class="text-slate-400">Your High Score: </span>
+            <span id="playerHighScoreVal" class="text-emerald-400 font-bold">0 PTS</span>
+          </div>
+          <div>
+            <span class="text-slate-400">Peak Wave: </span>
+            <span id="playerPeakWaveVal" class="text-cyan-400 font-bold">Wave 1</span>
+          </div>
+          <button onclick="submitHighScore()" class="px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 text-[10px] font-bold transition-all">
+            SYNC RECORD
+          </button>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="overflow-hidden rounded-xl border border-slate-800">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-950/90 text-slate-400 uppercase text-[9px] border-b border-slate-800">
+              <tr>
+                <th class="p-2.5">Rank</th>
+                <th class="p-2.5">Operative</th>
+                <th class="p-2.5">Class</th>
+                <th class="p-2.5">Wave</th>
+                <th class="p-2.5">Slain</th>
+                <th class="p-2.5 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardRowsContainer" class="divide-y divide-slate-800/60 bg-slate-900/60">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="text-[9px] text-slate-500 flex justify-between px-1">
+          <span>SAFE SERVERLESS SYNC • NO PRIVATE DATA TRANSMITTED</span>
+          <span>HOTKEY: [L]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS SELECTION MODAL -->
+  <div id="classSelectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div class="max-w-2xl w-full rounded-3xl bg-slate-900 border border-cyan-500/50 shadow-[0_0_50px_rgba(0,245,255,0.3)] flex flex-col max-h-[90vh] overflow-hidden font-mono">
+      <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/60">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🥷</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">SELECT CYBERPUNK CLASS</h2>
+            <p class="text-[10px] text-cyan-400">Choose Operative Archetype & Combat Discipline</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('classSelectModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div id="classCardsGrid" class="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
   </div>
 
