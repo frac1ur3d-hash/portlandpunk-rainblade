@@ -4800,6 +4800,10 @@
           // SINGLE-CLICK: Inspect item in card
           slotEl.onclick = (e) => {
             e.stopPropagation();
+            if (e.shiftKey) {
+              quickScrapItem(i);
+              return;
+            }
             inspectStashItem(i);
           };
 
@@ -4807,6 +4811,17 @@
           slotEl.ondblclick = (e) => {
             e.stopPropagation();
             equipItem(i);
+          };
+
+          // SHIFT + RIGHT-CLICK: Quick scrap item
+          slotEl.oncontextmenu = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.shiftKey) {
+              quickScrapItem(i);
+            } else {
+              equipItem(i);
+            }
           };
 
           slotEl.innerHTML = `
@@ -4821,9 +4836,14 @@
                 <span class="text-[9px] text-cyan-400 font-mono">${item.tier}</span>
               </div>
               <div class="text-[10px] font-mono text-emerald-400">${item.bonus}</div>
-              <div class="text-[9px] font-mono text-slate-400 flex justify-between border-t border-slate-800 pt-1">
-                <span>Value: ${item.value || 50} ☕</span>
-                <span class="text-cyan-300 font-bold">DBL-CLICK / DRAG</span>
+              <div class="text-[9px] font-mono text-slate-400 flex flex-col gap-0.5 border-t border-slate-800 pt-1">
+                <div class="flex justify-between">
+                  <span>Value: ${item.value || 50} ☕</span>
+                  <span class="text-cyan-300 font-bold">DBL-CLICK: EQUIP</span>
+                </div>
+                <div class="text-rose-400 font-bold text-[8px] text-right">
+                  ⚡ SHIFT + RIGHT-CLICK: QUICK SCRAP
+                </div>
               </div>
             </div>
           `;
@@ -4871,6 +4891,22 @@
       inspectEquipSlot(slot);
       playSound('coin');
       showToast(`Equipped ${item.name} to ${slot.toUpperCase()}!`, "success");
+    }
+
+    
+    // === QUICK SCRAP ITEM (SHIFT + RIGHT-CLICK) ===
+    function quickScrapItem(index) {
+      const item = gameState.inventory[index];
+      if (!item) return;
+      const refund = item.value || 45;
+      gameState.player.beans += refund;
+      gameState.inventory.splice(index, 1);
+      playSound('coin');
+      createImpactParticles(gameState.player.x, gameState.player.y, '#fbbf24', 8);
+      addFloatingText(`+${refund} ☕ (Scrapped ${item.name})`, gameState.player.x, gameState.player.y - 20, '#fbbf24', 13);
+      renderInventoryBag();
+      updateHUD();
+      showToast(`⚡ Quick-Scrapped ${item.name} for +${refund} Beans!`, "info");
     }
 
     function scrapItem(index) {
