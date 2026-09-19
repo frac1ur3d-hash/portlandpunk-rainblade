@@ -384,7 +384,7 @@
           <!-- Paperdoll Visual Layout Container -->
           <div class="relative w-full max-w-[350px] h-[390px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2">
             <!-- Center Hero 8-Bit Silhouette -->
-            <div class="absolute flex flex-col items-center justify-center opacity-70 pointer-events-none">
+            <div class="absolute inset-0 flex flex-col items-center justify-center opacity-70 pointer-events-none">
               <div class="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">🥷</div>
               <div class="text-[10px] font-mono text-cyan-400 font-bold mt-1 tracking-widest" id="d4HeroNameDisplay">RAIN-WALKER</div>
               <div class="text-[9px] font-mono text-slate-500">OPERATIVE LVL <span id="d4HeroLvlDisplay">1</span></div>
@@ -1109,6 +1109,7 @@
         y: 0,
         vx: 0,
         vy: 0,
+        baseSpeed: 4.8,
         speed: 4.8,
         radius: 19,
         angle: 0,
@@ -1378,7 +1379,7 @@
       keys: {},
       mouse: { x: 0, y: 0, worldX: 0, worldY: 0, isDown: false },
       touchJoystick: { active: false, startX: 0, startY: 0, dirX: 0, dirY: 0 },
-      camera: { x: 0, y: 0 },
+      camera: { x: 0, y: 0, initialized: false },
       audioEnabled: false,
       lastTimestamp: performance.now(),
     };
@@ -3957,10 +3958,20 @@
       }
 
       const rect = canvas.getBoundingClientRect();
+      if (isNaN(p.x) || p.x === null) p.x = 0;
+      if (isNaN(p.y) || p.y === null) p.y = 0;
+      if (isNaN(p.speed) || p.speed <= 0) p.speed = 4.8;
+
       const targetCamX = p.x - (rect.width / 2);
       const targetCamY = p.y - (rect.height / 2);
-      gameState.camera.x += (targetCamX - gameState.camera.x) * 0.12;
-      gameState.camera.y += (targetCamY - gameState.camera.y) * 0.12;
+      if (isNaN(gameState.camera.x) || !gameState.camera.initialized) {
+        gameState.camera.x = targetCamX;
+        gameState.camera.y = targetCamY;
+        gameState.camera.initialized = true;
+      } else {
+        gameState.camera.x += (targetCamX - gameState.camera.x) * 0.15;
+        gameState.camera.y += (targetCamY - gameState.camera.y) * 0.15;
+      }
 
       if (gameState.screenShake > 0) gameState.screenShake = Math.max(0, gameState.screenShake - dt * 25);
       if (gameState.bassPulse > 0) gameState.bassPulse = Math.max(0, gameState.bassPulse - dt * 2.2);
@@ -5132,7 +5143,10 @@
       p.hp = Math.min(p.hp, p.maxHp);
       p.armor = totalArmor;
       p.baseAttack = totalAttack;
+      if (!p.baseSpeed || isNaN(p.baseSpeed)) p.baseSpeed = 4.8;
       p.speed = p.baseSpeed * speedMult;
+      if (isNaN(p.x) || p.x === null) p.x = 0;
+      if (isNaN(p.y) || p.y === null) p.y = 0;
       p.critChance = 0.05 + critBonus;
       p.blockChance = blockBonus;
 
@@ -5869,6 +5883,42 @@
             if (lb.classList.contains('hidden')) openLeaderboard();
             else lb.classList.add('hidden');
           }
+        }
+      }
+    });
+
+  
+    // === CENTER CHARACTER CAMERA CONTROLLER ===
+    function centerCharacter() {
+      const p = gameState.player;
+      if (isNaN(p.x) || p.x === null) p.x = 0;
+      if (isNaN(p.y) || p.y === null) p.y = 0;
+      if (isNaN(p.speed) || p.speed <= 0) p.speed = 4.8;
+      if (!p.baseSpeed) p.baseSpeed = 4.8;
+
+      const canvas = document.getElementById('gameCanvas');
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        gameState.camera.x = p.x - (rect.width / 2);
+        gameState.camera.y = p.y - (rect.height / 2);
+        gameState.camera.initialized = true;
+      }
+      createImpactParticles(p.x, p.y, '#00f5ff');
+      addFloatingText("🎯 CAMERA CENTERED", p.x, p.y - 25, '#00f5ff', 14);
+      showToast("Camera centered on Hero!", "info");
+    }
+
+    // Keydown 'c' or 'C' triggers centerCharacter when not in modals
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'c' || e.key === 'C') && !e.repeat && !e.target.matches('input, textarea')) {
+        const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'leaderboardModal', 'classSelectModal'].some(
+          id => {
+            const el = document.getElementById(id);
+            return el && !el.classList.contains('hidden');
+          }
+        );
+        if (!anyModalOpen) {
+          centerCharacter();
         }
       }
     });
