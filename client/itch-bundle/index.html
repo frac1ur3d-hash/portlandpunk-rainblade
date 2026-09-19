@@ -4766,6 +4766,149 @@
       showToast(`Unequipped ${item.name} to stash.`, "info");
     }
 
+    
+    // === DIABLO-STYLE SIDE-BY-SIDE GEAR COMPARISON TOOLTIP ===
+    function generateComparisonTooltipHtml(item, colIndex) {
+      if (!item) return '';
+
+      // Determine matching equipped slot
+      let targetSlot = item.type;
+      if (targetSlot === 'ring') {
+        // Compare with ring1 by default, or ring2 if ring1 is better
+        targetSlot = (!gameState.equipped.ring1 && gameState.equipped.ring2) ? 'ring2' : 'ring1';
+      }
+      const eq = gameState.equipped[targetSlot];
+
+      // Calculate Stat Differences
+      const diffs = [];
+      const itemDmg = item.damage || item.statVal || 0;
+      const eqDmg = eq ? (eq.damage || eq.statVal || 0) : 0;
+      if (itemDmg || eqDmg) {
+        const d = itemDmg - eqDmg;
+        diffs.push({ label: 'Attack', val: itemDmg, diff: d, unit: '' });
+      }
+
+      const itemHp = item.hp || 0;
+      const eqHp = eq ? (eq.hp || 0) : 0;
+      if (itemHp || eqHp) {
+        const d = itemHp - eqHp;
+        diffs.push({ label: 'Max HP', val: itemHp, diff: d, unit: '' });
+      }
+
+      const itemDef = item.armor || 0;
+      const eqDef = eq ? (eq.armor || 0) : 0;
+      if (itemDef || eqDef) {
+        const d = itemDef - eqDef;
+        diffs.push({ label: 'Armor', val: itemDef, diff: d, unit: '' });
+      }
+
+      const itemSpd = Math.round((item.speedBonus || 0) * 100);
+      const eqSpd = eq ? Math.round((eq.speedBonus || 0) * 100) : 0;
+      if (itemSpd || eqSpd) {
+        const d = itemSpd - eqSpd;
+        diffs.push({ label: 'Speed', val: itemSpd, diff: d, unit: '%' });
+      }
+
+      const itemCrit = Math.round((item.critChance || 0) * 100);
+      const eqCrit = eq ? Math.round((eq.critChance || 0) * 100) : 0;
+      if (itemCrit || eqCrit) {
+        const d = itemCrit - eqCrit;
+        diffs.push({ label: 'Crit', val: itemCrit, diff: d, unit: '%' });
+      }
+
+      // Generate stat diff pill tags
+      const diffsHtml = diffs.map(df => {
+        if (df.diff > 0) {
+          return `<span class="text-emerald-400 font-bold text-[9px] bg-emerald-950/70 border border-emerald-500/40 px-1 py-0.5 rounded">▲ +${df.diff}${df.unit} ${df.label}</span>`;
+        } else if (df.diff < 0) {
+          return `<span class="text-rose-400 font-bold text-[9px] bg-rose-950/70 border border-rose-500/40 px-1 py-0.5 rounded">▼ ${df.diff}${df.unit} ${df.label}</span>`;
+        } else {
+          return `<span class="text-slate-400 text-[9px] bg-slate-900 border border-slate-700 px-1 py-0.5 rounded">= ${df.label}</span>`;
+        }
+      }).join(' ');
+
+      // Alignment relative to grid column to prevent edge clipping
+      const alignClass = (colIndex % 6 <= 1) ? 'left-0' :
+                         (colIndex % 6 >= 4) ? 'right-0' : 'left-1/2 -translate-x-1/2';
+
+      return `
+        <!-- DIABLO SIDE-BY-SIDE COMPARISON CARD -->
+        <div class="absolute bottom-full mb-2 ${alignClass} w-[340px] sm:w-[410px] p-2.5 rounded-2xl bg-slate-950/98 border border-cyan-500/60 shadow-[0_0_35px_rgba(0,0,0,0.9)] pointer-events-none hidden group-hover:flex flex-col gap-2 z-50 font-mono">
+          
+          <!-- Top Stat Diff Highlight Bar -->
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 text-[9px]">
+            <span class="text-cyan-400 font-bold tracking-wider uppercase flex items-center gap-1">
+              <span>⚖️</span>
+              <span>GEAR COMPARISON (${targetSlot.toUpperCase()})</span>
+            </span>
+            <div class="flex gap-1 flex-wrap justify-end">
+              ${diffsHtml || '<span class="text-slate-400">Equip to compare</span>'}
+            </div>
+          </div>
+
+          <!-- Side-by-Side Dual Columns -->
+          <div class="grid grid-cols-2 gap-2 text-left">
+            
+            <!-- LEFT: Stash Item (New) -->
+            <div class="p-2 rounded-xl bg-slate-900/90 border border-cyan-500/50 flex flex-col justify-between gap-1">
+              <div>
+                <div class="flex items-center justify-between text-[8px] text-cyan-300 font-bold border-b border-slate-800 pb-0.5 mb-1">
+                  <span>[STASH ITEM]</span>
+                  <span>${item.tier}</span>
+                </div>
+                <div class="text-xs font-bold text-white flex items-center gap-1">
+                  <span>${item.icon || '🗡️'}</span>
+                  <span class="truncate">${item.name}</span>
+                </div>
+                <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+                <div class="text-[9px] text-emerald-400 mt-1 leading-tight">${item.bonus || ''}</div>
+                ${item.setId ? `<div class="text-[8px] text-emerald-300 font-bold mt-0.5">Set: ${GEAR_SETS[item.setId]?.name || item.setId}</div>` : ''}
+              </div>
+              <div class="text-[8px] text-slate-400 border-t border-slate-800 pt-1 mt-1 flex justify-between">
+                <span>Value: ${item.value || 50} ☕</span>
+                <span class="text-cyan-300 font-bold">NEW</span>
+              </div>
+            </div>
+
+            <!-- RIGHT: Currently Equipped -->
+            <div class="p-2 rounded-xl bg-slate-900/90 border ${eq ? 'border-amber-500/50' : 'border-slate-800'} flex flex-col justify-between gap-1">
+              <div>
+                <div class="flex items-center justify-between text-[8px] ${eq ? 'text-amber-300' : 'text-slate-500'} font-bold border-b border-slate-800 pb-0.5 mb-1">
+                  <span>[EQUIPPED NOW]</span>
+                  <span>${eq ? eq.tier : 'EMPTY'}</span>
+                </div>
+                ${eq ? `
+                  <div class="text-xs font-bold text-white flex items-center gap-1">
+                    <span>${eq.icon || '🛡️'}</span>
+                    <span class="truncate">${eq.name}</span>
+                  </div>
+                  <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(eq.stars || 1)} Lv.${eq.level || 1}</div>
+                  <div class="text-[9px] text-slate-300 mt-1 leading-tight">${eq.bonus || ''}</div>
+                  ${eq.setId ? `<div class="text-[8px] text-emerald-300 font-bold mt-0.5">Set: ${GEAR_SETS[eq.setId]?.name || eq.setId}</div>` : ''}
+                ` : `
+                  <div class="text-slate-500 text-[10px] my-auto py-3 text-center">
+                    (No item currently equipped)
+                  </div>
+                `}
+              </div>
+              <div class="text-[8px] text-slate-400 border-t border-slate-800 pt-1 mt-1 flex justify-between">
+                <span>${eq ? `Value: ${eq.value || 50} ☕` : 'Empty Socket'}</span>
+                <span class="text-amber-400 font-bold">${eq ? 'CURRENT' : '+100% UPGRADE'}</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Action Guide -->
+          <div class="pt-1 border-t border-slate-800 flex justify-between items-center text-[8px] text-slate-400">
+            <span class="text-cyan-300 font-bold">DBL-CLICK: EQUIP ITEM</span>
+            <span class="text-rose-400 font-bold">SHIFT+R-CLICK: QUICK SCRAP</span>
+          </div>
+
+        </div>
+      `;
+    }
+
     function renderInventoryBag() {
       const container = document.getElementById('d4InventoryGrid');
       if (!container) return;
@@ -4829,23 +4972,7 @@
             <span class="text-2xl my-auto select-none">${item.icon}</span>
             <span class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950/80 px-1 rounded">${'★'.repeat(item.stars || 1)}</span>
 
-            <!-- D4 Tactile Item Hover Tooltip -->
-            <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 p-2.5 rounded-xl bg-slate-950/95 border border-cyan-500 shadow-2xl pointer-events-none hidden group-hover:flex flex-col gap-1 z-50">
-              <div class="font-bold text-xs text-white flex items-center justify-between">
-                <span>${item.name}</span>
-                <span class="text-[9px] text-cyan-400 font-mono">${item.tier}</span>
-              </div>
-              <div class="text-[10px] font-mono text-emerald-400">${item.bonus}</div>
-              <div class="text-[9px] font-mono text-slate-400 flex flex-col gap-0.5 border-t border-slate-800 pt-1">
-                <div class="flex justify-between">
-                  <span>Value: ${item.value || 50} ☕</span>
-                  <span class="text-cyan-300 font-bold">DBL-CLICK: EQUIP</span>
-                </div>
-                <div class="text-rose-400 font-bold text-[8px] text-right">
-                  ⚡ SHIFT + RIGHT-CLICK: QUICK SCRAP
-                </div>
-              </div>
-            </div>
+            ${generateComparisonTooltipHtml(item, i)}
           `;
         } else {
           // Empty tactile grid slot: accepts drop
