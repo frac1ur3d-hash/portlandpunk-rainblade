@@ -742,80 +742,28 @@
     </div>
   </div>
 
-  <!-- Tactical Intermission Modal between waves -->
-  <div id="waveIntermissionModal" style="z-index: 50;" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div id="waveIntermissionCard" class="glass-panel w-full max-w-md rounded-3xl border border-emerald-500/60 overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.3)] flex flex-col transform transition-all duration-200 scale-95">
-      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xl font-bold flex items-center justify-center">
-            ⚔️
-          </div>
-          <div>
-            <h2 class="font-display font-black text-lg text-white tracking-wide">WAVE <span id="intermissionWaveNum">1</span> CLEARED!</h2>
-            <p class="text-[11px] text-slate-400 font-mono">Portland Anomaly Contained</p>
-          </div>
-        </div>
-        <button onclick="proceedFromIntermission()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Proceed to Next Wave">
-          ✕
-        </button>
-      </div>
 
-      <div class="p-6 space-y-4 font-mono text-xs">
-        <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div class="text-[9px] text-slate-400 uppercase">District</div>
-            <div id="intermissionDistrictName" class="font-bold text-white text-xs truncate mt-0.5">Burnside</div>
-          </div>
-          <div>
-            <div class="text-[9px] text-slate-400 uppercase">Beans Reward</div>
-            <div id="intermissionBeanBonus" class="font-bold text-amber-300 text-xs mt-0.5">+55 ☕</div>
-          </div>
-          <div>
-            <div class="text-[9px] text-slate-400 uppercase">XP Awarded</div>
-            <div id="intermissionXpBonus" class="font-bold text-emerald-400 text-xs mt-0.5">+70 XP</div>
-          </div>
-        </div>
-
-        <div id="intermissionSkillAlert" class="hidden p-3 rounded-2xl bg-cyan-950/60 border border-cyan-500/50 flex items-center justify-between">
-          <span id="intermissionSkillPointsText" class="text-cyan-300 font-bold text-xs">1 SKILL POINT UNSPENT</span>
-          <button onclick="openModalFromIntermission('skillsModal')" class="px-3 py-1 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all">Spend Points</button>
-        </div>
-
-        <div class="space-y-2 pt-1">
-          <button onclick="proceedFromIntermission()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-display font-extrabold text-sm tracking-wide shadow-glow-emerald transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
-            <span>▶</span>
-            <span>ENGAGE WAVE <span id="intermissionNextWaveNum">2</span> (SPACE)</span>
-          </button>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button onclick="openModalFromIntermission('inventoryModal')" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all">Equip Gear (I)</button>
-            <button onclick="openModalFromIntermission('skillsModal')" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all">Skills (K)</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dedicated Pause Screen Modal -->
+  <!-- Unified Dual-Purpose Tactical Pause Screen -->
   <div id="pauseModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div id="pauseModalCard" class="glass-panel w-full max-w-md rounded-3xl border border-amber-500/60 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.3)] flex flex-col transform transition-all duration-200 scale-95">
+    <div id="pauseModalCard" class="glass-panel w-full max-w-md rounded-3xl border border-amber-500/60 overflow-hidden shadow-[0_0_50px_rgba(245,158,11,0.3)] flex flex-col transform transition-all duration-200 scale-95 max-h-[90vh]">
+      <!-- Header -->
       <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
         <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xl font-bold flex items-center justify-center">
+          <div id="pauseModalIcon" class="p-2.5 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xl font-bold flex items-center justify-center">
             ⏸️
           </div>
           <div>
-            <h2 class="font-display font-black text-lg text-white tracking-wide">GAME PAUSED</h2>
-            <p class="text-[11px] text-slate-400 font-mono">Portland Anomaly Leyline Frozen</p>
+            <h2 id="pauseModalTitle" class="font-display font-black text-lg text-white tracking-wide">SIMULATION PAUSED</h2>
+            <p id="pauseModalSubtitle" class="text-[11px] text-slate-400 font-mono">Portland Anomaly Leyline Standby</p>
           </div>
         </div>
-        <button onclick="togglePause()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Resume Play">
+        <button onclick="handlePauseAction()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Resume / Next Wave">
           ✕
         </button>
       </div>
 
       <!-- Live Run Status Snapshot -->
-      <div class="p-6 space-y-4 font-mono text-xs">
+      <div class="p-6 space-y-4 font-mono text-xs overflow-y-auto">
         <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 grid grid-cols-3 gap-2 text-center">
           <div>
             <div class="text-[9px] text-slate-400 uppercase">District</div>
@@ -831,18 +779,59 @@
           </div>
         </div>
 
+        <!-- Wave Reward Panel (Shown dynamically between waves, hidden during manual pause) -->
+        <div id="pauseWaveRewardBox" class="hidden p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-center font-mono text-xs space-y-1">
+          <div class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">WAVE RECOVERY & REWARDS</div>
+          <div class="flex justify-around items-center text-xs font-bold pt-0.5">
+            <span id="pauseWaveBeanReward" class="text-amber-300">+55 ☕ Beans</span>
+            <span class="text-slate-600">•</span>
+            <span id="pauseWaveXpReward" class="text-emerald-300">+70 XP</span>
+          </div>
+        </div>
+
+        <!-- Skill Points Notice -->
         <div class="text-[11px] text-slate-300 flex justify-between items-center px-1">
           <span>Available Skill Points:</span>
-          <span id="pauseSkillPointsNum" class="font-bold text-cyan-300">1</span>
+          <div class="flex items-center gap-2">
+            <span id="pauseSkillPointsNum" class="font-bold text-cyan-300">1</span>
+            <button onclick="toggleModal('skillsModal')" class="px-2 py-0.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 text-[10px] font-bold">SPEND (K)</button>
+          </div>
         </div>
 
         <!-- Action Controls -->
         <div class="space-y-2.5 pt-1">
-          <!-- Resume Button -->
-          <button onclick="togglePause()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-display font-extrabold text-sm tracking-wide shadow-glow-emerald transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
-            <span>▶</span>
-            <span>RESUME PLAY (ESC)</span>
+          <!-- Main Action Button (Resume or Engage Next Wave) -->
+          <button id="pauseMainActionBtn" onclick="handlePauseAction()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-display font-extrabold text-sm tracking-wide shadow-glow-emerald transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
+            <span id="pauseMainActionIcon">▶</span>
+            <span id="pauseMainActionText">RESUME PLAY (ESC / SPACE)</span>
           </button>
+
+          <!-- Quick Gear & Skill Shortcuts -->
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="toggleModal('inventoryModal')" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>🎒</span>
+              <span>EQUIP GEAR (I)</span>
+            </button>
+            <button onclick="toggleModal('skillsModal')" class="py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>⚡</span>
+              <span>DISCIPLINES (K)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notification Toggle Switch (OFF by Default) -->
+        <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between font-mono">
+          <div>
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span id="notifToggleIcon">🔕</span>
+              <span>Loot & Cooldown Popups</span>
+            </div>
+            <div class="text-[9px] text-slate-400">Toggle "found loot", energy warnings & cooldown toasts</div>
+          </div>
+          <button id="toggleNotifsBtn" onclick="toggleNotifications()" class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 font-bold text-xs transition-all cursor-pointer">
+            OFF
+          </button>
+        </div>
 
           <!-- Save Checkpoint -->
           <button onclick="saveGameState()" class="w-full py-2.5 rounded-2xl bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 hover:border-cyan-400 text-cyan-300 font-bold text-xs transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer">
@@ -1104,6 +1093,9 @@
 
     const gameState = {
       isPaused: false,
+      settings: {
+        notificationsEnabled: false
+      },
       player: {
         x: 0,
         y: 0,
@@ -1573,27 +1565,38 @@
 
       if (e.key === 'Escape' || e.code === 'Escape' || e.key === 'p' || e.key === 'P') {
         e.preventDefault();
-        togglePause();
+        const pauseModal = document.getElementById('pauseModal');
+        if (pauseModal && !pauseModal.classList.contains('hidden')) {
+          handlePauseAction();
+        } else {
+          togglePause();
+        }
         return;
       }
 
-      if (gameState.intermissionActive && (e.key === ' ' || e.code === 'Space' || e.key === 'Enter')) {
-        const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal'].some(
-          id => !document.getElementById(id).classList.contains('hidden')
-        );
-        if (!anyModalOpen) {
-          e.preventDefault();
-          proceedFromIntermission();
-          return;
-        }
+      // If in pause screen (or wave intermission), Space / Enter continues or starts next wave
+      const pauseModalEl = document.getElementById('pauseModal');
+      const isPauseOpen = pauseModalEl && !pauseModalEl.classList.contains('hidden');
+      if (isPauseOpen && (e.key === ' ' || e.code === 'Space' || e.key === 'Enter')) {
+        e.preventDefault();
+        handlePauseAction();
+        return;
       }
 
       if (e.key === 'q' || e.key === 'Q') triggerSkill(1);
       if (e.key === 'e' || e.key === 'E') triggerSkill(2);
       if (e.key === 'r' || e.key === 'R') triggerSkill(3);
       if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-        triggerDodge();
+        const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'leaderboardModal', 'classSelectModal'].some(
+          id => {
+            const el = document.getElementById(id);
+            return el && !el.classList.contains('hidden');
+          }
+        );
+        if (!anyModalOpen) {
+          e.preventDefault();
+          triggerDodge();
+        }
       }
 
       if (e.key === 'i' || e.key === 'I' || e.key === 'b' || e.key === 'B') {
@@ -2139,47 +2142,56 @@
 
       playSound('level');
 
-      document.getElementById('intermissionWaveNum').textContent = gameState.wave;
-      document.getElementById('intermissionNextWaveNum').textContent = gameState.wave + 1;
-      document.getElementById('intermissionDistrictName').textContent = gameState.currentDistrict.name;
-      document.getElementById('intermissionBeanBonus').textContent = `+${beanBonus} ☕`;
-      document.getElementById('intermissionXpBonus').textContent = `+${xpBonus} XP`;
+      // Update Unified Pause Screen for Dual Purpose: Tactical Standby between Waves
+      const titleEl = document.getElementById('pauseModalTitle');
+      const subEl = document.getElementById('pauseModalSubtitle');
+      const iconEl = document.getElementById('pauseModalIcon');
+      const actionText = document.getElementById('pauseMainActionText');
+      const actionIcon = document.getElementById('pauseMainActionIcon');
+      const rewardBox = document.getElementById('pauseWaveRewardBox');
+      const beanRewardEl = document.getElementById('pauseWaveBeanReward');
+      const xpRewardEl = document.getElementById('pauseWaveXpReward');
 
-      const skillAlert = document.getElementById('intermissionSkillAlert');
-      const skillText = document.getElementById('intermissionSkillPointsText');
-      if (p.skillPoints > 0) {
-        skillAlert.classList.remove('hidden');
-        skillText.textContent = `${p.skillPoints} SKILL POINT${p.skillPoints > 1 ? 'S' : ''} UNSPENT`;
-      } else {
-        skillAlert.classList.add('hidden');
+      if (iconEl) iconEl.textContent = '⚡';
+      if (titleEl) titleEl.textContent = 'TACTICAL STANDBY';
+      if (subEl) subEl.textContent = `${gameState.currentDistrict.name} Anomaly Contained`;
+      if (actionText) actionText.textContent = `ENGAGE WAVE ${gameState.wave + 1} (SPACE / ESC)`;
+      if (actionIcon) actionIcon.textContent = '▶';
+
+      if (rewardBox) {
+        rewardBox.classList.remove('hidden');
+        if (beanRewardEl) beanRewardEl.textContent = `+${beanBonus} ☕ Beans`;
+        if (xpRewardEl) xpRewardEl.textContent = `+${xpBonus} XP`;
       }
 
+      const distEl = document.getElementById('pauseDistrictName');
+      const waveEl = document.getElementById('pauseWaveCounter');
+      const beansEl = document.getElementById('pauseBeansCounter');
+      const spEl = document.getElementById('pauseSkillPointsNum');
+      if (distEl) distEl.textContent = gameState.currentDistrict.name;
+      if (waveEl) waveEl.textContent = `Wave ${gameState.wave} (D${gameState.districtWave})`;
+      if (beansEl) beansEl.textContent = `${p.beans} ☕`;
+      if (spEl) spEl.textContent = p.skillPoints;
+
+      promptSafehouseExit(false);
+      updateNotifToggleButton();
       updateHUD();
 
-      const modal = document.getElementById('waveIntermissionModal');
-      const card = document.getElementById('waveIntermissionCard');
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        card.classList.remove('scale-95');
-        card.classList.add('scale-100');
-      }, 10);
+      const pauseModal = document.getElementById('pauseModal');
+      const pauseCard = document.getElementById('pauseModalCard');
+      if (pauseModal) {
+        pauseModal.classList.remove('hidden');
+        setTimeout(() => {
+          if (pauseCard) {
+            pauseCard.classList.remove('scale-95');
+            pauseCard.classList.add('scale-100');
+          }
+        }, 10);
+      }
     }
 
     function proceedFromIntermission() {
-      const modal = document.getElementById('waveIntermissionModal');
-      const card = document.getElementById('waveIntermissionCard');
-      card.classList.remove('scale-100');
-      card.classList.add('scale-95');
-      setTimeout(() => modal.classList.add('hidden'), 120);
-
-      gameState.intermissionActive = false;
-      gameState.isPaused = false;
-
-      if (gameState.audioEnabled && audioInitialized && Tone.Transport.state === 'paused') {
-        Tone.Transport.start();
-      }
-
-      startNextWave();
+      handlePauseAction();
     }
 
     function openModalFromIntermission(modalId) {
@@ -3507,10 +3519,9 @@
     }
 
     function triggerLevelUpCelebration(lvl) {
-      document.getElementById('bannerLevelNum').textContent = lvl;
-      const banner = document.getElementById('levelUpBanner');
-      banner.classList.remove('hidden');
-      setTimeout(() => banner.classList.add('hidden'), 2400);
+      const bannerNum = document.getElementById('bannerLevelNum');
+      if (bannerNum) bannerNum.textContent = lvl;
+      // Intrusive center-screen banner suppressed to keep screen clean
     }
 
     function createImpactParticles(x, y, color = '#38bdf8', count = 7) {
@@ -5571,39 +5582,125 @@
     }
 
     function togglePause() {
-      gameState.isPaused = !gameState.isPaused;
       const pauseModal = document.getElementById('pauseModal');
       const pauseCard = document.getElementById('pauseModalCard');
+      if (!pauseModal) return;
 
-      if (gameState.isPaused) {
+      const isOpening = pauseModal.classList.contains('hidden');
+      gameState.isPaused = isOpening;
+
+      if (isOpening) {
         if (gameState.audioEnabled && audioInitialized && Tone.Transport.state === 'started') {
           Tone.Transport.pause();
         }
 
-        ['inventoryModal', 'skillsModal', 'locationModal', 'charModal'].forEach(id => {
+        ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'leaderboardModal', 'classSelectModal'].forEach(id => {
           const m = document.getElementById(id);
           if (m && !m.classList.contains('hidden')) m.classList.add('hidden');
         });
 
-        document.getElementById('pauseDistrictName').textContent = gameState.currentDistrict.name;
-        document.getElementById('pauseWaveCounter').textContent = `Wave ${gameState.wave} (D${gameState.districtWave})`;
-        document.getElementById('pauseBeansCounter').textContent = `${gameState.player.beans} ☕`;
-        document.getElementById('pauseSkillPointsNum').textContent = gameState.player.skillPoints;
+        const iconEl = document.getElementById('pauseModalIcon');
+        const titleEl = document.getElementById('pauseModalTitle');
+        const subEl = document.getElementById('pauseModalSubtitle');
+        const actionIcon = document.getElementById('pauseMainActionIcon');
+        const actionText = document.getElementById('pauseMainActionText');
+        const rewardBox = document.getElementById('pauseWaveRewardBox');
+
+        if (gameState.intermissionActive) {
+          if (iconEl) iconEl.textContent = '⚡';
+          if (titleEl) titleEl.textContent = 'TACTICAL STANDBY';
+          if (subEl) subEl.textContent = `${gameState.currentDistrict.name} Anomaly Contained`;
+          if (actionIcon) actionIcon.textContent = '▶';
+          if (actionText) actionText.textContent = `ENGAGE WAVE ${gameState.wave + 1} (SPACE / ESC)`;
+          if (rewardBox) rewardBox.classList.remove('hidden');
+        } else {
+          if (iconEl) iconEl.textContent = '⏸️';
+          if (titleEl) titleEl.textContent = 'SIMULATION PAUSED';
+          if (subEl) subEl.textContent = 'Portland Anomaly Leyline Standby';
+          if (actionIcon) actionIcon.textContent = '▶';
+          if (actionText) actionText.textContent = 'RESUME PLAY (ESC / SPACE)';
+          if (rewardBox) rewardBox.classList.add('hidden');
+        }
+
+        const distEl = document.getElementById('pauseDistrictName');
+        const waveEl = document.getElementById('pauseWaveCounter');
+        const beansEl = document.getElementById('pauseBeansCounter');
+        const spEl = document.getElementById('pauseSkillPointsNum');
+        if (distEl) distEl.textContent = gameState.currentDistrict.name;
+        if (waveEl) waveEl.textContent = `Wave ${gameState.wave} (D${gameState.districtWave})`;
+        if (beansEl) beansEl.textContent = `${gameState.player.beans} ☕`;
+        if (spEl) spEl.textContent = gameState.player.skillPoints;
+
         promptSafehouseExit(false);
+        updateNotifToggleButton();
 
         pauseModal.classList.remove('hidden');
         setTimeout(() => {
-          pauseCard.classList.remove('scale-95');
-          pauseCard.classList.add('scale-100');
+          if (pauseCard) {
+            pauseCard.classList.remove('scale-95');
+            pauseCard.classList.add('scale-100');
+          }
         }, 10);
       } else {
+        handlePauseAction();
+      }
+    }
+
+    function handlePauseAction() {
+      const pauseModal = document.getElementById('pauseModal');
+      const pauseCard = document.getElementById('pauseModalCard');
+      if (pauseCard) {
         pauseCard.classList.remove('scale-100');
         pauseCard.classList.add('scale-95');
+      }
+      if (pauseModal) {
         setTimeout(() => pauseModal.classList.add('hidden'), 120);
+      }
 
-        if (gameState.audioEnabled && audioInitialized && Tone.Transport.state === 'paused') {
-          Tone.Transport.start();
-        }
+      const wasIntermission = gameState.intermissionActive;
+      gameState.intermissionActive = false;
+      gameState.isPaused = false;
+
+      if (gameState.audioEnabled && audioInitialized && Tone.Transport.state === 'paused') {
+        Tone.Transport.start();
+      }
+
+      if (wasIntermission) {
+        startNextWave();
+      }
+    }
+
+    function initNotificationSettings() {
+      if (!gameState.settings) gameState.settings = {};
+      const saved = localStorage.getItem('portland_notifications_enabled');
+      // Default is strictly OFF (false)
+      gameState.settings.notificationsEnabled = (saved === 'true');
+      updateNotifToggleButton();
+    }
+
+    function toggleNotifications() {
+      if (!gameState.settings) gameState.settings = {};
+      gameState.settings.notificationsEnabled = !gameState.settings.notificationsEnabled;
+      localStorage.setItem('portland_notifications_enabled', gameState.settings.notificationsEnabled ? 'true' : 'false');
+      updateNotifToggleButton();
+      if (gameState.settings.notificationsEnabled) {
+        showToast("Loot & Cooldown Popups: ON", "info");
+      }
+    }
+
+    function updateNotifToggleButton() {
+      const btn = document.getElementById('toggleNotifsBtn');
+      const icon = document.getElementById('notifToggleIcon');
+      if (!btn) return;
+      const isEnabled = !!gameState.settings?.notificationsEnabled;
+      if (isEnabled) {
+        btn.textContent = 'ON';
+        btn.className = 'px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-300 font-bold text-xs transition-all cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.3)]';
+        if (icon) icon.textContent = '🔔';
+      } else {
+        btn.textContent = 'OFF';
+        btn.className = 'px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 font-bold text-xs transition-all cursor-pointer';
+        if (icon) icon.textContent = '🔕';
       }
     }
 
@@ -5763,7 +5860,24 @@
     }
 
     function showToast(message, type = 'info') {
+      if (!gameState.settings?.notificationsEnabled) {
+        const msg = (message || '').toLowerCase();
+        // User request: notifications that say you found this, or energy level, or cool off not cooled off yet - OFF by default!
+        // Also suppress any "cleared" toasts
+        if (
+          msg.includes('found loot') ||
+          msg.includes('caffeination') ||
+          msg.includes('energy') ||
+          msg.includes('cooldown') ||
+          msg.includes('cooled off') ||
+          msg.includes('cleared')
+        ) {
+          return;
+        }
+      }
+
       const container = document.getElementById('toastContainer');
+      if (!container) return;
       const toast = document.createElement('div');
 
       let borderCol = 'border-emerald-500/40';
@@ -5859,6 +5973,7 @@
 
     window.onload = function() {
       initTelegramApp();
+      initNotificationSettings();
       resizeCanvas();
       initRain();
       recalcPlayerStats();
