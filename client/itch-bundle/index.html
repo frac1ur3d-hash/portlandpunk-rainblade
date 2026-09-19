@@ -374,78 +374,164 @@
       <!-- Main Body: 2 Columns (Left: D4 Paperdoll Silhouette, Right: Grid Bag & Item Inspection) -->
       <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- LEFT: Diablo 4 Paperdoll Character Silhouette & Sockets (5 Columns) -->
+        <!-- LEFT: Diablo 4 Paperdoll Character Silhouette & Sockets (8 Sockets) -->
         <div class="lg:col-span-6 flex flex-col items-center bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 relative">
-          <div class="w-full flex justify-between items-center mb-3">
+          <div class="w-full flex justify-between items-center mb-2">
             <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Character Paperdoll Loadout</span>
-            <span class="text-[9px] font-mono text-slate-400">Equipped Gear Sockets</span>
+            <span class="text-[9px] font-mono text-slate-400">8 Sockets • Drag & Drop • Dbl-Click</span>
           </div>
 
           <!-- Paperdoll Visual Layout Container -->
-          <div class="relative w-full max-w-[340px] h-[360px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2">
+          <div class="relative w-full max-w-[350px] h-[390px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2">
             <!-- Center Hero 8-Bit Silhouette -->
-            <div class="absolute flex flex-col items-center justify-center opacity-75 pointer-events-none">
+            <div class="absolute flex flex-col items-center justify-center opacity-70 pointer-events-none">
               <div class="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">🥷</div>
               <div class="text-[10px] font-mono text-cyan-400 font-bold mt-1 tracking-widest" id="d4HeroNameDisplay">RAIN-WALKER</div>
               <div class="text-[9px] font-mono text-slate-500">OPERATIVE LVL <span id="d4HeroLvlDisplay">1</span></div>
             </div>
 
-            <!-- Top Row: Head / Mask Slot -->
-            <div class="absolute top-3 flex justify-center">
-              <div class="w-14 h-14 rounded-xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-all shadow-md group" title="Headgear Slot">
-                <span class="text-2xl group-hover:scale-110 transition-transform">🥽</span>
-                <span class="text-[8px] font-mono text-slate-400">MASK</span>
+            <!-- 1. Top Center: Head / Cyber-Visor -->
+            <div class="absolute top-2.5 flex flex-col items-center">
+              <div id="d4SlotHead" 
+                   onclick="inspectEquipSlot('head')" 
+                   ondblclick="unequipSlot('head')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'head')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'head')"
+                   class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-cyan-400 font-bold">HEAD</span>
+                <span id="d4HeadIcon" class="text-xl">🥽</span>
+                <span id="d4HeadLvl" class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
               </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">VISOR / HOOD</span>
             </div>
 
-            <!-- Mid Row Left: Primary Weapon (Left Hand) -->
-            <div class="absolute left-3 top-28 flex flex-col items-center">
-              <div id="d4SlotWeapon" onclick="inspectEquipSlot('weapon')" class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-emerald-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all">
-                <span class="text-xs font-mono text-emerald-400 font-bold">WEAPON</span>
+            <!-- 2. Mid Left: Main Hand Weapon -->
+            <div class="absolute left-2.5 top-20 flex flex-col items-center">
+              <div id="d4SlotWeapon" 
+                   onclick="inspectEquipSlot('weapon')" 
+                   ondblclick="unequipSlot('weapon')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'weapon')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'weapon')"
+                   class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-emerald-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-emerald-400 font-bold">MAIN-HAND</span>
                 <span id="d4WeaponIcon" class="text-2xl">🗡️</span>
                 <span id="d4WeaponLvl" class="text-[9px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
               </div>
-              <span class="text-[8px] font-mono text-slate-400 mt-1">MAIN HAND</span>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">KATANA / BLADE</span>
             </div>
 
-            <!-- Mid Row Center: Body Armor / Duster -->
-            <div class="absolute top-24 flex flex-col items-center">
-              <div id="d4SlotArmor" onclick="inspectEquipSlot('armor')" class="w-16 h-22 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
-                <span class="text-xs font-mono text-cyan-400 font-bold">CHEST</span>
+            <!-- 3. Mid Center: Body Armor / Duster -->
+            <div class="absolute top-20 flex flex-col items-center">
+              <div id="d4SlotArmor" 
+                   onclick="inspectEquipSlot('armor')" 
+                   ondblclick="unequipSlot('armor')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'armor')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'armor')"
+                   class="w-15 h-20 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-cyan-400 font-bold">CHEST</span>
                 <span id="d4ArmorIcon" class="text-2xl">🧥</span>
                 <span id="d4ArmorLvl" class="text-[9px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
               </div>
-              <span class="text-[8px] font-mono text-slate-400 mt-1">TORSO</span>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">DUSTER / VEST</span>
             </div>
 
-            <!-- Mid Row Right: Off Hand / Tact Shield -->
-            <div class="absolute right-3 top-28 flex flex-col items-center">
-              <div class="w-16 h-20 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-slate-500 transition-all opacity-80" title="Off-Hand Aegis">
-                <span class="text-xs font-mono text-slate-400 font-bold">OFF-HAND</span>
-                <span class="text-2xl">🛡️</span>
-                <span class="text-[8px] font-mono text-slate-500">KINETIC</span>
+            <!-- 4. Mid Right: Off-Hand (Dual-Wield or Shield) -->
+            <div class="absolute right-2.5 top-20 flex flex-col items-center">
+              <div id="d4SlotOffhand" 
+                   onclick="inspectEquipSlot('offhand')" 
+                   ondblclick="unequipSlot('offhand')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'offhand')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'offhand')"
+                   class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-purple-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-purple-400 font-bold">OFF-HAND</span>
+                <span id="d4OffhandIcon" class="text-2xl">🛡️</span>
+                <span id="d4OffhandLvl" class="text-[9px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
               </div>
-              <span class="text-[8px] font-mono text-slate-400 mt-1">SHIELD</span>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">SHIELD / DUAL</span>
             </div>
 
-            <!-- Bottom Left: Urban Relic (Trinket 1) -->
-            <div class="absolute left-6 bottom-3 flex flex-col items-center">
-              <div id="d4SlotRelic" onclick="inspectEquipSlot('relic')" class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
-                <span class="text-[9px] font-mono text-amber-400 font-bold">RELIC</span>
+            <!-- 5. Lower Center: Footwear / Boots -->
+            <div class="absolute bottom-20 flex flex-col items-center">
+              <div id="d4SlotBoots" 
+                   onclick="inspectEquipSlot('boots')" 
+                   ondblclick="unequipSlot('boots')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'boots')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'boots')"
+                   class="w-15 h-15 rounded-2xl bg-slate-900/95 border-2 border-teal-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-teal-400 hover:shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-all">
+                <span class="text-[9px] font-mono text-teal-400 font-bold">FEET</span>
+                <span id="d4BootsIcon" class="text-xl">👢</span>
+                <span id="d4BootsLvl" class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
+              </div>
+              <span class="text-[8px] font-mono text-slate-400 mt-0.5">BOOTS / KICKS</span>
+            </div>
+
+            <!-- 6. Bottom Left: Ring 1 -->
+            <div class="absolute left-3 bottom-2 flex flex-col items-center">
+              <div id="d4SlotRing1" 
+                   onclick="inspectEquipSlot('ring1')" 
+                   ondblclick="unequipSlot('ring1')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'ring1')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'ring1')"
+                   class="w-13 h-13 rounded-2xl bg-slate-900/95 border-2 border-rose-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.5)] transition-all">
+                <span class="text-[8px] font-mono text-rose-400 font-bold">RING 1</span>
+                <span id="d4Ring1Icon" class="text-lg">💍</span>
+                <span id="d4Ring1Lvl" class="text-[7px] font-mono text-amber-300 bg-slate-950 px-0.5 rounded">Lv.1</span>
+              </div>
+              <span class="text-[7px] font-mono text-slate-400 mt-0.5">LEYLINE</span>
+            </div>
+
+            <!-- 7. Bottom Center: Urban Relic / Module -->
+            <div class="absolute bottom-2 flex flex-col items-center">
+              <div id="d4SlotRelic" 
+                   onclick="inspectEquipSlot('relic')" 
+                   ondblclick="unequipSlot('relic')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'relic')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'relic')"
+                   class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
+                <span class="text-[8px] font-mono text-amber-400 font-bold">RELIC</span>
                 <span id="d4RelicIcon" class="text-xl">🍩</span>
-                <span id="d4RelicLvl" class="text-[8px] font-mono text-amber-300 bg-slate-950 px-1 rounded">Lv.1</span>
+                <span id="d4RelicLvl" class="text-[7px] font-mono text-amber-300 bg-slate-950 px-0.5 rounded">Lv.1</span>
               </div>
-              <span class="text-[8px] font-mono text-slate-400 mt-0.5">TRINKET</span>
+              <span class="text-[7px] font-mono text-slate-400 mt-0.5">TALISMAN</span>
             </div>
 
-            <!-- Bottom Right: Leyline Ring / Charm -->
-            <div class="absolute right-6 bottom-3 flex flex-col items-center">
-              <div class="w-14 h-14 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-rose-400 transition-all opacity-80">
-                <span class="text-[9px] font-mono text-rose-400 font-bold">RING</span>
-                <span class="text-xl">💍</span>
-                <span class="text-[8px] font-mono text-slate-500">LEYLINE</span>
+            <!-- 8. Bottom Right: Ring 2 -->
+            <div class="absolute right-3 bottom-2 flex flex-col items-center">
+              <div id="d4SlotRing2" 
+                   onclick="inspectEquipSlot('ring2')" 
+                   ondblclick="unequipSlot('ring2')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'ring2')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'ring2')"
+                   class="w-13 h-13 rounded-2xl bg-slate-900/95 border-2 border-indigo-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all">
+                <span class="text-[8px] font-mono text-indigo-400 font-bold">RING 2</span>
+                <span id="d4Ring2Icon" class="text-lg">💎</span>
+                <span id="d4Ring2Lvl" class="text-[7px] font-mono text-amber-300 bg-slate-950 px-0.5 rounded">Lv.1</span>
               </div>
-              <span class="text-[8px] font-mono text-slate-400 mt-0.5">FINGER</span>
+              <span class="text-[7px] font-mono text-slate-400 mt-0.5">SIGNET</span>
             </div>
           </div>
 
@@ -911,6 +997,21 @@
         enemiesSlain: 0,
       },
       equipped: {
+        head: {
+          id: 'h1',
+          name: 'Rain-City AR Visor',
+          tier: 'Uncommon',
+          hp: 25,
+          critChance: 0.05,
+          bonus: '+25 HP, +5% Crit Chance',
+          type: 'head',
+          icon: '🥽',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 100,
+          value: 60
+        },
         weapon: {
           id: 'w1',
           name: 'Barista Straight-Razor',
@@ -924,6 +1025,22 @@
           xp: 0,
           xpMax: 120,
           value: 70
+        },
+        offhand: {
+          id: 'o1',
+          name: 'Burnside Riot Deflector',
+          tier: 'Rare',
+          armor: 14,
+          blockChance: 0.15,
+          subType: 'shield',
+          bonus: '+14 Armor, +15% Block Chance',
+          type: 'offhand',
+          icon: '🛡️',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 130,
+          value: 85
         },
         armor: {
           id: 'a1',
@@ -939,6 +1056,48 @@
           xp: 0,
           xpMax: 120,
           value: 70
+        },
+        boots: {
+          id: 'b1',
+          name: "Powell's Puddle Jumpers",
+          tier: 'Uncommon',
+          speedBonus: 0.15,
+          bonus: '+15% Move Speed, Splash Dash',
+          type: 'boots',
+          icon: '👢',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 100,
+          value: 65
+        },
+        ring1: {
+          id: 'rg1',
+          name: 'Stumptown Leyline Band',
+          tier: 'Rare',
+          ricochetBonus: 0.20,
+          bonus: '+20% Ricochet Bullet Damage',
+          type: 'ring1',
+          icon: '💍',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 110,
+          value: 80
+        },
+        ring2: {
+          id: 'rg2',
+          name: 'Rose City Thorn Signet',
+          tier: 'Rare',
+          beanBonus: 0.25,
+          bonus: '+25% Extra Beans Found',
+          type: 'ring2',
+          icon: '💎',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 110,
+          value: 80
         },
         relic: {
           id: 'r1',
@@ -3094,17 +3253,36 @@
 
       const dropChance = 0.50;
       if (Math.random() < dropChance) {
-        const randomItem = FULL_PORTLAND_LOOT_TABLE[Math.floor(Math.random() * FULL_PORTLAND_LOOT_TABLE.length)];
+        const extraDrops = [
+          { name: 'Rain-City AR Visor', type: 'head', icon: '🥽', tier: 'Uncommon', hp: 30, critChance: 0.05, bonus: '+30 HP, +5% Crit', value: 65 },
+          { name: 'Hawthorne Cryptid Cowl', type: 'head', icon: '🥷', tier: 'Rare', hp: 55, critChance: 0.10, bonus: '+55 HP, +10% Crit', value: 110 },
+          { name: 'Stumptown Burlap Hood', type: 'head', icon: '🧢', tier: 'Epic', hp: 80, critChance: 0.14, bonus: '+80 HP, +14% Crit, Leyline Cloak', value: 160 },
+          { name: 'Burnside Riot Deflector', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Rare', armor: 16, blockChance: 0.18, bonus: '+16 Armor, +18% Block Chance', value: 95 },
+          { name: 'Tanto Cyber-Wakizashi (Dual-Wield)', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 24, attackSpeedBonus: 0.25, bonus: '+24 Dual-Slash Dmg, +25% Speed', value: 155 },
+          { name: 'Eastside Deflector Aegis', type: 'offhand', subType: 'shield', icon: '🔰', tier: 'Legendary', armor: 28, blockChance: 0.25, bonus: '+28 Armor, +25% Block, Kinetic Pulse', value: 210 },
+          { name: "Powell's Puddle Jumpers", type: 'boots', icon: '👢', tier: 'Uncommon', speedBonus: 0.15, bonus: '+15% Move Speed', value: 70 },
+          { name: 'Overclocked Doc Martens', type: 'boots', icon: '🥾', tier: 'Rare', speedBonus: 0.22, armor: 8, bonus: '+22% Speed, +8 Armor', value: 120 },
+          { name: 'Forest Park Mud-Stompers', type: 'boots', icon: '👟', tier: 'Epic', speedBonus: 0.30, bonus: '+30% Speed, Instant Dash Reset', value: 165 },
+          { name: 'Stumptown Leyline Band', type: 'ring', icon: '💍', tier: 'Rare', damage: 12, ricochetBonus: 0.25, bonus: '+12 Dmg, +25% Ricochet Crit', value: 100 },
+          { name: 'Rose City Thorn Signet', type: 'ring', icon: '💎', tier: 'Rare', beanBonus: 0.30, bonus: '+30% Extra Beans Found', value: 105 },
+          { name: 'Willamette Obsidian Signet', type: 'ring', icon: '💍', tier: 'Legendary', damage: 20, critChance: 0.12, bonus: '+20 Dmg, +12% Crit', value: 220 }
+        ];
+        const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
+        const randomItem = combinedPool[Math.floor(Math.random() * combinedPool.length)];
         const newItem = {
           id: 'drop_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
           name: randomItem.name,
           type: randomItem.type,
+          subType: randomItem.subType || null,
           bonus: randomItem.bonus,
           tier: randomItem.tier,
           icon: randomItem.icon,
-          damage: randomItem.type === 'weapon' ? (randomItem.statVal || 20) : 0,
-          hp: randomItem.type === 'armor' ? (randomItem.hp || 50) : 0,
+          damage: randomItem.damage || (randomItem.type === 'weapon' ? (randomItem.statVal || 20) : 0),
+          hp: randomItem.hp || (randomItem.type === 'armor' ? (randomItem.hp || 50) : 0),
           armor: randomItem.armor || 0,
+          speedBonus: randomItem.speedBonus || 0,
+          critChance: randomItem.critChance || 0,
+          blockChance: randomItem.blockChance || 0,
           value: randomItem.value || 75,
           level: 1,
           stars: 1,
@@ -3112,7 +3290,7 @@
           xpMax: 120
         };
 
-        if (gameState.inventory.length < 16) {
+        if (gameState.inventory.length < 24) {
           gameState.inventory.push(newItem);
           showToast(`Found Loot: ${newItem.name} [${newItem.tier}]!`, 'success');
           document.getElementById('hudInventoryBadge').classList.remove('hidden');
@@ -4165,6 +4343,235 @@
       inspectEquipSlot(activeInspectSlot);
     }
 
+    // --- DRAG AND DROP & SELECTION STATE ---
+    let draggedItemSource = null; // { source: 'stash', index: 0 } or { source: 'socket', slot: 'weapon' }
+    let inspectedItemData = null; // Currently inspected item (either from socket or stash)
+
+    function handleDragStartStash(e, index) {
+      const item = gameState.inventory[index];
+      if (!item) return;
+      draggedItemSource = { source: 'stash', index };
+      e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
+      e.dataTransfer.effectAllowed = 'move';
+      inspectStashItem(index);
+    }
+
+    function handleDragStartSocket(e, slot) {
+      const item = gameState.equipped[slot];
+      if (!item) {
+        e.preventDefault();
+        return;
+      }
+      draggedItemSource = { source: 'socket', slot };
+      e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
+      e.dataTransfer.effectAllowed = 'move';
+      inspectEquipSlot(slot);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (e.currentTarget) {
+        e.currentTarget.classList.add('border-cyan-400', 'shadow-[0_0_15px_rgba(0,245,255,0.6)]');
+      }
+    }
+
+    function handleDragLeave(e) {
+      if (e.currentTarget) {
+        e.currentTarget.classList.remove('border-cyan-400', 'shadow-[0_0_15px_rgba(0,245,255,0.6)]');
+      }
+    }
+
+    function isSlotCompatible(itemType, slot) {
+      if (!itemType || !slot) return false;
+      if (slot === 'ring1' || slot === 'ring2') {
+        return itemType === 'ring' || itemType === 'ring1' || itemType === 'ring2';
+      }
+      return itemType === slot;
+    }
+
+    function handleDropOnSocket(e, targetSlot) {
+      e.preventDefault();
+      handleDragLeave(e);
+      if (!draggedItemSource) return;
+
+      if (draggedItemSource.source === 'stash') {
+        const item = gameState.inventory[draggedItemSource.index];
+        if (!item) return;
+        if (!isSlotCompatible(item.type, targetSlot)) {
+          showToast(`Cannot equip ${item.type.toUpperCase()} into ${targetSlot.toUpperCase()} socket!`, "warning");
+          return;
+        }
+        // Equip item into targetSlot
+        const currentEquipped = gameState.equipped[targetSlot];
+        gameState.equipped[targetSlot] = item;
+        gameState.inventory.splice(draggedItemSource.index, 1);
+        if (currentEquipped) {
+          gameState.inventory.push(currentEquipped);
+        }
+        recalcPlayerStats();
+        renderInventoryBag();
+        updateEquippedUI();
+        inspectEquipSlot(targetSlot);
+        playSound('coin');
+        showToast(`Equipped ${item.name} to ${targetSlot.toUpperCase()}!`, "success");
+      } else if (draggedItemSource.source === 'socket') {
+        // Swapping sockets (e.g. Ring1 and Ring2)
+        const sourceSlot = draggedItemSource.slot;
+        if (sourceSlot === targetSlot) return;
+        const srcItem = gameState.equipped[sourceSlot];
+        const tgtItem = gameState.equipped[targetSlot];
+        if (srcItem && isSlotCompatible(srcItem.type, targetSlot)) {
+          gameState.equipped[targetSlot] = srcItem;
+          gameState.equipped[sourceSlot] = tgtItem || null;
+          recalcPlayerStats();
+          renderInventoryBag();
+          updateEquippedUI();
+          inspectEquipSlot(targetSlot);
+          playSound('coin');
+        }
+      }
+      draggedItemSource = null;
+    }
+
+    function handleDropOnStash(e, targetIndex) {
+      e.preventDefault();
+      handleDragLeave(e);
+      if (!draggedItemSource) return;
+
+      if (draggedItemSource.source === 'socket') {
+        // Unequip item into stash
+        const slot = draggedItemSource.slot;
+        const item = gameState.equipped[slot];
+        if (!item) return;
+
+        gameState.equipped[slot] = null;
+        gameState.inventory.splice(targetIndex, 0, item);
+        recalcPlayerStats();
+        renderInventoryBag();
+        updateEquippedUI();
+        inspectStashItem(targetIndex);
+        playSound('coin');
+        showToast(`Unequipped ${item.name} to stash.`, "info");
+      } else if (draggedItemSource.source === 'stash') {
+        // Reorder in stash
+        const fromIndex = draggedItemSource.index;
+        if (fromIndex !== targetIndex && fromIndex < gameState.inventory.length) {
+          const item = gameState.inventory.splice(fromIndex, 1)[0];
+          gameState.inventory.splice(targetIndex, 0, item);
+          renderInventoryBag();
+          inspectStashItem(targetIndex);
+        }
+      }
+      draggedItemSource = null;
+    }
+
+    function inspectStashItem(index) {
+      const item = gameState.inventory[index];
+      if (!item) return;
+      activeInspectSlot = null;
+      displayItemInCard(item, false);
+    }
+
+    function inspectEquipSlot(slot) {
+      activeInspectSlot = slot;
+      const item = gameState.equipped[slot];
+      if (!item) {
+        displayEmptySlotInCard(slot);
+        return;
+      }
+      displayItemInCard(item, true, slot);
+    }
+
+    function displayEmptySlotInCard(slot) {
+      const nameEl = document.getElementById('inspectItemName');
+      const iconEl = document.getElementById('inspectItemIcon');
+      const statsEl = document.getElementById('inspectItemStats');
+      const starsEl = document.getElementById('inspectItemStars');
+      const xpBarEl = document.getElementById('inspectItemXpBar');
+      const xpTextEl = document.getElementById('inspectItemXpText');
+      const costEl = document.getElementById('inspectReforgeCost');
+      const btnReforge = document.getElementById('btnInspectReforge');
+
+      if (nameEl) nameEl.textContent = `Empty ${slot.toUpperCase()} Socket`;
+      if (iconEl) iconEl.textContent = '⭕';
+      if (statsEl) statsEl.textContent = 'Drag or Double-Click an item from stash to equip.';
+      if (starsEl) starsEl.textContent = '';
+      if (costEl) costEl.textContent = '0 ☕';
+      if (xpBarEl) xpBarEl.style.width = '0%';
+      if (xpTextEl) xpTextEl.textContent = 'No item equipped';
+      if (btnReforge) {
+        btnReforge.classList.add('opacity-40', 'pointer-events-none');
+        btnReforge.classList.remove('animate-pulse');
+      }
+    }
+
+    function displayItemInCard(item, isEquipped = false, slot = null) {
+      const nameEl = document.getElementById('inspectItemName');
+      const iconEl = document.getElementById('inspectItemIcon');
+      const statsEl = document.getElementById('inspectItemStats');
+      const starsEl = document.getElementById('inspectItemStars');
+      const xpBarEl = document.getElementById('inspectItemXpBar');
+      const xpTextEl = document.getElementById('inspectItemXpText');
+      const costEl = document.getElementById('inspectReforgeCost');
+      const btnReforge = document.getElementById('btnInspectReforge');
+
+      const lvl = item.level || 1;
+      const stars = item.stars || 1;
+      const xp = item.xp || 0;
+      const xpMax = item.xpMax || (100 * lvl);
+      const cost = 45 * lvl;
+
+      if (nameEl) nameEl.textContent = `${item.name} (Lv.${lvl})`;
+      if (iconEl) iconEl.textContent = item.icon || '🗡️';
+      if (statsEl) statsEl.textContent = item.bonus || '';
+      if (starsEl) starsEl.textContent = '★'.repeat(stars);
+      if (costEl) costEl.textContent = `${cost} ☕`;
+
+      const pct = Math.min(100, Math.round((xp / xpMax) * 100));
+      if (xpBarEl) xpBarEl.style.width = `${pct}%`;
+      if (xpTextEl) xpTextEl.textContent = lvl >= 10 ? 'MAX MASTERWORK (LVL 10)' : `${xp} / ${xpMax} XP (${pct}%)`;
+
+      if (btnReforge) {
+        if (!isEquipped) {
+          btnReforge.classList.add('opacity-40', 'pointer-events-none');
+          btnReforge.classList.remove('animate-pulse');
+          btnReforge.textContent = 'EQUIP FIRST';
+        } else if (lvl >= 10) {
+          btnReforge.classList.add('opacity-40', 'pointer-events-none');
+          btnReforge.classList.remove('animate-pulse');
+          btnReforge.textContent = 'MAXED';
+        } else if (xp >= xpMax && gameState.player.beans >= cost) {
+          btnReforge.classList.remove('opacity-40', 'pointer-events-none');
+          btnReforge.classList.add('animate-pulse', 'bg-amber-500', 'text-slate-950');
+          btnReforge.textContent = 'REFORGE';
+        } else {
+          btnReforge.classList.remove('opacity-40', 'pointer-events-none');
+          btnReforge.classList.remove('animate-pulse');
+          btnReforge.textContent = 'REFORGE';
+        }
+      }
+    }
+
+    function unequipSlot(slot) {
+      const item = gameState.equipped[slot];
+      if (!item) return;
+
+      if (gameState.inventory.length >= 24) {
+        showToast("Stash is full! Scrap or organize items first.", "rose");
+        return;
+      }
+
+      gameState.equipped[slot] = null;
+      gameState.inventory.push(item);
+      recalcPlayerStats();
+      renderInventoryBag();
+      updateEquippedUI();
+      inspectEquipSlot(slot);
+      playSound('coin');
+      showToast(`Unequipped ${item.name} to stash.`, "info");
+    }
+
     function renderInventoryBag() {
       const container = document.getElementById('d4InventoryGrid');
       if (!container) return;
@@ -4190,10 +4597,27 @@
                              'border-slate-700 bg-slate-900/80';
           
           slotEl.className = `w-full aspect-square rounded-xl border-2 ${tierBorder} flex flex-col items-center justify-between p-1 cursor-pointer hover:scale-105 hover:shadow-[0_0_12px_rgba(0,245,255,0.4)] transition-all relative group`;
-          slotEl.onclick = () => equipItem(i);
+          slotEl.draggable = true;
+          slotEl.ondragstart = (e) => handleDragStartStash(e, i);
+          slotEl.ondragover = (e) => handleDragOver(e);
+          slotEl.ondragleave = (e) => handleDragLeave(e);
+          slotEl.ondrop = (e) => handleDropOnStash(e, i);
+
+          // SINGLE-CLICK: Inspect item in card
+          slotEl.onclick = (e) => {
+            e.stopPropagation();
+            inspectStashItem(i);
+          };
+
+          // DOUBLE-CLICK: Equip item directly
+          slotEl.ondblclick = (e) => {
+            e.stopPropagation();
+            equipItem(i);
+          };
+
           slotEl.innerHTML = `
             <span class="text-[8px] font-mono font-bold text-slate-400 self-start">${item.type.slice(0,3).toUpperCase()}</span>
-            <span class="text-2xl my-auto">${item.icon}</span>
+            <span class="text-2xl my-auto select-none">${item.icon}</span>
             <span class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950/80 px-1 rounded">${'★'.repeat(item.stars || 1)}</span>
 
             <!-- D4 Tactile Item Hover Tooltip -->
@@ -4205,14 +4629,17 @@
               <div class="text-[10px] font-mono text-emerald-400">${item.bonus}</div>
               <div class="text-[9px] font-mono text-slate-400 flex justify-between border-t border-slate-800 pt-1">
                 <span>Value: ${item.value || 50} ☕</span>
-                <span class="text-cyan-300 font-bold">CLICK TO EQUIP</span>
+                <span class="text-cyan-300 font-bold">DBL-CLICK / DRAG</span>
               </div>
             </div>
           `;
         } else {
-          // Empty tactile grid slot
+          // Empty tactile grid slot: accepts drop
           slotEl.className = "w-full aspect-square rounded-xl border border-slate-800/60 bg-slate-950/40 flex items-center justify-center text-slate-800 text-sm select-none hover:border-slate-700 transition-colors";
           slotEl.innerHTML = '<span>•</span>';
+          slotEl.ondragover = (e) => handleDragOver(e);
+          slotEl.ondragleave = (e) => handleDragLeave(e);
+          slotEl.ondrop = (e) => handleDropOnStash(e, i);
         }
 
         container.appendChild(slotEl);
@@ -4220,16 +4647,24 @@
 
       // Keep paperdoll equipped slots updated
       updateEquippedUI();
-      inspectEquipSlot(activeInspectSlot);
+      if (activeInspectSlot) {
+        inspectEquipSlot(activeInspectSlot);
+      }
     }
 
     function equipItem(index) {
       const item = gameState.inventory[index];
       if (!item) return;
 
-      const slot = item.type;
-      const currentEquipped = gameState.equipped[slot];
+      // Determine target slot
+      let slot = item.type;
+      if (slot === 'ring') {
+        if (!gameState.equipped.ring1) slot = 'ring1';
+        else if (!gameState.equipped.ring2) slot = 'ring2';
+        else slot = activeInspectSlot === 'ring2' ? 'ring2' : 'ring1';
+      }
 
+      const currentEquipped = gameState.equipped[slot];
       gameState.equipped[slot] = item;
       gameState.inventory.splice(index, 1);
       if (currentEquipped) {
@@ -4239,7 +4674,9 @@
       recalcPlayerStats();
       renderInventoryBag();
       updateEquippedUI();
-      showToast(`Equipped ${item.name}!`, "success");
+      inspectEquipSlot(slot);
+      playSound('coin');
+      showToast(`Equipped ${item.name} to ${slot.toUpperCase()}!`, "success");
     }
 
     function scrapItem(index) {
@@ -4278,27 +4715,46 @@
       if (heroName) heroName.textContent = hero.name || 'RAIN-WALKER';
       if (heroLvl) heroLvl.textContent = hero.level || 1;
 
-      // Update D4 Paperdoll Sockets
-      if (eq.weapon) {
-        const wIcon = document.getElementById('d4WeaponIcon');
-        const wLvl = document.getElementById('d4WeaponLvl');
-        if (wIcon) wIcon.textContent = eq.weapon.icon || '🗡️';
-        if (wLvl) wLvl.textContent = `Lv.${eq.weapon.level || 1}`;
-      }
-      if (eq.armor) {
-        const aIcon = document.getElementById('d4ArmorIcon');
-        const aLvl = document.getElementById('d4ArmorLvl');
-        if (aIcon) aIcon.textContent = eq.armor.icon || '🧥';
-        if (aLvl) aLvl.textContent = `Lv.${eq.armor.level || 1}`;
-      }
-      if (eq.relic) {
-        const rIcon = document.getElementById('d4RelicIcon');
-        const rLvl = document.getElementById('d4RelicLvl');
-        if (rIcon) rIcon.textContent = eq.relic.icon || '🍩';
-        if (rLvl) rLvl.textContent = `Lv.${eq.relic.level || 1}`;
-      }
+      // Update all 8 D4 Paperdoll Sockets
+      const socketDefs = [
+        { slot: 'head', iconId: 'd4HeadIcon', lvlId: 'd4HeadLvl', defIcon: '🥽', boxId: 'd4SlotHead' },
+        { slot: 'weapon', iconId: 'd4WeaponIcon', lvlId: 'd4WeaponLvl', defIcon: '🗡️', boxId: 'd4SlotWeapon' },
+        { slot: 'offhand', iconId: 'd4OffhandIcon', lvlId: 'd4OffhandLvl', defIcon: '🛡️', boxId: 'd4SlotOffhand' },
+        { slot: 'armor', iconId: 'd4ArmorIcon', lvlId: 'd4ArmorLvl', defIcon: '🧥', boxId: 'd4SlotArmor' },
+        { slot: 'boots', iconId: 'd4BootsIcon', lvlId: 'd4BootsLvl', defIcon: '👢', boxId: 'd4SlotBoots' },
+        { slot: 'ring1', iconId: 'd4Ring1Icon', lvlId: 'd4Ring1Lvl', defIcon: '💍', boxId: 'd4SlotRing1' },
+        { slot: 'ring2', iconId: 'd4Ring2Icon', lvlId: 'd4Ring2Lvl', defIcon: '💎', boxId: 'd4SlotRing2' },
+        { slot: 'relic', iconId: 'd4RelicIcon', lvlId: 'd4RelicLvl', defIcon: '🍩', boxId: 'd4SlotRelic' }
+      ];
 
-      inspectEquipSlot(activeInspectSlot);
+      socketDefs.forEach(({ slot, iconId, lvlId, defIcon, boxId }) => {
+        const it = eq[slot];
+        const iconEl = document.getElementById(iconId);
+        const lvlEl = document.getElementById(lvlId);
+        const boxEl = document.getElementById(boxId);
+
+        if (it) {
+          if (iconEl) iconEl.textContent = it.icon || defIcon;
+          if (lvlEl) lvlEl.textContent = `Lv.${it.level || 1}`;
+          if (boxEl) {
+            boxEl.classList.remove('opacity-40', 'border-slate-700');
+            const tierBorder = it.tier === 'Legendary' ? 'border-amber-400' :
+                               it.tier === 'Epic' ? 'border-purple-400' :
+                               it.tier === 'Rare' ? 'border-cyan-400' : 'border-emerald-400';
+            boxEl.className = `w-14 h-14 rounded-2xl bg-slate-900/95 border-2 ${tierBorder} flex flex-col items-center justify-between p-1 cursor-pointer hover:shadow-[0_0_15px_rgba(0,245,255,0.5)] transition-all`;
+          }
+        } else {
+          if (iconEl) iconEl.textContent = defIcon;
+          if (lvlEl) lvlEl.textContent = '--';
+          if (boxEl) {
+            boxEl.className = "w-14 h-14 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col items-center justify-between p-1 cursor-pointer opacity-50 hover:opacity-100 hover:border-slate-600 transition-all";
+          }
+        }
+      });
+
+      if (activeInspectSlot) {
+        inspectEquipSlot(activeInspectSlot);
+      }
     }
 
     function grantGearXp(enemyXp) {
@@ -4306,7 +4762,7 @@
       const gearXpGain = Math.max(8, Math.round(enemyXp * 0.75));
       let leveledUpAny = false;
 
-      ['weapon', 'armor', 'relic'].forEach(slot => {
+      ['head', 'weapon', 'offhand', 'armor', 'boots', 'ring1', 'ring2', 'relic'].forEach(slot => {
         const item = gameState.equipped[slot];
         if (item) {
           if (!item.level) item.level = 1;
@@ -4386,19 +4842,85 @@
 
     function recalcPlayerStats() {
       const p = gameState.player;
+      const eq = gameState.equipped;
       let totalAttack = 18 + (p.level * 4);
       let totalArmor = 8 + (p.level * 2);
+      let extraHp = 0;
+      let speedMult = 1.0;
+      let critBonus = 0;
+      let blockBonus = 0;
 
-      if (gameState.equipped.weapon) totalAttack += gameState.equipped.weapon.damage || 0;
-      if (gameState.equipped.armor) {
-        p.maxHp = 120 + (gameState.equipped.armor.hp || 0) + (p.level * 20);
-        totalArmor += gameState.equipped.armor.armor || 0;
+      // 1. Head
+      if (eq.head) {
+        extraHp += eq.head.hp || 0;
+        critBonus += eq.head.critChance || 0;
+        totalArmor += eq.head.armor || 0;
       }
 
-      p.baseAttack = totalAttack;
+      // 2. Main-Hand Weapon
+      if (eq.weapon) {
+        totalAttack += eq.weapon.damage || eq.weapon.statVal || 0;
+      }
+
+      // 3. Off-Hand (Shield vs Dual-Wield Blade)
+      if (eq.offhand) {
+        if (eq.offhand.subType === 'dualwield' || eq.offhand.damage) {
+          totalAttack += Math.round((eq.offhand.damage || eq.offhand.statVal || 0) * 0.75); // Off-hand slash damage
+        }
+        if (eq.offhand.armor) {
+          totalArmor += eq.offhand.armor;
+        }
+        if (eq.offhand.blockChance) {
+          blockBonus += eq.offhand.blockChance;
+        }
+      }
+
+      // 4. Chest Armor
+      if (eq.armor) {
+        extraHp += eq.armor.hp || 0;
+        totalArmor += eq.armor.armor || 0;
+      }
+
+      // 5. Boots
+      if (eq.boots) {
+        speedMult += eq.boots.speedBonus || 0;
+        totalArmor += eq.boots.armor || 0;
+      }
+
+      // 6. Ring 1
+      if (eq.ring1) {
+        totalAttack += eq.ring1.damage || 0;
+        critBonus += eq.ring1.critChance || 0;
+      }
+
+      // 7. Ring 2
+      if (eq.ring2) {
+        totalAttack += eq.ring2.damage || 0;
+        critBonus += eq.ring2.critChance || 0;
+      }
+
+      // 8. Relic
+      if (eq.relic) {
+        speedMult += eq.relic.speedBonus || 0;
+        extraHp += eq.relic.hp || 0;
+      }
+
+      p.maxHp = 120 + extraHp + (p.level * 20);
+      p.hp = Math.min(p.hp, p.maxHp);
       p.armor = totalArmor;
-      document.getElementById('statDamagePower').textContent = totalAttack;
-      document.getElementById('statArmorRating').textContent = totalArmor;
+      p.baseAttack = totalAttack;
+      p.speed = p.baseSpeed * speedMult;
+      p.critChance = 0.05 + critBonus;
+      p.blockChance = blockBonus;
+
+      const statDmg = document.getElementById('statDamagePower');
+      const statDef = document.getElementById('statArmorRating');
+      const statSpd = document.getElementById('statMoveSpeed');
+      if (statDmg) statDmg.textContent = totalAttack;
+      if (statDef) statDef.textContent = totalArmor;
+      if (statSpd) statSpd.textContent = `${Math.round(p.speed / p.baseSpeed * 100)}%`;
+
+      updateHUD();
     }
 
     function renderDistricts() {
