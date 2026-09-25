@@ -1,0 +1,26 @@
+title: "PORTLAND PROTOCOL // RAIN BLADE"
+email: "contact@portlandpunk.dev"
+description: "8-Bit Cyber ARPG with Diablo 3 Skill Runes, Tactical Blade Ricochet, 120+ Portland Items, and Procedural Leyline Dungeons."
+baseurl: ""
+url: "https://portland-rain-blade.netlify.app"
+author: "Google DeepMind Advanced Agentic Coding & Fractured Hash"
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .bundle
+  - .git
+  - .gitignore

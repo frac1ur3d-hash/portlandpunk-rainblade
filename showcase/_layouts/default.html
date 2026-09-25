@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | default: site.title }}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Cyberpunk Styles -->
+  <link rel="stylesheet" href="{{ '/assets/css/custom.css' | relative_url }}">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            cyan: { 400: '#00f5ff', 500: '#06b6d4' },
+            rose: { 500: '#f43f5e', 600: '#e11d48' },
+            emerald: { 400: '#10b981', 500: '#059669' },
+            amber: { 400: '#fbbf24', 500: '#f59e0b' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#030712] text-slate-100 min-h-screen flex flex-col relative selection:bg-cyan-500 selection:text-black">
+
+  <!-- Ambient CRT Scanline Overlay -->
+  <div class="fixed inset-0 scanlines pointer-events-none z-50 opacity-40"></div>
+
+  <!-- Header Nav -->
+  <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="{{ '/' | relative_url }}" class="flex items-center gap-2.5 group">
+          <span class="text-2xl transform group-hover:rotate-12 transition-transform duration-300">🗡️</span>
+          <div>
+            <span class="font-display font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-rose-400 to-amber-300">
+              PORTLAND PROTOCOL
+            </span>
+            <span class="hidden sm:inline-block text-[10px] text-cyan-400/80 font-mono tracking-widest pl-2">
+              // RAIN BLADE
+            </span>
+          </div>
+        </a>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 font-mono text-xs">
+        <a href="#features" class="text-slate-300 hover:text-cyan-400 transition-colors">FEATURES</a>
+        <a href="#play" class="text-slate-300 hover:text-cyan-400 transition-colors">PLAY GAME</a>
+        <a href="#classes" class="text-slate-300 hover:text-cyan-400 transition-colors">CLASSES</a>
+        <a href="#gear" class="text-slate-300 hover:text-cyan-400 transition-colors">DIABLO SETS</a>
+        <a href="#dungeons" class="text-slate-300 hover:text-cyan-400 transition-colors">DUNGEON ATLAS</a>
+        <a href="#roadmap" class="text-slate-300 hover:text-cyan-400 transition-colors">ROADMAP</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="{{ '/rain-blade.html' | relative_url }}" target="_blank" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 font-display font-extrabold text-xs tracking-wider shadow-glow-cyan transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-1.5">
+          <span>⚡</span>
+          <span>LAUNCH DEMO</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow">
+    {{ content }}
+  </main>
+
+  <!-- Cyberpunk Footer -->
+  <footer class="bg-slate-950 border-t border-slate-800/80 py-12 px-4 sm:px-6 lg:px-8 font-mono text-xs text-slate-400 relative z-10">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <div class="space-y-3">
+        <div class="font-display font-bold text-white text-sm tracking-wide">PORTLAND PROTOCOL // RAIN BLADE</div>
+        <p class="text-slate-400 text-[11px] leading-relaxed">
+          Tactical 8-Bit Cyber ARPG grounded in real Pacific Northwest leyline geography, Diablo-style gear sets, and physics blade deflection.
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Quick Access</div>
+        <ul class="space-y-1.5 text-[11px]">
+          <li><a href="{{ '/rain-blade.html' | relative_url }}" class="hover:text-cyan-400 transition-colors">Direct Playable Client</a></li>
+          <li><a href="https://portland-rain-blade.netlify.app" target="_blank" class="hover:text-cyan-400 transition-colors">Netlify Production Deploy</a></li>
+          <li><a href="https://github.com/frac1ur3d-hash/portlandpunk-rainblade" target="_blank" class="hover:text-cyan-400 transition-colors">GitHub Repository</a></li>
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <div class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Platforms</div>
+        <ul class="space-y-1.5 text-[11px]">
+          <li><span class="text-emerald-400">●</span> Web Browsers (60 FPS Canvas)</li>
+          <li><span class="text-emerald-400">●</span> Telegram Mini App Protocol</li>
+          <li><span class="text-emerald-400">●</span> Itch.io Zip Offline Bundle</li>
+          <li><span class="text-emerald-400">●</span> Electron Desktop App</li>
+        </ul>
+      </div>
+
+      <div class="space-y-2">
+        <div class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Docker Preview</div>
+        <p class="text-[11px] text-slate-400">
+          Run locally in Docker:
+        </p>
+        <code class="block p-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-cyan-300">
+          docker compose -f jekyll-docker.yml up
+        </code>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-slate-500">
+      <div>© 2026 Portland Protocol. Pacific Northwest Leyline Division. Open Source MIT.</div>
+      <div class="flex items-center gap-4">
+        <span>TONE.JS AUDIO</span>
+        <span>•</span>
+        <span>HTML5 CANVAS</span>
+        <span>•</span>
+        <span>JEKYLL DOCKER</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

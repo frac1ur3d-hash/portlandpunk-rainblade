@@ -1,0 +1,32 @@
+services:
+  jekyll:
+    image: jekyll/jekyll:4.2.2
+    container_name: portlandpunk_jekyll_showcase
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+      - "35729:35729"
+    environment:
+      - JEKYLL_ENV=development
+      - TZ=America/Los_Angeles
+    volumes:
+      - ./showcase:/srv/jekyll:Z
+      - jekyll_bundle_cache:/usr/local/bundle
+    command: jekyll serve --watch --force_polling --livereload --host 0.0.0.0 --port 4000
+
+  jekyll-build:
+    image: jekyll/jekyll:4.2.2
+    container_name: portlandpunk_jekyll_builder
+    environment:
+      - JEKYLL_ENV=production
+      - TZ=America/Los_Angeles
+    volumes:
+      - ./showcase:/srv/jekyll:Z
+      - jekyll_bundle_cache:/usr/local/bundle
+    command: jekyll build --destination /srv/jekyll/_site
+    profiles:
+      - build
+
+volumes:
+  jekyll_bundle_cache:
+    name: portlandpunk_jekyll_bundle_cache
