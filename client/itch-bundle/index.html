@@ -265,6 +265,10 @@
             <span class="text-xs">R</span>
             <span class="text-[8px] text-slate-400">Briar</span>
           </button>
+          <button id="btnTrinketTouch" onclick="triggerTrinket()" class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-fuchsia-500/50 text-fuchsia-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-lg">
+            <span class="text-xs">T</span>
+            <span class="text-[8px] text-slate-400">Trinket</span>
+          </button>
         </div>
 
         <div class="flex gap-2.5">
@@ -325,6 +329,16 @@
           <span class="absolute -bottom-1 -right-1 bg-slate-950 border border-slate-700 text-[8px] font-mono rounded px-1 text-slate-300">R</span>
         </div>
         <span class="text-[9px] font-mono text-slate-400 mt-0.5">Rose Vortex</span>
+      </div>
+
+      <!-- Active Urban Trinket -->
+      <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerTrinket()">
+        <div id="skillSlotTrinket" class="w-11 h-11 rounded-xl bg-slate-800/90 border border-fuchsia-500/60 flex items-center justify-center text-fuchsia-300 shadow-sm relative overflow-hidden">
+          <span id="hudTrinketIcon" class="text-xl">🎫</span>
+          <div id="cooldownOverlayTrinket" class="absolute inset-0 bg-slate-950/80 transition-all flex items-center justify-center text-[10px] font-mono text-fuchsia-300 font-bold hidden">15.0</div>
+          <span class="absolute -bottom-1 -right-1 bg-slate-950 border border-slate-700 text-[8px] font-mono rounded px-1 text-slate-300">T</span>
+        </div>
+        <span id="hudTrinketLabel" class="text-[9px] font-mono text-slate-400 mt-0.5">Trinket</span>
       </div>
 
       <!-- Dodge Roll -->
@@ -462,6 +476,24 @@
               <span class="text-[8px] font-mono text-slate-400 mt-0.5">SHIELD / DUAL</span>
             </div>
 
+            <!-- 5a. Lower Left: Utility Belt -->
+            <div class="absolute left-3 bottom-20 flex flex-col items-center">
+              <div id="d4SlotBelt" 
+                   onclick="inspectEquipSlot('belt')" 
+                   ondblclick="unequipSlot('belt')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'belt')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'belt')"
+                   class="w-13 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
+                <span class="text-[8px] font-mono text-amber-400 font-bold">BELT</span>
+                <span id="d4BeltIcon" class="text-lg">🥋</span>
+                <span id="d4BeltLvl" class="text-[7px] font-mono text-amber-300 bg-slate-950 px-0.5 rounded">Lv.1</span>
+              </div>
+              <span class="text-[7px] font-mono text-slate-400 mt-0.5">UTILITY</span>
+            </div>
+
             <!-- 5. Lower Center: Footwear / Boots -->
             <div class="absolute bottom-20 flex flex-col items-center">
               <div id="d4SlotBoots" 
@@ -478,6 +510,24 @@
                 <span id="d4BootsLvl" class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950 px-1 rounded">Lv.1</span>
               </div>
               <span class="text-[8px] font-mono text-slate-400 mt-0.5">BOOTS / KICKS</span>
+            </div>
+
+            <!-- 5b. Lower Right: Active Cyber Gadget / Trinket -->
+            <div class="absolute right-3 bottom-20 flex flex-col items-center">
+              <div id="d4SlotTrinket" 
+                   onclick="inspectEquipSlot('trinket')" 
+                   ondblclick="unequipSlot('trinket')"
+                   ondragover="handleDragOver(event)" 
+                   ondragleave="handleDragLeave(event)" 
+                   ondrop="handleDropOnSocket(event, 'trinket')"
+                   draggable="true" 
+                   ondragstart="handleDragStartSocket(event, 'trinket')"
+                   class="w-13 h-14 rounded-2xl bg-slate-900/95 border-2 border-fuchsia-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all">
+                <span class="text-[8px] font-mono text-fuchsia-400 font-bold">GADGET</span>
+                <span id="d4TrinketIcon" class="text-lg">🎫</span>
+                <span id="d4TrinketLvl" class="text-[7px] font-mono text-amber-300 bg-slate-950 px-0.5 rounded">Lv.1</span>
+              </div>
+              <span class="text-[7px] font-mono text-slate-400 mt-0.5">TRINKET [T]</span>
             </div>
 
             <!-- 6. Bottom Left: Ring 1 -->
@@ -560,6 +610,45 @@
             <div class="flex justify-between text-[9px] font-mono text-slate-400 px-0.5">
               <span>Combat Mastery XP</span>
               <span id="inspectItemXpText">0 / 120 XP (0%)</span>
+            </div>
+
+            <!-- Sockets & Gemstones Container -->
+            <div id="inspectItemSocketsContainer" class="pt-2 border-t border-slate-800 flex items-center justify-between font-mono text-[10px]">
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400 font-bold">SOCKETS:</span>
+                <div id="inspectItemSocketsList" class="flex items-center gap-1">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+              <button id="btnSocketGem" onclick="openGemSocketMenu()" class="px-2 py-0.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-300 font-bold text-[9px] transition-all">
+                + INSERT GEM
+              </button>
+            </div>
+          </div>
+
+          <!-- Gem Socketing Selection Modal -->
+          <div id="gemSocketModal" class="hidden w-full mt-2 p-3 rounded-2xl bg-slate-900 border border-cyan-500/60 shadow-xl space-y-2 font-mono text-xs">
+            <div class="flex items-center justify-between text-[11px] border-b border-slate-800 pb-1.5">
+              <span class="text-cyan-300 font-bold">SOCKET PACIFIC NORTHWEST GEMSTONE</span>
+              <button onclick="closeGemSocketMenu()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px]">
+              <button onclick="socketGemstone('quartz')" class="p-2 rounded-xl bg-slate-950 border border-rose-500/40 hover:border-rose-400 text-left space-y-0.5 cursor-pointer">
+                <div class="font-bold text-rose-300 flex items-center gap-1"><span>🌸</span><span>Rose Quartz</span></div>
+                <div class="text-[9px] text-slate-400">+15% Crit DMG / +60 HP</div>
+              </button>
+              <button onclick="socketGemstone('amber')" class="p-2 rounded-xl bg-slate-950 border border-amber-500/40 hover:border-amber-400 text-left space-y-0.5 cursor-pointer">
+                <div class="font-bold text-amber-300 flex items-center gap-1"><span>🟤</span><span>Hazelnut Amber</span></div>
+                <div class="text-[9px] text-slate-400">+18 Armor / -15% CD</div>
+              </button>
+              <button onclick="socketGemstone('pearl')" class="p-2 rounded-xl bg-slate-950 border border-cyan-500/40 hover:border-cyan-400 text-left space-y-0.5 cursor-pointer">
+                <div class="font-bold text-cyan-300 flex items-center gap-1"><span>⚪</span><span>Willamette Pearl</span></div>
+                <div class="text-[9px] text-slate-400">+25% Deflect / +3 HP/s</div>
+              </button>
+              <button onclick="socketGemstone('obsidian')" class="p-2 rounded-xl bg-slate-950 border border-purple-500/40 hover:border-purple-400 text-left space-y-0.5 cursor-pointer">
+                <div class="font-bold text-purple-300 flex items-center gap-1"><span>⚫</span><span>Hood Obsidian</span></div>
+                <div class="text-[9px] text-slate-400">+35 Burn / +40 Thorns</div>
+              </button>
             </div>
           </div>
         </div>
@@ -1127,6 +1216,9 @@
         dodgeDirX: 0,
         dodgeDirY: 0,
         slashArc: 0,
+        invulnerableTimer: 0,
+        thornsDamage: 0,
+        regenRate: 0,
         comboHits: 0,
         comboTimer: 0,
         highestCombo: 0,
@@ -1148,7 +1240,9 @@
           stars: 1,
           xp: 0,
           xpMax: 100,
-          value: 60
+          value: 60,
+          sockets: 1,
+          gems: []
         },
         weapon: {
           id: 'w1',
@@ -1162,7 +1256,9 @@
           stars: 1,
           xp: 0,
           xpMax: 120,
-          value: 70
+          value: 70,
+          sockets: 1,
+          gems: []
         },
         offhand: {
           id: 'o1',
@@ -1178,7 +1274,9 @@
           stars: 1,
           xp: 0,
           xpMax: 130,
-          value: 85
+          value: 85,
+          sockets: 1,
+          gems: []
         },
         armor: {
           id: 'a1',
@@ -1193,7 +1291,26 @@
           stars: 1,
           xp: 0,
           xpMax: 120,
-          value: 70
+          value: 70,
+          sockets: 1,
+          gems: []
+        },
+        belt: {
+          id: 'blt1',
+          name: 'Burnside Skate Tool Belt',
+          tier: 'Uncommon',
+          armor: 10,
+          hp: 30,
+          bonus: '+30 HP, +10 Armor, 1 Gem Socket',
+          type: 'belt',
+          icon: '🥋',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 100,
+          value: 65,
+          sockets: 1,
+          gems: ['pearl']
         },
         boots: {
           id: 'b1',
@@ -1207,7 +1324,25 @@
           stars: 1,
           xp: 0,
           xpMax: 100,
-          value: 65
+          value: 65,
+          sockets: 1,
+          gems: []
+        },
+        trinket: {
+          id: 'trk1',
+          name: 'MAX Transit Pass of Phasing',
+          tier: 'Rare',
+          bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)',
+          type: 'trinket',
+          icon: '🎫',
+          level: 1,
+          stars: 1,
+          xp: 0,
+          xpMax: 120,
+          value: 90,
+          activeAbility: 'phasing',
+          sockets: 1,
+          gems: ['quartz']
         },
         ring1: {
           id: 'rg1',
@@ -1222,7 +1357,9 @@
           stars: 1,
           xp: 0,
           xpMax: 110,
-          value: 80
+          value: 80,
+          sockets: 1,
+          gems: []
         },
         ring2: {
           id: 'rg2',
@@ -1236,7 +1373,9 @@
           stars: 1,
           xp: 0,
           xpMax: 110,
-          value: 80
+          value: 80,
+          sockets: 1,
+          gems: []
         },
         relic: {
           id: 'r1',
@@ -1250,7 +1389,9 @@
           stars: 1,
           xp: 0,
           xpMax: 150,
-          value: 95
+          value: 95,
+          sockets: 1,
+          gems: []
         }
       },
       inventory: [
@@ -1262,7 +1403,9 @@
           bonus: '+28 Slash Dmg, Extended Arc',
           type: 'weapon',
           icon: '🪓',
-          value: 120
+          value: 120,
+          sockets: 1,
+          gems: []
         },
         {
           id: 'a2',
@@ -1273,7 +1416,9 @@
           bonus: '+95 HP, +18 Armor, Rain Regen',
           type: 'armor',
           icon: '🛡️',
-          value: 220
+          value: 220,
+          sockets: 2,
+          gems: ['pearl', 'amber']
         }
       ],
       skills: {
@@ -1366,6 +1511,8 @@
       waveInProgress: false,
       intermissionActive: false,
       
+      trinketCooldown: 0,
+      maxTrinketCooldown: 20.0,
       screenShake: 0,
       bassPulse: 0,
       keys: {},
@@ -1599,12 +1746,25 @@
         }
       }
 
+      if (e.key === 't' || e.key === 'T') {
+        const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'leaderboardModal', 'classSelectModal'].some(
+          id => {
+            const el = document.getElementById(id);
+            return el && !el.classList.contains('hidden');
+          }
+        );
+        if (!anyModalOpen) {
+          e.preventDefault();
+          triggerTrinket();
+        }
+      }
+
       if (e.key === 'i' || e.key === 'I' || e.key === 'b' || e.key === 'B') {
         e.preventDefault();
         toggleModal('inventoryModal');
       }
 
-      if (e.key === 'k' || e.key === 'K' || e.key === 'c' || e.key === 'C') {
+      if (e.key === 'k' || e.key === 'K') {
         e.preventDefault();
         toggleModal('skillsModal');
       }
@@ -1906,6 +2066,77 @@
         playDubstepBassDrop(12);
         showToast("Rose Briar Cyclone Roaring!", "rose");
       }
+    }
+
+    function triggerTrinket() {
+      const p = gameState.player;
+      const trinket = gameState.equipped ? gameState.equipped.trinket : null;
+      if (!trinket) {
+        showToast("No active gadget equipped in Trinket socket [T]!", "warning");
+        return;
+      }
+
+      if (gameState.trinketCooldown > 0) {
+        showToast(`Trinket recharging: ${gameState.trinketCooldown.toFixed(1)}s`, "info");
+        return;
+      }
+
+      triggerTelegramHaptic('impact', 'medium');
+      const ability = trinket.activeAbility || 'phasing';
+
+      if (ability === 'phasing') {
+        p.invulnerableTimer = 2.5;
+        gameState.trinketCooldown = 20.0;
+        playSound('dodge');
+        for (let i = 0; i < 10; i++) {
+          gameState.particles.push({
+            x: p.x + (Math.random() - 0.5) * 25,
+            y: p.y + (Math.random() - 0.5) * 25,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            life: 0.45,
+            maxLife: 0.45,
+            color: '#d946ef',
+            size: 7
+          });
+        }
+        showToast("⚡ PHASE SHIFT ACTIVE! Invulnerable for 2.5s", "rose");
+      } else if (ability === 'nitro') {
+        p.energy = p.maxEnergy;
+        p.speed = p.baseSpeed * 1.6;
+        gameState.trinketCooldown = 18.0;
+        playSound('special');
+        showToast("☕ NITRO COLD FOAM! 100% Caffeination & Overdrive!", "warning");
+      } else if (ability === 'emp') {
+        gameState.trinketCooldown = 15.0;
+        gameState.projectiles = [];
+        gameState.enemies.forEach(e => {
+          const dist = Math.hypot(e.x - p.x, e.y - p.y);
+          if (dist < 260) {
+            e.hp -= 30;
+            e.hitFlash = 0.25;
+            const angle = Math.atan2(e.y - p.y, e.x - p.x);
+            e.x += Math.cos(angle) * 40;
+            e.y += Math.sin(angle) * 40;
+          }
+        });
+        playSound('parry');
+        createImpactParticles(p.x, p.y, '#00f5ff');
+        showToast("💥 EMP DISRUPTER! Deflected fire & stunned enemies!", "cyan");
+      } else if (ability === 'sugar') {
+        p.hp = Math.min(p.maxHp, p.hp + 75);
+        p.energy = Math.min(p.maxEnergy, p.energy + 30);
+        gameState.trinketCooldown = 22.0;
+        playSound('special');
+        showToast("🍩 VOODOO SUGAR RUSH! +75 HP & +30 Energy!", "success");
+      } else {
+        p.invulnerableTimer = 2.0;
+        p.hp = Math.min(p.maxHp, p.hp + 40);
+        gameState.trinketCooldown = 20.0;
+        playSound('special');
+        showToast("✨ Gadget Activated!", "info");
+      }
+      updateHUD();
     }
 
     function upgradeSkill(slot) {
@@ -3425,7 +3656,16 @@
           { name: 'Forest Park Mud-Stompers', type: 'boots', icon: '👟', tier: 'Epic', speedBonus: 0.30, bonus: '+30% Speed, Instant Dash Reset', value: 165 },
           { name: 'Stumptown Leyline Band', type: 'ring', icon: '💍', tier: 'Rare', damage: 12, ricochetBonus: 0.25, bonus: '+12 Dmg, +25% Ricochet Crit', value: 100 },
           { name: 'Rose City Thorn Signet', type: 'ring', icon: '💎', tier: 'Rare', beanBonus: 0.30, bonus: '+30% Extra Beans Found', value: 105 },
-          { name: 'Willamette Obsidian Signet', type: 'ring', icon: '💍', tier: 'Legendary', damage: 20, critChance: 0.12, bonus: '+20 Dmg, +12% Crit', value: 220 }
+          { name: 'Willamette Obsidian Signet', type: 'ring', icon: '💍', tier: 'Legendary', damage: 20, critChance: 0.12, bonus: '+20 Dmg, +12% Crit', value: 220 },
+          // Belts
+          { name: 'Burnside Skate Tool Belt', type: 'belt', icon: '🥋', tier: 'Uncommon', hp: 35, armor: 10, bonus: '+35 HP, +10 Armor, 1 Gem Socket', value: 75, sockets: 1, gems: [] },
+          { name: 'Cargo Heavy Duty Rigging Belt', type: 'belt', icon: '🎗️', tier: 'Rare', hp: 60, armor: 16, bonus: '+60 HP, +16 Armor, Kinetic Dampening', value: 125, sockets: 2, gems: ['amber'] },
+          { name: 'Stumptown Barista Apron Belt', type: 'belt', icon: '🎽', tier: 'Epic', hp: 85, armor: 22, bonus: '+85 HP, +22 Armor, +15% Energy Regen', value: 185, sockets: 2, gems: ['quartz'] },
+          // Trinkets & Active Urban Gadgets
+          { name: 'MAX Transit Pass of Phasing', type: 'trinket', icon: '🎫', tier: 'Rare', bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)', value: 130, activeAbility: 'phasing', sockets: 1, gems: [] },
+          { name: 'Nitro Cold Foam Injector', type: 'trinket', icon: '🧪', tier: 'Rare', bonus: 'Active [T]: 100% Caffeination & 4s Overdrive (18s CD)', value: 140, activeAbility: 'nitro', sockets: 1, gems: ['amber'] },
+          { name: 'Burnside EMP Disrupter', type: 'trinket', icon: '📡', tier: 'Epic', bonus: 'Active [T]: 360° Shockwave Deflect & Stun (15s CD)', value: 195, activeAbility: 'emp', sockets: 2, gems: ['pearl'] },
+          { name: 'Voodoo Glaze Emergency Vial', type: 'trinket', icon: '🍩', tier: 'Epic', bonus: 'Active [T]: Instant +75 HP & +30 Energy (22s CD)', value: 180, activeAbility: 'sugar', sockets: 2, gems: ['quartz'] }
         ];
         const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
         const randomItem = combinedPool[Math.floor(Math.random() * combinedPool.length)];
@@ -3438,7 +3678,7 @@
           tier: randomItem.tier,
           icon: randomItem.icon,
           damage: randomItem.damage || (randomItem.type === 'weapon' ? (randomItem.statVal || 20) : 0),
-          hp: randomItem.hp || (randomItem.type === 'armor' ? (randomItem.hp || 50) : 0),
+          hp: randomItem.hp || (randomItem.type === 'armor' ? (randomItem.hp || 50) : (randomItem.type === 'belt' ? (randomItem.hp || 30) : 0)),
           armor: randomItem.armor || 0,
           speedBonus: randomItem.speedBonus || 0,
           critChance: randomItem.critChance || 0,
@@ -3447,7 +3687,10 @@
           level: 1,
           stars: 1,
           xp: 0,
-          xpMax: 120
+          xpMax: 120,
+          sockets: randomItem.sockets !== undefined ? randomItem.sockets : 1,
+          gems: randomItem.gems ? [...randomItem.gems] : [],
+          activeAbility: randomItem.activeAbility || null
         };
 
         if (gameState.inventory.length < 24) {
@@ -3576,6 +3819,9 @@
         const regenAmount = gameState.skills[4].rank * 2.0 * dt;
         p.hp = Math.min(p.maxHp, p.hp + regenAmount);
       }
+      if (p.regenRate > 0) {
+        p.hp = Math.min(p.maxHp, p.hp + (p.regenRate * dt));
+      }
       p.energy = Math.min(p.maxEnergy, p.energy + (12 * dt));
 
       for (let s = 1; s <= 3; s++) {
@@ -3593,6 +3839,35 @@
         }
         if (gameState.skills[s].activeTimer > 0) {
           gameState.skills[s].activeTimer = Math.max(0, gameState.skills[s].activeTimer - dt);
+        }
+      }
+
+      // Urban Trinket Cooldown & Phasing Invulnerability
+      if (gameState.trinketCooldown > 0) {
+        gameState.trinketCooldown = Math.max(0, gameState.trinketCooldown - dt);
+        const cdOverlayTrinket = document.getElementById('cooldownOverlayTrinket');
+        if (cdOverlayTrinket) {
+          if (gameState.trinketCooldown > 0) {
+            cdOverlayTrinket.classList.remove('hidden');
+            cdOverlayTrinket.textContent = gameState.trinketCooldown.toFixed(1);
+          } else {
+            cdOverlayTrinket.classList.add('hidden');
+          }
+        }
+      }
+      if (p.invulnerableTimer > 0) {
+        p.invulnerableTimer = Math.max(0, p.invulnerableTimer - dt);
+        if (Math.random() < 0.35) {
+          gameState.particles.push({
+            x: p.x + (Math.random() - 0.5) * 22,
+            y: p.y + (Math.random() - 0.5) * 22,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: -1.2,
+            life: 0.3,
+            maxLife: 0.3,
+            color: '#d946ef',
+            size: 4
+          });
         }
       }
 
@@ -3810,10 +4085,12 @@
           enemy.y += (dy / (dist || 1)) * (enemy.speed * 1.2);
 
           if (dist < p.radius + enemy.radius + 10) {
-            if (!p.isDodging) {
+            if (!p.isDodging && !(p.invulnerableTimer > 0)) {
               const dmg = Math.max(8, enemy.damage - Math.round(p.armor * 0.4));
               p.hp -= dmg;
               addFloatingText(`SPORE BLAST -${dmg}`, p.x, p.y - 15, '#e879f9', 16);
+            } else if (p.invulnerableTimer > 0) {
+              addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
             }
             createImpactParticles(enemy.x, enemy.y, '#e879f9');
             enemy.hp = 0;
@@ -3846,15 +4123,28 @@
         if (dist < p.radius + enemy.radius && !p.isDodging) {
           enemy.attackCd = (enemy.attackCd || 0) - dt;
           if (enemy.attackCd <= 0) {
-            const taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
-            p.hp -= taken;
-            addFloatingText(`-${taken}`, p.x, p.y - 15, '#f43f5e', 14);
-            playSound('hit');
-            enemy.attackCd = 1.0;
+            if (p.invulnerableTimer > 0) {
+              addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
+              playSound('dodge');
+              enemy.attackCd = 0.8;
+            } else {
+              const taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
+              p.hp -= taken;
+              addFloatingText(`-${taken}`, p.x, p.y - 15, '#f43f5e', 14);
+              playSound('hit');
+              enemy.attackCd = 1.0;
 
-            if (p.hp <= 0) {
-              p.hp = 0;
-              openEmergencyRevive();
+              // Retaliatory Thorns from Hood Obsidian & Armor
+              if (p.thornsDamage > 0) {
+                enemy.hp -= p.thornsDamage;
+                addFloatingText(`THORNS -${p.thornsDamage}`, enemy.x, enemy.y - 12, '#c084fc', 13);
+                createImpactParticles(enemy.x, enemy.y, '#c084fc');
+              }
+
+              if (p.hp <= 0) {
+                p.hp = 0;
+                openEmergencyRevive();
+              }
             }
           }
         }
@@ -3925,11 +4215,14 @@
           // Standard hostile projectile hits player
           const distToPlayer = Math.hypot(proj.x - p.x, proj.y - p.y);
           if (distToPlayer < p.radius + proj.radius) {
-            if (!p.isDodging) {
+            if (!p.isDodging && !(p.invulnerableTimer > 0)) {
               const taken = Math.max(3, Math.round(proj.damage - (p.armor * 0.4)));
               p.hp -= taken;
               addFloatingText(`-${taken}`, p.x, p.y - 10, '#f43f5e', 13);
               playSound('hit');
+            } else if (p.invulnerableTimer > 0) {
+              addFloatingText(`PHASED`, p.x, p.y - 10, '#d946ef', 12);
+              playSound('dodge');
             }
             createImpactParticles(proj.x, proj.y, proj.color);
             gameState.projectiles.splice(pIdx, 1);
@@ -4463,53 +4756,13 @@
     }
 
     let activeInspectSlot = 'weapon';
-
-    function inspectEquipSlot(slot) {
-      activeInspectSlot = slot;
-      const item = gameState.equipped[slot];
-      if (!item) return;
-
-      const nameEl = document.getElementById('inspectItemName');
-      const iconEl = document.getElementById('inspectItemIcon');
-      const statsEl = document.getElementById('inspectItemStats');
-      const starsEl = document.getElementById('inspectItemStars');
-      const xpBarEl = document.getElementById('inspectItemXpBar');
-      const xpTextEl = document.getElementById('inspectItemXpText');
-      const costEl = document.getElementById('inspectReforgeCost');
-      const btnReforge = document.getElementById('btnInspectReforge');
-
-      const lvl = item.level || 1;
-      const stars = item.stars || 1;
-      const xp = item.xp || 0;
-      const xpMax = item.xpMax || (100 * lvl);
-      const cost = 45 * lvl;
-
-      if (nameEl) nameEl.textContent = `${item.name} (Lv.${lvl})`;
-      if (iconEl) iconEl.textContent = item.icon || '🗡️';
-      if (statsEl) statsEl.textContent = item.bonus || '';
-      if (starsEl) starsEl.textContent = '★'.repeat(stars);
-      if (costEl) costEl.textContent = `${cost} ☕`;
-
-      const pct = Math.min(100, Math.round((xp / xpMax) * 100));
-      if (xpBarEl) xpBarEl.style.width = `${pct}%`;
-      if (xpTextEl) xpTextEl.textContent = lvl >= 10 ? 'MAX MASTERWORK (LVL 10)' : `${xp} / ${xpMax} XP (${pct}%)`;
-
-      if (btnReforge) {
-        if (lvl >= 10) {
-          btnReforge.classList.add('opacity-40', 'pointer-events-none');
-          btnReforge.textContent = 'MAXED';
-        } else if (xp >= xpMax && gameState.player.beans >= cost) {
-          btnReforge.classList.remove('opacity-40', 'pointer-events-none');
-          btnReforge.classList.add('animate-pulse', 'bg-amber-500', 'text-slate-950');
-        } else {
-          btnReforge.classList.remove('animate-pulse');
-        }
-      }
-    }
+    let currentInspectedItemRef = null;
 
     function reforgeInspectedSlot() {
-      reforgeGear(activeInspectSlot);
-      inspectEquipSlot(activeInspectSlot);
+      if (activeInspectSlot) {
+        reforgeGear(activeInspectSlot);
+        inspectEquipSlot(activeInspectSlot);
+      }
     }
 
     // --- DRAG AND DROP & SELECTION STATE ---
@@ -4555,6 +4808,9 @@
       if (!itemType || !slot) return false;
       if (slot === 'ring1' || slot === 'ring2') {
         return itemType === 'ring' || itemType === 'ring1' || itemType === 'ring2';
+      }
+      if (slot === 'trinket') {
+        return itemType === 'trinket' || itemType === 'gadget';
       }
       return itemType === slot;
     }
@@ -4639,12 +4895,14 @@
       const item = gameState.inventory[index];
       if (!item) return;
       activeInspectSlot = null;
+      currentInspectedItemRef = item;
       displayItemInCard(item, false);
     }
 
     function inspectEquipSlot(slot) {
       activeInspectSlot = slot;
       const item = gameState.equipped[slot];
+      currentInspectedItemRef = item;
       if (!item) {
         displayEmptySlotInCard(slot);
         return;
@@ -4653,6 +4911,7 @@
     }
 
     function displayEmptySlotInCard(slot) {
+      currentInspectedItemRef = null;
       const nameEl = document.getElementById('inspectItemName');
       const iconEl = document.getElementById('inspectItemIcon');
       const statsEl = document.getElementById('inspectItemStats');
@@ -4661,6 +4920,8 @@
       const xpTextEl = document.getElementById('inspectItemXpText');
       const costEl = document.getElementById('inspectReforgeCost');
       const btnReforge = document.getElementById('btnInspectReforge');
+      const socketsContainer = document.getElementById('inspectItemSocketsContainer');
+      const gemModal = document.getElementById('gemSocketModal');
 
       if (nameEl) nameEl.textContent = `Empty ${slot.toUpperCase()} Socket`;
       if (iconEl) iconEl.textContent = '⭕';
@@ -4673,6 +4934,8 @@
         btnReforge.classList.add('opacity-40', 'pointer-events-none');
         btnReforge.classList.remove('animate-pulse');
       }
+      if (socketsContainer) socketsContainer.classList.add('hidden');
+      if (gemModal) gemModal.classList.add('hidden');
     }
 
     function displayItemInCard(item, isEquipped = false, slot = null) {
@@ -4756,6 +5019,106 @@
           btnReforge.textContent = 'REFORGE';
         }
       }
+
+      // Gemstone Sockets Display
+      const socketsContainer = document.getElementById('inspectItemSocketsContainer');
+      const socketsList = document.getElementById('inspectItemSocketsList');
+      const btnSocketGem = document.getElementById('btnSocketGem');
+      const gemModal = document.getElementById('gemSocketModal');
+      if (gemModal) gemModal.classList.add('hidden');
+
+      if (socketsContainer && socketsList) {
+        const totalSockets = item.sockets !== undefined ? item.sockets : 1;
+        if (totalSockets > 0) {
+          socketsContainer.classList.remove('hidden');
+          const gems = item.gems || [];
+          let socketHtml = '';
+          const gemDefs = {
+            quartz: { icon: '🌸', name: 'Rose Quartz (+15% Crit DMG / +60 HP)' },
+            amber: { icon: '🟤', name: 'Hazelnut Amber (+18 Armor / -15% CD)' },
+            pearl: { icon: '⚪', name: 'Willamette Pearl (+12% Deflect / +3 HP/s)' },
+            obsidian: { icon: '⚫', name: 'Hood Obsidian (+20 Dmg / +25 Thorns)' }
+          };
+
+          for (let i = 0; i < totalSockets; i++) {
+            if (i < gems.length) {
+              const gType = gems[i];
+              const gInfo = gemDefs[gType] || { icon: '💎', name: gType };
+              socketHtml += `<span title="${gInfo.name}" class="px-1.5 py-0.5 rounded bg-slate-950 border border-cyan-500/60 text-xs shadow-sm">${gInfo.icon}</span>`;
+            } else {
+              socketHtml += `<span title="Empty Socket" class="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 text-slate-500 text-xs">⭕</span>`;
+            }
+          }
+          socketsList.innerHTML = socketHtml;
+
+          if (btnSocketGem) {
+            if (gems.length >= totalSockets) {
+              btnSocketGem.classList.add('opacity-40', 'pointer-events-none');
+              btnSocketGem.textContent = 'SOCKETS FULL';
+            } else {
+              btnSocketGem.classList.remove('opacity-40', 'pointer-events-none');
+              btnSocketGem.textContent = '+ INSERT GEM (50 ☕)';
+            }
+          }
+        } else {
+          socketsContainer.classList.add('hidden');
+        }
+      }
+    }
+
+    function openGemSocketMenu() {
+      const item = activeInspectSlot ? gameState.equipped[activeInspectSlot] : currentInspectedItemRef;
+      if (!item) {
+        showToast("Select an item first to socket gems.", "warning");
+        return;
+      }
+      const totalSockets = item.sockets !== undefined ? item.sockets : 1;
+      const gems = item.gems || [];
+      if (gems.length >= totalSockets) {
+        showToast("All sockets on this gear piece are occupied!", "info");
+        return;
+      }
+      const modal = document.getElementById('gemSocketModal');
+      if (modal) modal.classList.toggle('hidden');
+    }
+
+    function closeGemSocketMenu() {
+      const modal = document.getElementById('gemSocketModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function socketGemstone(gemType) {
+      const item = activeInspectSlot ? gameState.equipped[activeInspectSlot] : currentInspectedItemRef;
+      if (!item) return;
+
+      const totalSockets = item.sockets !== undefined ? item.sockets : 1;
+      if (!item.gems) item.gems = [];
+
+      if (item.gems.length >= totalSockets) {
+        showToast("Sockets already full!", "warning");
+        closeGemSocketMenu();
+        return;
+      }
+
+      const cost = 50;
+      if (gameState.player.beans < cost) {
+        showToast(`Need ${cost} Beans to infuse a Pacific Northwest Gemstone!`, "warning");
+        return;
+      }
+
+      gameState.player.beans -= cost;
+      item.gems.push(gemType);
+      playSound('coin');
+      recalcPlayerStats();
+
+      if (activeInspectSlot) {
+        inspectEquipSlot(activeInspectSlot);
+      } else {
+        displayItemInCard(item, false);
+      }
+      closeGemSocketMenu();
+      updateHUD();
+      showToast(`✨ Infused ${gemType.toUpperCase()} Gemstone into ${item.name}!`, "success");
     }
 
     function unequipSlot(slot) {
@@ -4788,7 +5151,8 @@
         // Compare with ring1 by default, or ring2 if ring1 is better
         targetSlot = (!gameState.equipped.ring1 && gameState.equipped.ring2) ? 'ring2' : 'ring1';
       }
-      const eq = gameState.equipped[targetSlot];
+      if (targetSlot === 'gadget') targetSlot = 'trinket';
+      const eq = gameState.equipped ? gameState.equipped[targetSlot] : null;
 
       // Calculate Stat Differences
       const diffs = [];
@@ -5010,6 +5374,7 @@
 
       // Determine target slot
       let slot = item.type;
+      if (slot === 'gadget') slot = 'trinket';
       if (slot === 'ring') {
         if (!gameState.equipped.ring1) slot = 'ring1';
         else if (!gameState.equipped.ring2) slot = 'ring2';
@@ -5083,13 +5448,15 @@
       if (heroName) heroName.textContent = hero.name || 'RAIN-WALKER';
       if (heroLvl) heroLvl.textContent = hero.level || 1;
 
-      // Update all 8 D4 Paperdoll Sockets
+      // Update all 10 D4 Paperdoll Sockets
       const socketDefs = [
         { slot: 'head', iconId: 'd4HeadIcon', lvlId: 'd4HeadLvl', defIcon: '🥽', boxId: 'd4SlotHead' },
         { slot: 'weapon', iconId: 'd4WeaponIcon', lvlId: 'd4WeaponLvl', defIcon: '🗡️', boxId: 'd4SlotWeapon' },
         { slot: 'offhand', iconId: 'd4OffhandIcon', lvlId: 'd4OffhandLvl', defIcon: '🛡️', boxId: 'd4SlotOffhand' },
         { slot: 'armor', iconId: 'd4ArmorIcon', lvlId: 'd4ArmorLvl', defIcon: '🧥', boxId: 'd4SlotArmor' },
+        { slot: 'belt', iconId: 'd4BeltIcon', lvlId: 'd4BeltLvl', defIcon: '🥋', boxId: 'd4SlotBelt' },
         { slot: 'boots', iconId: 'd4BootsIcon', lvlId: 'd4BootsLvl', defIcon: '👢', boxId: 'd4SlotBoots' },
+        { slot: 'trinket', iconId: 'd4TrinketIcon', lvlId: 'd4TrinketLvl', defIcon: '🎫', boxId: 'd4SlotTrinket' },
         { slot: 'ring1', iconId: 'd4Ring1Icon', lvlId: 'd4Ring1Lvl', defIcon: '💍', boxId: 'd4SlotRing1' },
         { slot: 'ring2', iconId: 'd4Ring2Icon', lvlId: 'd4Ring2Lvl', defIcon: '💎', boxId: 'd4SlotRing2' },
         { slot: 'relic', iconId: 'd4RelicIcon', lvlId: 'd4RelicLvl', defIcon: '🍩', boxId: 'd4SlotRelic' }
@@ -5120,6 +5487,17 @@
         }
       });
 
+      // Update Desktop HUD Trinket Icon & Label
+      const hudTrinketIcon = document.getElementById('hudTrinketIcon');
+      const hudTrinketLabel = document.getElementById('hudTrinketLabel');
+      if (eq.trinket) {
+        if (hudTrinketIcon) hudTrinketIcon.textContent = eq.trinket.icon || '🎫';
+        if (hudTrinketLabel) hudTrinketLabel.textContent = eq.trinket.name.split(' ')[0] || 'Trinket';
+      } else {
+        if (hudTrinketIcon) hudTrinketIcon.textContent = '❌';
+        if (hudTrinketLabel) hudTrinketLabel.textContent = 'No Trinket';
+      }
+
       if (activeInspectSlot) {
         inspectEquipSlot(activeInspectSlot);
       }
@@ -5130,7 +5508,7 @@
       const gearXpGain = Math.max(8, Math.round(enemyXp * 0.75));
       let leveledUpAny = false;
 
-      ['head', 'weapon', 'offhand', 'armor', 'boots', 'ring1', 'ring2', 'relic'].forEach(slot => {
+      ['head', 'weapon', 'offhand', 'armor', 'belt', 'boots', 'trinket', 'ring1', 'ring2', 'relic'].forEach(slot => {
         const item = gameState.equipped[slot];
         if (item) {
           if (!item.level) item.level = 1;
@@ -5223,7 +5601,7 @@
       let critBonus = cDef.critBonus || 0;
       let blockBonus = cDef.blockBonus || 0;
 
-      // 2. Calculate Equipped Gear Stats (8 Sockets)
+      // 2. Calculate Equipped Gear Stats (10 Sockets)
       if (eq.head) {
         extraHp += eq.head.hp || 0;
         critBonus += eq.head.critChance || 0;
@@ -5247,9 +5625,20 @@
         extraHp += eq.armor.hp || 0;
         totalArmor += eq.armor.armor || 0;
       }
+      if (eq.belt) {
+        extraHp += eq.belt.hp || 0;
+        totalArmor += eq.belt.armor || 0;
+        if (eq.belt.attack) totalAttack += eq.belt.attack;
+      }
       if (eq.boots) {
         speedMult += eq.boots.speedBonus || 0;
         totalArmor += eq.boots.armor || 0;
+      }
+      if (eq.trinket) {
+        if (eq.trinket.damage) totalAttack += eq.trinket.damage;
+        if (eq.trinket.critChance) critBonus += eq.trinket.critChance;
+        if (eq.trinket.hp) extraHp += eq.trinket.hp;
+        if (eq.trinket.armor) totalArmor += eq.trinket.armor;
       }
       if (eq.ring1) {
         totalAttack += eq.ring1.damage || 0;
@@ -5263,6 +5652,28 @@
         speedMult += eq.relic.speedBonus || 0;
         extraHp += eq.relic.hp || 0;
       }
+
+      // Calculate Gemstone Sockets across all 10 Paperdoll Sockets
+      p.thornsDamage = 0;
+      p.regenRate = 0;
+      Object.values(eq).forEach(item => {
+        if (item && item.gems && Array.isArray(item.gems)) {
+          item.gems.forEach(gem => {
+            if (gem === 'quartz') {
+              extraHp += 60;
+              critBonus += 0.08;
+            } else if (gem === 'amber') {
+              totalArmor += 18;
+            } else if (gem === 'pearl') {
+              blockBonus += 0.12;
+              p.regenRate = (p.regenRate || 0) + 3;
+            } else if (gem === 'obsidian') {
+              totalAttack += 20;
+              p.thornsDamage = (p.thornsDamage || 0) + 25;
+            }
+          });
+        }
+      });
 
       // 3. Compute Diablo Set Bonuses
       const setCounts = {};
@@ -5822,8 +6233,45 @@
       try {
         const p = gameState.player;
         Object.assign(p, loadedData.player);
-        gameState.equipped = loadedData.equipped;
-        gameState.inventory = loadedData.inventory;
+        gameState.equipped = loadedData.equipped || {};
+        if (!gameState.equipped.belt) {
+          gameState.equipped.belt = {
+            id: 'blt1',
+            name: 'Burnside Skate Tool Belt',
+            tier: 'Uncommon',
+            armor: 10,
+            hp: 30,
+            bonus: '+30 HP, +10 Armor, 1 Gem Socket',
+            type: 'belt',
+            icon: '🥋',
+            level: 1,
+            stars: 1,
+            xp: 0,
+            xpMax: 100,
+            value: 65,
+            sockets: 1,
+            gems: ['pearl']
+          };
+        }
+        if (!gameState.equipped.trinket) {
+          gameState.equipped.trinket = {
+            id: 'trk1',
+            name: 'MAX Transit Pass of Phasing',
+            tier: 'Rare',
+            bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)',
+            type: 'trinket',
+            icon: '🎫',
+            level: 1,
+            stars: 1,
+            xp: 0,
+            xpMax: 120,
+            value: 90,
+            activeAbility: 'phasing',
+            sockets: 1,
+            gems: ['quartz']
+          };
+        }
+        gameState.inventory = loadedData.inventory || [];
 
         for (let i = 1; i <= 4; i++) {
           if (loadedData.skills && loadedData.skills[i]) {
