@@ -55,6 +55,11 @@
       user-select: none;
       -webkit-user-select: none;
     }
+
+    #gameCanvas, #touchControls, #joystickZone, #joystickKnob {
+      touch-action: none !important;
+      -webkit-touch-callout: none !important;
+    }
     
     body {
       overflow: hidden;
@@ -212,7 +217,7 @@
     </button>
 
     <!-- Main Game Canvas -->
-    <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+    <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
 
     <!-- Experience Gauge -->
     <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none">
@@ -244,10 +249,10 @@
     </div>
 
     <!-- Mobile Touch Controls -->
-    <div id="touchControls" class="absolute inset-0 pointer-events-none z-10 hidden flex justify-between p-6 items-end pb-12">
+    <div id="touchControls" class="absolute inset-0 pointer-events-none z-10 hidden flex justify-between p-6 items-end pb-12" style="touch-action: none;">
       <!-- Virtual Joystick -->
-      <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/50 border border-slate-700/60 relative pointer-events-auto flex items-center justify-center backdrop-blur-sm">
-        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/80 shadow-glow-emerald border border-white/40 transition-transform"></div>
+      <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/50 border border-slate-700/60 relative pointer-events-auto flex items-center justify-center backdrop-blur-sm" style="touch-action: none;">
+        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/80 shadow-glow-emerald border border-white/40" style="touch-action: none;"></div>
       </div>
 
       <!-- Action Buttons -->
@@ -1518,6 +1523,8 @@
       keys: {},
       mouse: { x: 0, y: 0, worldX: 0, worldY: 0, isDown: false },
       touchJoystick: { active: false, startX: 0, startY: 0, dirX: 0, dirY: 0 },
+      canvasWidth: window.innerWidth || 800,
+      canvasHeight: window.innerHeight || 600,
       camera: { x: 0, y: 0, initialized: false },
       audioEnabled: false,
       lastTimestamp: performance.now(),
@@ -1697,11 +1704,20 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
+    let cachedCanvasRect = { left: 0, top: 0, width: 800, height: 600 };
     function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      cachedCanvasRect = {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width || window.innerWidth,
+        height: rect.height || window.innerHeight
+      };
+      gameState.canvasWidth = cachedCanvasRect.width;
+      gameState.canvasHeight = cachedCanvasRect.height;
+      canvas.width = Math.floor(gameState.canvasWidth * dpr);
+      canvas.height = Math.floor(gameState.canvasHeight * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     window.addEventListener('resize', resizeCanvas);
@@ -1776,12 +1792,15 @@
       gameState.keys[e.key.toLowerCase()] = false;
     });
 
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      gameState.mouse.x = e.clientX - rect.left;
-      gameState.mouse.y = e.clientY - rect.top;
+    function updateMousePos(clientX, clientY) {
+      gameState.mouse.x = clientX - cachedCanvasRect.left;
+      gameState.mouse.y = clientY - cachedCanvasRect.top;
       gameState.mouse.worldX = gameState.mouse.x + gameState.camera.x;
       gameState.mouse.worldY = gameState.mouse.y + gameState.camera.y;
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      updateMousePos(e.clientX, e.clientY);
     });
 
     canvas.addEventListener('mousedown', (e) => {
@@ -1795,6 +1814,29 @@
     window.addEventListener('mouseup', () => {
       gameState.mouse.isDown = false;
     });
+
+    // Touch support directly on canvas for mobile aiming / slashing without page scroll gestures
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (!audioInitialized) initAudio();
+      const touch = e.changedTouches[0];
+      if (touch) {
+        updateMousePos(touch.clientX, touch.clientY);
+        gameState.player.angle = Math.atan2(gameState.mouse.worldY - gameState.player.y, gameState.mouse.worldX - gameState.player.x);
+        triggerAttack();
+      }
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.changedTouches[0];
+      if (touch) {
+        updateMousePos(touch.clientX, touch.clientY);
+        if (!gameState.touchJoystick.active) {
+          gameState.player.angle = Math.atan2(gameState.mouse.worldY - gameState.player.y, gameState.mouse.worldX - gameState.player.x);
+        }
+      }
+    }, { passive: false });
 
     canvas.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -1812,34 +1854,50 @@
 
     joystickZone.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      if (!audioInitialized) initAudio();
       const touch = e.changedTouches[0];
       touchId = touch.identifier;
       const rect = joystickZone.getBoundingClientRect();
       gameState.touchJoystick.startX = rect.left + rect.width / 2;
       gameState.touchJoystick.startY = rect.top + rect.height / 2;
       gameState.touchJoystick.active = true;
+      joystickKnob.style.transition = 'none';
       updateJoystick(touch.clientX, touch.clientY);
-    });
+    }, { passive: false });
 
-    joystickZone.addEventListener('touchmove', (e) => {
-      e.preventDefault();
+    window.addEventListener('touchmove', (e) => {
+      if (touchId === null || !gameState.touchJoystick.active) return;
       for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === touchId) {
+          e.preventDefault();
           updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
           break;
         }
       }
-    });
+    }, { passive: false });
 
-    const resetJoystick = () => {
+    const resetJoystick = (e) => {
+      if (touchId === null) return;
+      if (e && e.changedTouches) {
+        let match = false;
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          if (e.changedTouches[i].identifier === touchId) {
+            match = true;
+            break;
+          }
+        }
+        if (!match) return;
+      }
+      touchId = null;
       gameState.touchJoystick.active = false;
       gameState.touchJoystick.dirX = 0;
       gameState.touchJoystick.dirY = 0;
+      joystickKnob.style.transition = 'transform 0.12s ease-out';
       joystickKnob.style.transform = `translate(0px, 0px)`;
     };
 
-    joystickZone.addEventListener('touchend', resetJoystick);
-    joystickZone.addEventListener('touchcancel', resetJoystick);
+    window.addEventListener('touchend', resetJoystick, { passive: false });
+    window.addEventListener('touchcancel', resetJoystick, { passive: false });
 
     function updateJoystick(clientX, clientY) {
       const dx = clientX - gameState.touchJoystick.startX;
@@ -1857,26 +1915,25 @@
       gameState.touchJoystick.dirY = offsetY / maxDist;
     }
 
-    document.getElementById('btnAttackTouch').addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      triggerAttack();
-    });
-    document.getElementById('btnDodgeTouch').addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      triggerDodge();
-    });
-    document.getElementById('btnSkill1Touch').addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      triggerSkill(1);
-    });
-    document.getElementById('btnSkill2Touch').addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      triggerSkill(2);
-    });
-    document.getElementById('btnSkill3Touch').addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      triggerSkill(3);
-    });
+    const bindTouchAction = (id, action) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!audioInitialized) initAudio();
+        action();
+      }, { passive: false });
+      el.addEventListener('click', (e) => {
+        if (!audioInitialized) initAudio();
+      });
+    };
+
+    bindTouchAction('btnAttackTouch', triggerAttack);
+    bindTouchAction('btnDodgeTouch', triggerDodge);
+    bindTouchAction('btnSkill1Touch', () => triggerSkill(1));
+    bindTouchAction('btnSkill2Touch', () => triggerSkill(2));
+    bindTouchAction('btnSkill3Touch', () => triggerSkill(3));
+    bindTouchAction('btnTrinketTouch', triggerTrinket);
 
     function normalizeAngle(angle) {
       while (angle > Math.PI) angle -= Math.PI * 2;
@@ -3799,10 +3856,14 @@
 
     function initRain() {
       gameState.rainDrops = [];
-      for (let i = 0; i < 180; i++) {
+      const isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth < 768);
+      const dropCount = isMobile ? 80 : 160;
+      const w = gameState.canvasWidth || window.innerWidth;
+      const h = gameState.canvasHeight || window.innerHeight;
+      for (let i = 0; i < dropCount; i++) {
         gameState.rainDrops.push({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
+          x: Math.random() * w,
+          y: Math.random() * h,
           speed: 8 + Math.random() * 12,
           len: 12 + Math.random() * 18,
           alpha: 0.15 + Math.random() * 0.35
@@ -4253,6 +4314,9 @@
         pt.life -= dt;
         if (pt.life <= 0) gameState.particles.splice(i, 1);
       }
+      if (gameState.particles.length > 120) {
+        gameState.particles.splice(0, gameState.particles.length - 120);
+      }
 
       for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
         const ft = gameState.floatingTexts[i];
@@ -4260,14 +4324,18 @@
         ft.life -= dt;
         if (ft.life <= 0) gameState.floatingTexts.splice(i, 1);
       }
+      if (gameState.floatingTexts.length > 40) {
+        gameState.floatingTexts.splice(0, gameState.floatingTexts.length - 40);
+      }
 
-      const rect = canvas.getBoundingClientRect();
+      const cw = gameState.canvasWidth || window.innerWidth;
+      const ch = gameState.canvasHeight || window.innerHeight;
       if (isNaN(p.x) || p.x === null) p.x = 0;
       if (isNaN(p.y) || p.y === null) p.y = 0;
       if (isNaN(p.speed) || p.speed <= 0) p.speed = 4.8;
 
-      const targetCamX = p.x - (rect.width / 2);
-      const targetCamY = p.y - (rect.height / 2);
+      const targetCamX = p.x - (cw / 2);
+      const targetCamY = p.y - (ch / 2);
       if (isNaN(gameState.camera.x) || !gameState.camera.initialized) {
         gameState.camera.x = targetCamX;
         gameState.camera.y = targetCamY;
@@ -4287,26 +4355,24 @@
       }
     }
 
-    function drawUrbanEnvironment(rect) {
+    function drawUrbanEnvironment(cw, ch) {
       const gridSize = 140;
       const startX = Math.floor(gameState.camera.x / gridSize) * gridSize;
       const startY = Math.floor(gameState.camera.y / gridSize) * gridSize;
 
       ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
       ctx.lineWidth = 1;
+      ctx.beginPath();
 
-      for (let x = startX; x < startX + rect.width + gridSize; x += gridSize) {
-        ctx.beginPath();
+      for (let x = startX; x < startX + cw + gridSize; x += gridSize) {
         ctx.moveTo(x, startY);
-        ctx.lineTo(x, startY + rect.height + gridSize);
-        ctx.stroke();
+        ctx.lineTo(x, startY + ch + gridSize);
       }
-      for (let y = startY; y < startY + rect.height + gridSize; y += gridSize) {
-        ctx.beginPath();
+      for (let y = startY; y < startY + ch + gridSize; y += gridSize) {
         ctx.moveTo(startX, y);
-        ctx.lineTo(startX + rect.width + gridSize, y);
-        ctx.stroke();
+        ctx.lineTo(startX + cw + gridSize, y);
       }
+      ctx.stroke();
 
       ctx.save();
       ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
@@ -4674,8 +4740,9 @@
     }
 
     function render() {
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
+      const w = gameState.canvasWidth || window.innerWidth;
+      const h = gameState.canvasHeight || window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
 
       ctx.save();
 
@@ -4688,7 +4755,7 @@
 
       ctx.translate(-gameState.camera.x + shakeX, -gameState.camera.y + shakeY);
 
-      drawUrbanEnvironment(rect);
+      drawUrbanEnvironment(w, h);
       drawSlashes();
       drawProjectiles();
       drawEnemies();
@@ -4698,16 +4765,16 @@
 
       ctx.restore();
 
-      drawRainOverlay(rect.width, rect.height);
+      drawRainOverlay(w, h);
 
       if (gameState.bassPulse > 0) {
         ctx.save();
         ctx.globalAlpha = gameState.bassPulse * 0.45;
-        const grad = ctx.createRadialGradient(rect.width / 2, rect.height / 2, rect.width * 0.3, rect.width / 2, rect.height / 2, rect.width * 0.7);
+        const grad = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.7);
         grad.addColorStop(0, 'rgba(6, 182, 212, 0)');
         grad.addColorStop(1, 'rgba(16, 185, 129, 0.65)');
         ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, rect.width, rect.height);
+        ctx.fillRect(0, 0, w, h);
         ctx.restore();
       }
     }
@@ -6381,6 +6448,9 @@
         tg.ready();
         tg.expand();
         tg.enableClosingConfirmation();
+        if (typeof tg.disableVerticalSwipes === 'function') {
+          try { tg.disableVerticalSwipes(); } catch (e) {}
+        }
 
         // Sync player name from Telegram User profile
         const user = tg.initDataUnsafe?.user;
@@ -6439,6 +6509,22 @@
         showToast(`Portland Protocol Online. Welcome, ${welcomeName}!`, "info");
       }, 600);
     };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (!gameState.isPaused && !gameState.bossActive && !gameState.intermissionActive) {
+          gameState.isPaused = true;
+        }
+        if (audioInitialized && typeof Tone !== 'undefined' && Tone.Transport.state === 'started') {
+          Tone.Transport.pause();
+        }
+      } else {
+        gameState.lastTimestamp = performance.now();
+        if (gameState.audioEnabled && audioInitialized && typeof Tone !== 'undefined') {
+          Tone.Transport.start();
+        }
+      }
+    });
   
     // === SAFE LOCAL SAVE, EXPORT/IMPORT, & GLOBAL LEADERBOARD ===
 
@@ -6622,13 +6708,11 @@
       if (isNaN(p.speed) || p.speed <= 0) p.speed = 4.8;
       if (!p.baseSpeed) p.baseSpeed = 4.8;
 
-      const canvas = document.getElementById('gameCanvas');
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        gameState.camera.x = p.x - (rect.width / 2);
-        gameState.camera.y = p.y - (rect.height / 2);
-        gameState.camera.initialized = true;
-      }
+      const cw = gameState.canvasWidth || window.innerWidth;
+      const ch = gameState.canvasHeight || window.innerHeight;
+      gameState.camera.x = p.x - (cw / 2);
+      gameState.camera.y = p.y - (ch / 2);
+      gameState.camera.initialized = true;
       createImpactParticles(p.x, p.y, '#00f5ff');
       addFloatingText("🎯 CAMERA CENTERED", p.x, p.y - 25, '#00f5ff', 14);
       showToast("Camera centered on Hero!", "info");
