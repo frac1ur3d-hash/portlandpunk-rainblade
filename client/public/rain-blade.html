@@ -401,7 +401,11 @@
           </div>
 
           <!-- Paperdoll Visual Layout Container -->
-          <div class="relative w-full max-w-[350px] h-[390px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2">
+          <div id="d4PaperdollContainer"
+               ondragover="handleDragOverPaperdoll(event)"
+               ondragleave="handleDragLeavePaperdoll(event)"
+               ondrop="handleDropOnPaperdoll(event)"
+               class="relative w-full max-w-[350px] h-[390px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2 transition-all">
             <!-- Center Hero 8-Bit Silhouette -->
             <div class="absolute inset-0 flex flex-col items-center justify-center opacity-70 pointer-events-none">
               <div class="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">🥷</div>
@@ -412,6 +416,7 @@
             <!-- 1. Top Center: Head / Cyber-Visor -->
             <div class="absolute top-2.5 flex flex-col items-center">
               <div id="d4SlotHead" 
+                   data-slot="head"
                    onclick="inspectEquipSlot('head')" 
                    ondblclick="unequipSlot('head')"
                    ondragover="handleDragOver(event)" 
@@ -419,6 +424,8 @@
                    ondrop="handleDropOnSocket(event, 'head')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'head')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'head')"
                    class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
                 <span class="text-[9px] font-mono text-cyan-400 font-bold">HEAD</span>
                 <span id="d4HeadIcon" class="text-xl">🥽</span>
@@ -430,6 +437,7 @@
             <!-- 2. Mid Left: Main Hand Weapon -->
             <div class="absolute left-2.5 top-20 flex flex-col items-center">
               <div id="d4SlotWeapon" 
+                   data-slot="weapon"
                    onclick="inspectEquipSlot('weapon')" 
                    ondblclick="unequipSlot('weapon')"
                    ondragover="handleDragOver(event)" 
@@ -437,6 +445,8 @@
                    ondrop="handleDropOnSocket(event, 'weapon')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'weapon')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'weapon')"
                    class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-emerald-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all">
                 <span class="text-[9px] font-mono text-emerald-400 font-bold">MAIN-HAND</span>
                 <span id="d4WeaponIcon" class="text-2xl">🗡️</span>
@@ -448,6 +458,7 @@
             <!-- 3. Mid Center: Body Armor / Duster -->
             <div class="absolute top-20 flex flex-col items-center">
               <div id="d4SlotArmor" 
+                   data-slot="armor"
                    onclick="inspectEquipSlot('armor')" 
                    ondblclick="unequipSlot('armor')"
                    ondragover="handleDragOver(event)" 
@@ -455,6 +466,8 @@
                    ondrop="handleDropOnSocket(event, 'armor')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'armor')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'armor')"
                    class="w-15 h-20 rounded-2xl bg-slate-900/95 border-2 border-cyan-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.5)] transition-all">
                 <span class="text-[9px] font-mono text-cyan-400 font-bold">CHEST</span>
                 <span id="d4ArmorIcon" class="text-2xl">🧥</span>
@@ -466,6 +479,7 @@
             <!-- 4. Mid Right: Off-Hand (Dual-Wield or Shield) -->
             <div class="absolute right-2.5 top-20 flex flex-col items-center">
               <div id="d4SlotOffhand" 
+                   data-slot="offhand"
                    onclick="inspectEquipSlot('offhand')" 
                    ondblclick="unequipSlot('offhand')"
                    ondragover="handleDragOver(event)" 
@@ -473,6 +487,8 @@
                    ondrop="handleDropOnSocket(event, 'offhand')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'offhand')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'offhand')"
                    class="w-16 h-20 rounded-2xl bg-slate-900/95 border-2 border-purple-500/80 flex flex-col items-center justify-between p-1.5 cursor-pointer hover:border-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] transition-all">
                 <span class="text-[9px] font-mono text-purple-400 font-bold">OFF-HAND</span>
                 <span id="d4OffhandIcon" class="text-2xl">🛡️</span>
@@ -484,6 +500,7 @@
             <!-- 5a. Lower Left: Utility Belt -->
             <div class="absolute left-3 bottom-20 flex flex-col items-center">
               <div id="d4SlotBelt" 
+                   data-slot="belt"
                    onclick="inspectEquipSlot('belt')" 
                    ondblclick="unequipSlot('belt')"
                    ondragover="handleDragOver(event)" 
@@ -491,6 +508,8 @@
                    ondrop="handleDropOnSocket(event, 'belt')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'belt')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'belt')"
                    class="w-13 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
                 <span class="text-[8px] font-mono text-amber-400 font-bold">BELT</span>
                 <span id="d4BeltIcon" class="text-lg">🥋</span>
@@ -502,6 +521,7 @@
             <!-- 5. Lower Center: Footwear / Boots -->
             <div class="absolute bottom-20 flex flex-col items-center">
               <div id="d4SlotBoots" 
+                   data-slot="boots"
                    onclick="inspectEquipSlot('boots')" 
                    ondblclick="unequipSlot('boots')"
                    ondragover="handleDragOver(event)" 
@@ -509,6 +529,8 @@
                    ondrop="handleDropOnSocket(event, 'boots')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'boots')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'boots')"
                    class="w-15 h-15 rounded-2xl bg-slate-900/95 border-2 border-teal-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-teal-400 hover:shadow-[0_0_15px_rgba(20,184,166,0.5)] transition-all">
                 <span class="text-[9px] font-mono text-teal-400 font-bold">FEET</span>
                 <span id="d4BootsIcon" class="text-xl">👢</span>
@@ -520,6 +542,7 @@
             <!-- 5b. Lower Right: Active Cyber Gadget / Trinket -->
             <div class="absolute right-3 bottom-20 flex flex-col items-center">
               <div id="d4SlotTrinket" 
+                   data-slot="trinket"
                    onclick="inspectEquipSlot('trinket')" 
                    ondblclick="unequipSlot('trinket')"
                    ondragover="handleDragOver(event)" 
@@ -527,6 +550,8 @@
                    ondrop="handleDropOnSocket(event, 'trinket')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'trinket')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'trinket')"
                    class="w-13 h-14 rounded-2xl bg-slate-900/95 border-2 border-fuchsia-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(217,70,239,0.5)] transition-all">
                 <span class="text-[8px] font-mono text-fuchsia-400 font-bold">GADGET</span>
                 <span id="d4TrinketIcon" class="text-lg">🎫</span>
@@ -538,6 +563,7 @@
             <!-- 6. Bottom Left: Ring 1 -->
             <div class="absolute left-3 bottom-2 flex flex-col items-center">
               <div id="d4SlotRing1" 
+                   data-slot="ring1"
                    onclick="inspectEquipSlot('ring1')" 
                    ondblclick="unequipSlot('ring1')"
                    ondragover="handleDragOver(event)" 
@@ -545,6 +571,8 @@
                    ondrop="handleDropOnSocket(event, 'ring1')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'ring1')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'ring1')"
                    class="w-13 h-13 rounded-2xl bg-slate-900/95 border-2 border-rose-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.5)] transition-all">
                 <span class="text-[8px] font-mono text-rose-400 font-bold">RING 1</span>
                 <span id="d4Ring1Icon" class="text-lg">💍</span>
@@ -556,6 +584,7 @@
             <!-- 7. Bottom Center: Urban Relic / Module -->
             <div class="absolute bottom-2 flex flex-col items-center">
               <div id="d4SlotRelic" 
+                   data-slot="relic"
                    onclick="inspectEquipSlot('relic')" 
                    ondblclick="unequipSlot('relic')"
                    ondragover="handleDragOver(event)" 
@@ -563,6 +592,8 @@
                    ondrop="handleDropOnSocket(event, 'relic')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'relic')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'relic')"
                    class="w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-amber-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-amber-400 hover:shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all">
                 <span class="text-[8px] font-mono text-amber-400 font-bold">RELIC</span>
                 <span id="d4RelicIcon" class="text-xl">🍩</span>
@@ -574,6 +605,7 @@
             <!-- 8. Bottom Right: Ring 2 -->
             <div class="absolute right-3 bottom-2 flex flex-col items-center">
               <div id="d4SlotRing2" 
+                   data-slot="ring2"
                    onclick="inspectEquipSlot('ring2')" 
                    ondblclick="unequipSlot('ring2')"
                    ondragover="handleDragOver(event)" 
@@ -581,6 +613,8 @@
                    ondrop="handleDropOnSocket(event, 'ring2')"
                    draggable="true" 
                    ondragstart="handleDragStartSocket(event, 'ring2')"
+                   ondragend="handleDragEnd()"
+                   ontouchstart="initTouchDrag(event, 'socket', 'ring2')"
                    class="w-13 h-13 rounded-2xl bg-slate-900/95 border-2 border-indigo-500/80 flex flex-col items-center justify-between p-1 cursor-pointer hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all">
                 <span class="text-[8px] font-mono text-indigo-400 font-bold">RING 2</span>
                 <span id="d4Ring2Icon" class="text-lg">💎</span>
@@ -603,10 +637,16 @@
                   <div id="inspectItemStats" class="text-[10px] font-mono text-emerald-400">+16 Attack Power</div>
                 </div>
               </div>
-              <button id="btnInspectReforge" onclick="reforgeInspectedSlot()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-mono font-bold shadow-glow-amber transition-all flex flex-col items-center">
-                <span>REFORGE</span>
-                <span id="inspectReforgeCost" class="text-[9px] font-normal">45 ☕</span>
-              </button>
+              <div class="flex items-center gap-2">
+                <button id="btnInspectReforge" onclick="reforgeInspectedSlot()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-mono font-bold shadow-glow-amber transition-all flex flex-col items-center cursor-pointer active:scale-95" title="Reforge currently inspected gear item">
+                  <span>REFORGE</span>
+                  <span id="inspectReforgeCost" class="text-[9px] font-normal">45 ☕</span>
+                </button>
+                <button id="btnReforgeAll" onclick="reforgeAllEquippedGear()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-mono font-black shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all flex flex-col items-center cursor-pointer active:scale-95" title="Masterwork and upgrade all equipped gear items simultaneously!">
+                  <span class="flex items-center gap-1"><span>⚡</span><span>REFORGE ALL</span></span>
+                  <span id="reforgeAllCostText" class="text-[9px] font-bold">ALL SLOTS ☕</span>
+                </button>
+              </div>
             </div>
             <!-- Progress Bar -->
             <div class="w-full bg-slate-950 rounded-full h-2 overflow-hidden border border-slate-800">
@@ -676,11 +716,16 @@
           </div>
 
           <!-- Stash Actions Footer -->
-          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
-            <span class="text-[10px] font-mono text-slate-400">Right-click or tap to equip / dismantle.</span>
-            <button onclick="scrapAllJunk()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/80 border border-slate-700 hover:border-rose-500/50 text-xs font-mono text-rose-300 transition-all shadow-md">
-              Scrap Bag Loot ♻️
-            </button>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+            <span class="text-[10px] font-mono text-slate-400">Drag & drop to equip / swap. Shift+R-Click to scrap.</span>
+            <div class="flex items-center gap-2">
+              <button onclick="reforgeAllEquippedGear()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-xs font-mono text-amber-300 font-bold transition-all shadow-md flex items-center gap-1 cursor-pointer active:scale-95" title="Reforge All Equipped Loadout Gear">
+                <span>⚡</span><span>Reforge All Gear</span>
+              </button>
+              <button onclick="scrapAllJunk()" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/80 border border-slate-700 hover:border-rose-500/50 text-xs font-mono text-rose-300 transition-all shadow-md active:scale-95">
+                Scrap Bag Loot ♻️
+              </button>
+            </div>
           </div>
         </div>
 
@@ -4836,54 +4881,156 @@
     let draggedItemSource = null; // { source: 'stash', index: 0 } or { source: 'socket', slot: 'weapon' }
     let inspectedItemData = null; // Currently inspected item (either from socket or stash)
 
+    function getAutoEquipSlotForItem(item) {
+      if (!item) return null;
+      let slot = item.type ? item.type.toLowerCase() : '';
+      if (slot === 'gadget') slot = 'trinket';
+      if (slot === 'shield' || slot === 'dualwield') slot = 'offhand';
+      if (slot === 'ring' || slot === 'ring1' || slot === 'ring2') {
+        if (!gameState.equipped.ring1) return 'ring1';
+        if (!gameState.equipped.ring2) return 'ring2';
+        return activeInspectSlot === 'ring2' ? 'ring2' : 'ring1';
+      }
+      return slot;
+    }
+
+    function isSlotCompatible(itemType, slot) {
+      if (!itemType || !slot) return false;
+      const t = itemType.toLowerCase();
+      const s = slot.toLowerCase();
+      if (s === 'ring1' || s === 'ring2') {
+        return t === 'ring' || t === 'ring1' || t === 'ring2';
+      }
+      if (s === 'trinket') {
+        return t === 'trinket' || t === 'gadget';
+      }
+      if (s === 'offhand') {
+        return t === 'offhand' || t === 'shield' || t === 'dualwield';
+      }
+      return t === s;
+    }
+
+    function highlightCompatibleSockets(itemType) {
+      clearDragHighlights();
+      const paperdoll = document.getElementById('d4PaperdollContainer');
+      if (paperdoll) {
+        paperdoll.classList.add('border-cyan-400', 'shadow-[0_0_25px_rgba(6,182,212,0.4)]');
+      }
+      const sockets = ['head', 'weapon', 'armor', 'offhand', 'belt', 'boots', 'trinket', 'ring1', 'ring2', 'relic'];
+      sockets.forEach(slot => {
+        const slotEl = document.getElementById(`d4Slot${slot.charAt(0).toUpperCase() + slot.slice(1)}`);
+        if (slotEl) {
+          if (isSlotCompatible(itemType, slot)) {
+            slotEl.classList.add('ring-2', 'ring-emerald-400', 'border-emerald-400', 'animate-pulse', 'scale-105');
+          } else {
+            slotEl.classList.add('opacity-40');
+          }
+        }
+      });
+    }
+
+    function clearDragHighlights() {
+      const paperdoll = document.getElementById('d4PaperdollContainer');
+      if (paperdoll) {
+        paperdoll.classList.remove('border-cyan-400', 'shadow-[0_0_25px_rgba(6,182,212,0.4)]', 'ring-2', 'ring-cyan-400');
+      }
+      const sockets = ['head', 'weapon', 'armor', 'offhand', 'belt', 'boots', 'trinket', 'ring1', 'ring2', 'relic'];
+      sockets.forEach(slot => {
+        const slotEl = document.getElementById(`d4Slot${slot.charAt(0).toUpperCase() + slot.slice(1)}`);
+        if (slotEl) {
+          slotEl.classList.remove('ring-2', 'ring-emerald-400', 'border-emerald-400', 'animate-pulse', 'scale-105', 'opacity-40', 'border-cyan-400', 'shadow-[0_0_15px_rgba(0,245,255,0.6)]');
+        }
+      });
+    }
+
     function handleDragStartStash(e, index) {
       const item = gameState.inventory[index];
       if (!item) return;
       draggedItemSource = { source: 'stash', index };
-      e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
-      e.dataTransfer.effectAllowed = 'move';
+      try {
+        if (e && e.dataTransfer) {
+          e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
+          e.dataTransfer.effectAllowed = 'move';
+        }
+      } catch (err) {}
+      highlightCompatibleSockets(item.type);
       inspectStashItem(index);
     }
 
     function handleDragStartSocket(e, slot) {
       const item = gameState.equipped[slot];
       if (!item) {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
         return;
       }
       draggedItemSource = { source: 'socket', slot };
-      e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
-      e.dataTransfer.effectAllowed = 'move';
+      try {
+        if (e && e.dataTransfer) {
+          e.dataTransfer.setData('text/plain', JSON.stringify(draggedItemSource));
+          e.dataTransfer.effectAllowed = 'move';
+        }
+      } catch (err) {}
       inspectEquipSlot(slot);
     }
 
+    function handleDragEnd() {
+      clearDragHighlights();
+      draggedItemSource = null;
+    }
+
     function handleDragOver(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      if (e.currentTarget) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      if (e && e.currentTarget) {
         e.currentTarget.classList.add('border-cyan-400', 'shadow-[0_0_15px_rgba(0,245,255,0.6)]');
       }
     }
 
     function handleDragLeave(e) {
-      if (e.currentTarget) {
+      if (e && e.currentTarget) {
         e.currentTarget.classList.remove('border-cyan-400', 'shadow-[0_0_15px_rgba(0,245,255,0.6)]');
       }
     }
 
-    function isSlotCompatible(itemType, slot) {
-      if (!itemType || !slot) return false;
-      if (slot === 'ring1' || slot === 'ring2') {
-        return itemType === 'ring' || itemType === 'ring1' || itemType === 'ring2';
+    function handleDragOverPaperdoll(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      const container = document.getElementById('d4PaperdollContainer');
+      if (container) {
+        container.classList.add('ring-2', 'ring-cyan-400', 'border-cyan-400', 'shadow-[0_0_30px_rgba(6,182,212,0.6)]');
       }
-      if (slot === 'trinket') {
-        return itemType === 'trinket' || itemType === 'gadget';
+    }
+
+    function handleDragLeavePaperdoll(e) {
+      const container = document.getElementById('d4PaperdollContainer');
+      if (container) {
+        container.classList.remove('ring-2', 'ring-cyan-400', 'border-cyan-400', 'shadow-[0_0_30px_rgba(6,182,212,0.6)]');
       }
-      return itemType === slot;
+    }
+
+    function handleDropOnPaperdoll(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      handleDragLeavePaperdoll(e);
+      if (!draggedItemSource) return;
+
+      if (draggedItemSource.source === 'stash') {
+        const item = gameState.inventory[draggedItemSource.index];
+        if (!item) return;
+        const targetSlot = getAutoEquipSlotForItem(item);
+        if (!targetSlot) {
+          showToast(`Cannot equip ${item.name} to loadout!`, "warning");
+          clearDragHighlights();
+          draggedItemSource = null;
+          return;
+        }
+        equipItem(draggedItemSource.index);
+      }
+      draggedItemSource = null;
+      clearDragHighlights();
     }
 
     function handleDropOnSocket(e, targetSlot) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       handleDragLeave(e);
       if (!draggedItemSource) return;
 
@@ -4892,6 +5039,8 @@
         if (!item) return;
         if (!isSlotCompatible(item.type, targetSlot)) {
           showToast(`Cannot equip ${item.type.toUpperCase()} into ${targetSlot.toUpperCase()} socket!`, "warning");
+          clearDragHighlights();
+          draggedItemSource = null;
           return;
         }
         // Equip item into targetSlot
@@ -4899,14 +5048,16 @@
         gameState.equipped[targetSlot] = item;
         gameState.inventory.splice(draggedItemSource.index, 1);
         if (currentEquipped) {
-          gameState.inventory.push(currentEquipped);
+          gameState.inventory.splice(draggedItemSource.index, 0, currentEquipped);
         }
         recalcPlayerStats();
         renderInventoryBag();
         updateEquippedUI();
         inspectEquipSlot(targetSlot);
         playSound('coin');
-        showToast(`Equipped ${item.name} to ${targetSlot.toUpperCase()}!`, "success");
+        playDubstepBassDrop(10);
+        triggerTelegramHaptic('selection');
+        showToast(`Equipped ${item.name} into ${targetSlot.toUpperCase()}!`, "success");
       } else if (draggedItemSource.source === 'socket') {
         // Swapping sockets (e.g. Ring1 and Ring2)
         const sourceSlot = draggedItemSource.slot;
@@ -4921,13 +5072,15 @@
           updateEquippedUI();
           inspectEquipSlot(targetSlot);
           playSound('coin');
+          triggerTelegramHaptic('selection');
         }
       }
       draggedItemSource = null;
+      clearDragHighlights();
     }
 
     function handleDropOnStash(e, targetIndex) {
-      e.preventDefault();
+      if (e && e.preventDefault) e.preventDefault();
       handleDragLeave(e);
       if (!draggedItemSource) return;
 
@@ -4937,25 +5090,250 @@
         const item = gameState.equipped[slot];
         if (!item) return;
 
-        gameState.equipped[slot] = null;
-        gameState.inventory.splice(targetIndex, 0, item);
+        // If targetIndex is an existing item, check if we can swap
+        const existingStashItem = gameState.inventory[targetIndex];
+        if (existingStashItem && isSlotCompatible(existingStashItem.type, slot)) {
+          // Swap: equip stash item to slot, unequip old item to targetIndex
+          gameState.equipped[slot] = existingStashItem;
+          gameState.inventory[targetIndex] = item;
+          showToast(`Swapped ${item.name} with ${existingStashItem.name}!`, "success");
+        } else {
+          gameState.equipped[slot] = null;
+          if (targetIndex < gameState.inventory.length) {
+            gameState.inventory.splice(targetIndex, 0, item);
+          } else {
+            gameState.inventory.push(item);
+          }
+          showToast(`Unequipped ${item.name} to stash.`, "info");
+        }
         recalcPlayerStats();
         renderInventoryBag();
         updateEquippedUI();
-        inspectStashItem(targetIndex);
         playSound('coin');
-        showToast(`Unequipped ${item.name} to stash.`, "info");
+        triggerTelegramHaptic('selection');
       } else if (draggedItemSource.source === 'stash') {
         // Reorder in stash
         const fromIndex = draggedItemSource.index;
         if (fromIndex !== targetIndex && fromIndex < gameState.inventory.length) {
-          const item = gameState.inventory.splice(fromIndex, 1)[0];
-          gameState.inventory.splice(targetIndex, 0, item);
+          if (targetIndex < gameState.inventory.length) {
+            const temp = gameState.inventory[fromIndex];
+            gameState.inventory[fromIndex] = gameState.inventory[targetIndex];
+            gameState.inventory[targetIndex] = temp;
+          } else {
+            const item = gameState.inventory.splice(fromIndex, 1)[0];
+            gameState.inventory.push(item);
+          }
           renderInventoryBag();
-          inspectStashItem(targetIndex);
+          inspectStashItem(targetIndex < gameState.inventory.length ? targetIndex : gameState.inventory.length - 1);
         }
       }
       draggedItemSource = null;
+      clearDragHighlights();
+    }
+
+    // Touch Drag & Drop Controller for Mobile & Tablet screens
+    let touchDragState = {
+      active: false,
+      item: null,
+      source: null,
+      indexOrSlot: null,
+      startX: 0,
+      startY: 0,
+      ghostEl: null
+    };
+
+    function initTouchDrag(e, source, indexOrSlot) {
+      if (!e.touches || e.touches.length === 0) return;
+      const touch = e.touches[0];
+      const item = source === 'stash' ? gameState.inventory[indexOrSlot] : gameState.equipped[indexOrSlot];
+      if (!item) return;
+
+      touchDragState = {
+        active: false,
+        item: item,
+        source: source,
+        indexOrSlot: indexOrSlot,
+        startX: touch.clientX,
+        startY: touch.clientY,
+        ghostEl: null
+      };
+
+      const onTouchMove = (ev) => {
+        const curTouch = ev.touches[0];
+        const dist = Math.hypot(curTouch.clientX - touchDragState.startX, curTouch.clientY - touchDragState.startY);
+        
+        if (!touchDragState.active && dist > 8) {
+          touchDragState.active = true;
+          draggedItemSource = { source: touchDragState.source, index: touchDragState.indexOrSlot, slot: touchDragState.indexOrSlot };
+          highlightCompatibleSockets(touchDragState.item.type);
+
+          const ghost = document.createElement('div');
+          ghost.id = 'touchDragGhost';
+          ghost.className = 'fixed pointer-events-none z-[9999] w-14 h-14 rounded-2xl bg-slate-900/95 border-2 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] flex flex-col items-center justify-center p-1 text-2xl select-none';
+          ghost.innerHTML = `<span>${touchDragState.item.icon || '🗡️'}</span><span class="text-[8px] font-mono font-bold text-amber-300">Lv.${touchDragState.item.level || 1}</span>`;
+          document.body.appendChild(ghost);
+          touchDragState.ghostEl = ghost;
+        }
+
+        if (touchDragState.active && touchDragState.ghostEl) {
+          if (ev.cancelable) ev.preventDefault();
+          touchDragState.ghostEl.style.left = `${curTouch.clientX - 28}px`;
+          touchDragState.ghostEl.style.top = `${curTouch.clientY - 28}px`;
+        }
+      };
+
+      const onTouchEnd = (ev) => {
+        window.removeEventListener('touchmove', onTouchMove);
+        window.removeEventListener('touchend', onTouchEnd);
+        window.removeEventListener('touchcancel', onTouchEnd);
+
+        if (touchDragState.ghostEl) {
+          touchDragState.ghostEl.remove();
+          touchDragState.ghostEl = null;
+        }
+
+        if (touchDragState.active) {
+          const endTouch = ev.changedTouches[0];
+          const targetEl = document.elementFromPoint(endTouch.clientX, endTouch.clientY);
+          if (targetEl) {
+            const socketEl = targetEl.closest('[id^="d4Slot"]');
+            const paperdollEl = targetEl.closest('#d4PaperdollContainer');
+            const stashSlotEl = targetEl.closest('[data-stash-index]');
+
+            if (socketEl) {
+              const slotId = socketEl.id.replace('d4Slot', '').toLowerCase();
+              handleDropOnSocket({ preventDefault: () => {} }, slotId);
+            } else if (paperdollEl) {
+              handleDropOnPaperdoll({ preventDefault: () => {} });
+            } else if (stashSlotEl) {
+              const targetIdx = parseInt(stashSlotEl.getAttribute('data-stash-index'), 10);
+              handleDropOnStash({ preventDefault: () => {} }, targetIdx);
+            }
+          }
+          triggerTelegramHaptic('medium');
+        }
+        clearDragHighlights();
+        touchDragState.active = false;
+      };
+
+      window.addEventListener('touchmove', onTouchMove, { passive: false });
+      window.addEventListener('touchend', onTouchEnd, { passive: false });
+      window.addEventListener('touchcancel', onTouchEnd, { passive: false });
+    }
+
+    // === REFORGE ALL EQUIPPED GEAR CONTROLLER ===
+    function reforgeAllEquippedGear() {
+      const eq = gameState.equipped;
+      const slots = ['head', 'weapon', 'armor', 'offhand', 'belt', 'boots', 'trinket', 'ring1', 'ring2', 'relic'];
+      
+      const eligible = [];
+      let totalCost = 0;
+
+      slots.forEach(slot => {
+        const item = eq[slot];
+        if (item && (item.level || 1) < 10) {
+          const lvl = item.level || 1;
+          const cost = 45 * lvl;
+          eligible.push({ slot, item, cost });
+          totalCost += cost;
+        }
+      });
+
+      if (eligible.length === 0) {
+        showToast("All equipped loadout gear is already MAX Masterwork (Level 10)!", "info");
+        return;
+      }
+
+      if (gameState.player.beans < 45) {
+        showToast(`Need at least 45 Stumptown Beans to reforge loadout gear!`, "rose");
+        return;
+      }
+
+      let reforgedCount = 0;
+      let totalBeansSpent = 0;
+      let attackGained = 0;
+      let hpGained = 0;
+      let armorGained = 0;
+
+      for (const entry of eligible) {
+        if (gameState.player.beans < entry.cost) continue;
+
+        gameState.player.beans -= entry.cost;
+        totalBeansSpent += entry.cost;
+        reforgedCount++;
+
+        const item = entry.item;
+        const oldAtk = item.damage || 0;
+        const oldHp = item.hp || 0;
+        const oldDef = item.armor || 0;
+
+        item.level = (item.level || 1) + 1;
+        if (item.level % 2 === 0 && (item.stars || 1) < 5) {
+          item.stars = (item.stars || 1) + 1;
+        }
+        item.xp = 0;
+        item.xpMax = Math.round(140 * Math.pow(1.35, item.level - 1));
+
+        if (item.type === 'weapon') {
+          item.damage = Math.round((item.damage || 20) * 1.25);
+          item.bonus = `+${item.damage} Attack (★${item.stars} Lv${item.level})`;
+          attackGained += (item.damage - oldAtk);
+        } else if (item.type === 'armor') {
+          item.hp = Math.round((item.hp || 50) * 1.25);
+          item.armor = Math.round(((item.armor || 8) + 3) * 1.15);
+          item.bonus = `+${item.hp} HP, +${item.armor} Armor (★${item.stars} Lv${item.level})`;
+          hpGained += (item.hp - oldHp);
+          armorGained += (item.armor - oldDef);
+        } else if (item.type === 'belt') {
+          item.hp = Math.round((item.hp || 30) * 1.25);
+          item.armor = Math.round(((item.armor || 6) + 2) * 1.15);
+          item.bonus = `+${item.hp} HP, +${item.armor} Armor (★${item.stars} Lv${item.level})`;
+          hpGained += (item.hp - oldHp);
+          armorGained += (item.armor - oldDef);
+        } else if (item.type === 'offhand') {
+          if (item.armor) {
+            item.armor = Math.round((item.armor + 3) * 1.15);
+            armorGained += 4;
+          }
+          if (item.damage) {
+            item.damage = Math.round((item.damage || 15) * 1.22);
+            attackGained += 5;
+          }
+          item.bonus = `★${item.stars} Lv${item.level} Off-Hand Mastery`;
+        } else if (item.type === 'head') {
+          item.hp = Math.round((item.hp || 25) * 1.25);
+          hpGained += 12;
+          item.bonus = `★${item.stars} Lv${item.level} Visor Mastery`;
+        } else if (item.type === 'boots') {
+          item.bonus = `★${item.stars} Lv${item.level} Kicks Mastery`;
+        } else if (item.type === 'trinket') {
+          item.bonus = `★${item.stars} Lv${item.level} Active Gadget`;
+        } else {
+          item.bonus = `★${item.stars} Lv${item.level} Resonance`;
+        }
+      }
+
+      if (reforgedCount === 0) {
+        showToast(`Not enough beans to reforge any gear! (Need ${eligible[0].cost} ☕)`, "warning");
+        return;
+      }
+
+      playSound('level');
+      playDubstepBassDrop(18);
+      createImpactParticles(gameState.player.x, gameState.player.y, '#fbbf24', 24);
+      triggerTelegramHaptic('success');
+
+      recalcPlayerStats();
+      renderInventoryBag();
+      updateEquippedUI();
+      updateHUD();
+      if (activeInspectSlot) inspectEquipSlot(activeInspectSlot);
+
+      let summary = `⚡ Reforged ${reforgedCount} equipped items (-${totalBeansSpent} ☕)!`;
+      if (attackGained) summary += ` +${attackGained} Atk`;
+      if (hpGained) summary += ` +${hpGained} HP`;
+      if (armorGained) summary += ` +${armorGained} Arm`;
+      showToast(summary, "success");
     }
 
     function inspectStashItem(index) {
@@ -5269,13 +5647,19 @@
         }
       }).join(' ');
 
-      // Alignment relative to grid column to prevent edge clipping
-      const alignClass = (colIndex % 6 <= 1) ? 'left-0' :
-                         (colIndex % 6 >= 4) ? 'right-0' : 'left-1/2 -translate-x-1/2';
+      // Directional positioning: top rows (0 and 1, colIndex < 12) open downwards to prevent cutting off at top header.
+      // Bottom rows open upwards.
+      const isTopRows = colIndex < 12;
+      const verticalPosClass = isTopRows ? 'top-full mt-2.5' : 'bottom-full mb-2.5';
+
+      // Alignment relative to grid column to prevent horizontal edge clipping
+      const colInRow = colIndex % 6;
+      const alignClass = (colInRow <= 1) ? 'left-0' :
+                         (colInRow >= 4) ? 'right-0' : 'left-1/2 -translate-x-1/2';
 
       return `
         <!-- DIABLO SIDE-BY-SIDE COMPARISON CARD -->
-        <div class="absolute bottom-full mb-2 ${alignClass} w-[340px] sm:w-[410px] p-2.5 rounded-2xl bg-slate-950/98 border border-cyan-500/60 shadow-[0_0_35px_rgba(0,0,0,0.9)] pointer-events-none hidden group-hover:flex flex-col gap-2 z-50 font-mono">
+        <div class="absolute ${verticalPosClass} ${alignClass} w-[330px] sm:w-[390px] p-2.5 rounded-2xl bg-slate-950/98 border border-cyan-500/60 shadow-[0_0_35px_rgba(0,0,0,0.95)] pointer-events-none hidden md:group-hover:flex flex-col gap-2 z-50 font-mono">
           
           <!-- Top Stat Diff Highlight Bar -->
           <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 text-[9px]">
@@ -5376,11 +5760,14 @@
                              'border-slate-700 bg-slate-900/80';
           
           slotEl.className = `w-full aspect-square rounded-xl border-2 ${tierBorder} flex flex-col items-center justify-between p-1 cursor-pointer hover:scale-105 hover:shadow-[0_0_12px_rgba(0,245,255,0.4)] transition-all relative group`;
+          slotEl.setAttribute('data-stash-index', i);
           slotEl.draggable = true;
           slotEl.ondragstart = (e) => handleDragStartStash(e, i);
+          slotEl.ondragend = () => handleDragEnd();
           slotEl.ondragover = (e) => handleDragOver(e);
           slotEl.ondragleave = (e) => handleDragLeave(e);
           slotEl.ondrop = (e) => handleDropOnStash(e, i);
+          slotEl.ontouchstart = (e) => initTouchDrag(e, 'stash', i);
 
           // SINGLE-CLICK: Inspect item in card
           slotEl.onclick = (e) => {
@@ -5419,6 +5806,7 @@
         } else {
           // Empty tactile grid slot: accepts drop
           slotEl.className = "w-full aspect-square rounded-xl border border-slate-800/60 bg-slate-950/40 flex items-center justify-center text-slate-800 text-sm select-none hover:border-slate-700 transition-colors";
+          slotEl.setAttribute('data-stash-index', i);
           slotEl.innerHTML = '<span>•</span>';
           slotEl.ondragover = (e) => handleDragOver(e);
           slotEl.ondragleave = (e) => handleDragLeave(e);
@@ -5563,6 +5951,31 @@
       } else {
         if (hudTrinketIcon) hudTrinketIcon.textContent = '❌';
         if (hudTrinketLabel) hudTrinketLabel.textContent = 'No Trinket';
+      }
+
+      // Update Reforge All Button state & cost
+      const reforgeAllCostEl = document.getElementById('reforgeAllCostText');
+      const btnReforgeAll = document.getElementById('btnReforgeAll');
+      if (reforgeAllCostEl || btnReforgeAll) {
+        let totalReforgeCost = 0;
+        let eligibleCount = 0;
+        ['head', 'weapon', 'armor', 'offhand', 'belt', 'boots', 'trinket', 'ring1', 'ring2', 'relic'].forEach(s => {
+          const item = eq[s];
+          if (item && (item.level || 1) < 10) {
+            eligibleCount++;
+            totalReforgeCost += 45 * (item.level || 1);
+          }
+        });
+        if (reforgeAllCostEl) {
+          reforgeAllCostEl.textContent = eligibleCount > 0 ? `${totalReforgeCost} ☕ (${eligibleCount} Items)` : 'MAXED ☕';
+        }
+        if (btnReforgeAll) {
+          if (eligibleCount === 0 || gameState.player.beans < 45) {
+            btnReforgeAll.classList.add('opacity-40');
+          } else {
+            btnReforgeAll.classList.remove('opacity-40');
+          }
+        }
       }
 
       if (activeInspectSlot) {
