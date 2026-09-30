@@ -2147,7 +2147,7 @@
 
       // (4) Stumptown Roaster Set Bonus: Slashes emit Espresso Shockwave
       if (p.activeSetBonuses && p.activeSetBonuses['stumptown_4']) {
-        spawnProjectile(p.x, p.y, p.x + Math.cos(aimAngle) * 320, p.y + Math.sin(aimAngle) * 320, 6.5, 30, '#f59e0b', 8);
+        spawnProjectile(p.x, p.y, p.x + Math.cos(aimAngle) * 320, p.y + Math.sin(aimAngle) * 320, 6.5, 30, '#f59e0b', 8, true);
         createImpactParticles(p.x, p.y, '#f59e0b', 4);
       }
 
@@ -2155,8 +2155,8 @@
       if (p.activeSetBonuses && p.activeSetBonuses['cryo_4']) {
         const s1 = aimAngle - 0.22;
         const s2 = aimAngle + 0.22;
-        spawnProjectile(p.x, p.y, p.x + Math.cos(s1) * 300, p.y + Math.sin(s1) * 300, 7.0, 35, '#38bdf8', 6);
-        spawnProjectile(p.x, p.y, p.x + Math.cos(s2) * 300, p.y + Math.sin(s2) * 300, 7.0, 35, '#38bdf8', 6);
+        spawnProjectile(p.x, p.y, p.x + Math.cos(s1) * 300, p.y + Math.sin(s1) * 300, 7.0, 35, '#38bdf8', 6, true);
+        spawnProjectile(p.x, p.y, p.x + Math.cos(s2) * 300, p.y + Math.sin(s2) * 300, 7.0, 35, '#38bdf8', 6, true);
       }
 
       let hitCount = 0;
@@ -2815,7 +2815,7 @@
       }
     }
 
-    function spawnProjectile(x, y, targetX, targetY, speed, damage, color, radius = 5) {
+    function spawnProjectile(x, y, targetX, targetY, speed, damage, color, radius = 5, isFriendly = false) {
       const dx = targetX - x;
       const dy = targetY - y;
       const dist = Math.hypot(dx, dy) || 1;
@@ -2827,7 +2827,8 @@
         damage: damage,
         color: color,
         radius: radius,
-        life: 3.5
+        life: 3.5,
+        isFriendly: !!isFriendly
       });
     }
 
@@ -4160,6 +4161,56 @@
       }
     }
 
+    function killEnemy(enemy, idx) {
+      if (!enemy) return;
+      const p = gameState.player;
+      p.enemiesSlain++;
+      const slainEl = document.getElementById('statEnemiesKilled');
+      if (slainEl) slainEl.textContent = p.enemiesSlain;
+      gainExperience(enemy.xpReward);
+      grantGearXp(enemy.xpReward);
+      dropLoot(enemy.x, enemy.y);
+      createImpactParticles(enemy.x, enemy.y, enemy.accentColor || '#f43f5e');
+
+      // (6) Burnside Anarchist: Anarchy Overdrive (Enemy kills reset Dash)
+      if (p.activeSetBonuses && p.activeSetBonuses['anarchist_6']) {
+        p.dodgeCooldown = 0;
+        if (p.comboHits >= 5) {
+          p.invulnerableTimer = Math.max(p.invulnerableTimer, 2.0);
+          addFloatingText('ANARCHY OVERDRIVE!', p.x, p.y - 25, '#34d399', 15);
+        }
+      }
+
+      // Elite Death Explosions
+      if (enemy.isElite) {
+        if (enemy.affix === 'molten') {
+          createImpactParticles(enemy.x, enemy.y, '#f97316', 14);
+          if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 65 && !p.isDodging && !(p.invulnerableTimer > 0)) {
+            p.hp -= 20;
+            addFloatingText('MOLTEN BURST -20', p.x, p.y - 12, '#f97316', 14);
+          }
+        } else if (enemy.affix === 'frozen') {
+          for (let k = 0; k < 6; k++) {
+            const kAng = (Math.PI * 2 / 6) * k;
+            spawnProjectile(enemy.x, enemy.y, enemy.x + Math.cos(kAng) * 180, enemy.y + Math.sin(kAng) * 180, 5.0, 16, '#38bdf8', 6, false);
+          }
+        }
+      }
+
+      if (enemy.isBoss) {
+        gameState.bossActive = false;
+        showToast(`APEX BOSS SLAIN: ${enemy.name}!`, "success");
+        dropLoot(enemy.x + 10, enemy.y);
+        dropLoot(enemy.x - 10, enemy.y);
+      }
+      if (typeof idx === 'number' && idx >= 0 && idx < gameState.enemies.length) {
+        gameState.enemies.splice(idx, 1);
+      } else {
+        const found = gameState.enemies.indexOf(enemy);
+        if (found !== -1) gameState.enemies.splice(found, 1);
+      }
+    }
+
     function update(dt) {
       if (gameState.isPaused) return;
 
@@ -4352,7 +4403,8 @@
         const len = Math.hypot(moveX, moveY);
         if (len > 0) {
           const hasteMult = gameState.skills[2].activeTimer > 0 ? 1.6 : 1.0;
-          const currentSpeed = p.speed * hasteMult;
+          const chillMult = p.isChilled > 0 ? 0.60 : 1.0;
+          const currentSpeed = p.speed * hasteMult * chillMult;
           p.vx = (moveX / (len > 1 ? len : 1)) * currentSpeed;
           p.vy = (moveY / (len > 1 ? len : 1)) * currentSpeed;
           p.x += p.vx;
@@ -4364,6 +4416,8 @@
       }
 
       if (p.dodgeCooldown > 0) p.dodgeCooldown = Math.max(0, p.dodgeCooldown - dt);
+      if (p.cryoNovaCd > 0) p.cryoNovaCd = Math.max(0, p.cryoNovaCd - dt);
+      if (p.isChilled > 0) p.isChilled = Math.max(0, p.isChilled - dt);
 
       if (!gameState.touchJoystick.active) {
         p.angle = Math.atan2(gameState.mouse.worldY - p.y, gameState.mouse.worldX - p.x);
@@ -4426,7 +4480,7 @@
               if (ed < minD) { minD = ed; target = e; }
             });
             if (target) {
-              spawnProjectile(p.x, p.y, target.x, target.y, 5.5, 55, '#f59e0b', 10);
+              spawnProjectile(p.x, p.y, target.x, target.y, 5.5, 55, '#f59e0b', 10, true);
               addFloatingText('DRAGON BREATH', p.x, p.y - 25, '#f97316', 14);
             }
           }
@@ -4517,47 +4571,53 @@
         const dy = p.y - enemy.y;
         const dist = Math.hypot(dx, dy);
 
+        const effectiveSpeed = enemy.speed * speedFactor;
+
         if (enemy.role === 'ranged') {
           if (dist < enemy.preferredDist - 40) {
-            enemy.x -= (dx / dist) * enemy.speed;
-            enemy.y -= (dy / dist) * enemy.speed;
+            enemy.x -= (dx / dist) * effectiveSpeed;
+            enemy.y -= (dy / dist) * effectiveSpeed;
           } else if (dist > enemy.preferredDist + 40) {
-            enemy.x += (dx / dist) * enemy.speed;
-            enemy.y += (dy / dist) * enemy.speed;
+            enemy.x += (dx / dist) * effectiveSpeed;
+            enemy.y += (dy / dist) * effectiveSpeed;
           }
 
-          enemy.shootTimer = (enemy.shootTimer || 0) + dt;
-          if (enemy.shootTimer >= enemy.shootCooldown) {
-            enemy.shootTimer = 0;
-            spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.2, enemy.damage, '#38bdf8', 6);
+          if (speedFactor > 0) {
+            enemy.shootTimer = (enemy.shootTimer || 0) + dt;
+            if (enemy.shootTimer >= enemy.shootCooldown) {
+              enemy.shootTimer = 0;
+              spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.2, enemy.damage, '#38bdf8', 6, false);
+            }
           }
         } 
         else if (enemy.role === 'brute') {
           if (enemy.isCharging) {
-            enemy.x += enemy.chargeDirX * (enemy.speed * 3.4);
-            enemy.y += enemy.chargeDirY * (enemy.speed * 3.4);
+            enemy.x += enemy.chargeDirX * (effectiveSpeed * 3.4);
+            enemy.y += enemy.chargeDirY * (effectiveSpeed * 3.4);
             enemy.chargeDuration -= dt;
             if (enemy.chargeDuration <= 0) {
               enemy.isCharging = false;
             }
           } else {
-            enemy.x += (dx / (dist || 1)) * enemy.speed;
-            enemy.y += (dy / (dist || 1)) * enemy.speed;
-            enemy.chargeTimer = (enemy.chargeTimer || 0) + dt;
+            enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+            enemy.y += (dy / (dist || 1)) * effectiveSpeed;
+            if (speedFactor > 0) {
+              enemy.chargeTimer = (enemy.chargeTimer || 0) + dt;
 
-            if (enemy.chargeTimer >= enemy.chargeCooldown && dist < 280) {
-              enemy.chargeTimer = 0;
-              enemy.isCharging = true;
-              enemy.chargeDuration = 0.65;
-              enemy.chargeDirX = dx / (dist || 1);
-              enemy.chargeDirY = dy / (dist || 1);
-              createImpactParticles(enemy.x, enemy.y, '#10b981');
+              if (enemy.chargeTimer >= enemy.chargeCooldown && dist < 280) {
+                enemy.chargeTimer = 0;
+                enemy.isCharging = true;
+                enemy.chargeDuration = 0.65;
+                enemy.chargeDirX = dx / (dist || 1);
+                enemy.chargeDirY = dy / (dist || 1);
+                createImpactParticles(enemy.x, enemy.y, '#10b981');
+              }
             }
           }
         } 
         else if (enemy.role === 'exploder') {
-          enemy.x += (dx / (dist || 1)) * (enemy.speed * 1.2);
-          enemy.y += (dy / (dist || 1)) * (enemy.speed * 1.2);
+          enemy.x += (dx / (dist || 1)) * (effectiveSpeed * 1.2);
+          enemy.y += (dy / (dist || 1)) * (effectiveSpeed * 1.2);
 
           if (dist < p.radius + enemy.radius + 10) {
             if (!p.isDodging && !(p.invulnerableTimer > 0)) {
@@ -4572,30 +4632,32 @@
           }
         } 
         else if (enemy.role === 'boss') {
-          enemy.x += (dx / (dist || 1)) * enemy.speed;
-          enemy.y += (dy / (dist || 1)) * enemy.speed;
+          enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+          enemy.y += (dy / (dist || 1)) * effectiveSpeed;
 
-          enemy.specialAttackTimer = (enemy.specialAttackTimer || 0) - dt;
-          if (enemy.specialAttackTimer <= 0) {
-            enemy.specialAttackTimer = 3.8;
-            const bulletCount = 8;
-            for (let b = 0; b < bulletCount; b++) {
-              const bAngle = (Math.PI * 2 / bulletCount) * b;
-              const bx = enemy.x + Math.cos(bAngle) * 200;
-              const by = enemy.y + Math.sin(bAngle) * 200;
-              spawnProjectile(enemy.x, enemy.y, bx, by, 3.8, enemy.damage * 0.65, enemy.accentColor, 7);
+          if (speedFactor > 0) {
+            enemy.specialAttackTimer = (enemy.specialAttackTimer || 0) - dt;
+            if (enemy.specialAttackTimer <= 0) {
+              enemy.specialAttackTimer = 3.8;
+              const bulletCount = 8;
+              for (let b = 0; b < bulletCount; b++) {
+                const bAngle = (Math.PI * 2 / bulletCount) * b;
+                const bx = enemy.x + Math.cos(bAngle) * 200;
+                const by = enemy.y + Math.sin(bAngle) * 200;
+                spawnProjectile(enemy.x, enemy.y, bx, by, 3.8, enemy.damage * 0.65, enemy.accentColor, 7, false);
+              }
+              createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
             }
-            createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
           }
         } 
         else {
           if (dist > 0) {
-            enemy.x += (dx / dist) * enemy.speed;
-            enemy.y += (dy / dist) * enemy.speed;
+            enemy.x += (dx / dist) * effectiveSpeed;
+            enemy.y += (dy / dist) * effectiveSpeed;
           }
         }
 
-        if (dist < p.radius + enemy.radius && !p.isDodging) {
+        if (dist < p.radius + enemy.radius && !p.isDodging && speedFactor > 0) {
           enemy.attackCd = (enemy.attackCd || 0) - dt;
           if (enemy.attackCd <= 0) {
             if (p.invulnerableTimer > 0) {
@@ -4651,45 +4713,7 @@
         }
 
         if (enemy.hp <= 0) {
-          p.enemiesSlain++;
-          document.getElementById('statEnemiesKilled').textContent = p.enemiesSlain;
-          gainExperience(enemy.xpReward);
-          grantGearXp(enemy.xpReward);
-          dropLoot(enemy.x, enemy.y);
-          createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
-
-          // (6) Burnside Anarchist: Anarchy Overdrive (Enemy kills reset Dash)
-          if (p.activeSetBonuses && p.activeSetBonuses['anarchist_6']) {
-            p.dodgeCooldown = 0;
-            if (p.comboHits >= 5) {
-              p.invulnerableTimer = Math.max(p.invulnerableTimer, 2.0);
-              addFloatingText('ANARCHY OVERDRIVE!', p.x, p.y - 25, '#34d399', 15);
-            }
-          }
-
-          // Elite Death Explosions
-          if (enemy.isElite) {
-            if (enemy.affix === 'molten') {
-              createImpactParticles(enemy.x, enemy.y, '#f97316', 14);
-              if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 65 && !p.isDodging && !(p.invulnerableTimer > 0)) {
-                p.hp -= 20;
-                addFloatingText('MOLTEN BURST -20', p.x, p.y - 12, '#f97316', 14);
-              }
-            } else if (enemy.affix === 'frozen') {
-              for (let k = 0; k < 6; k++) {
-                const kAng = (Math.PI * 2 / 6) * k;
-                spawnProjectile(enemy.x, enemy.y, enemy.x + Math.cos(kAng) * 180, enemy.y + Math.sin(kAng) * 180, 5.0, 16, '#38bdf8', 6);
-              }
-            }
-          }
-          
-          if (enemy.isBoss) {
-            gameState.bossActive = false;
-            showToast(`APEX BOSS SLAIN: ${enemy.name}!`, "success");
-            dropLoot(enemy.x + 10, enemy.y);
-            dropLoot(enemy.x - 10, enemy.y);
-          }
-          gameState.enemies.splice(idx, 1);
+          killEnemy(enemy, idx);
         }
       }
 
@@ -4699,8 +4723,8 @@
         proj.y += proj.vy;
         proj.life -= dt;
 
-        // If projectile is ricocheted by hero, it strikes ENEMIES!
-        if (proj.isReflected) {
+        // Friendly or Ricocheted Projectiles strike ENEMIES
+        if (proj.isReflected || proj.isFriendly) {
           let hitEnemy = false;
           for (let eIdx = gameState.enemies.length - 1; eIdx >= 0; eIdx--) {
             const enemy = gameState.enemies[eIdx];
@@ -4713,22 +4737,18 @@
               enemy.x += Math.cos(kbAngle) * 22;
               enemy.y += Math.sin(kbAngle) * 22;
               playSound('hit');
-              createImpactParticles(proj.x, proj.y, '#00f5ff', 8);
+              createImpactParticles(proj.x, proj.y, proj.color || '#00f5ff', 8);
               createImpactParticles(enemy.x, enemy.y, '#f43f5e', 6);
-              addFloatingText(`CRIT RICOCHET -${proj.damage}`, enemy.x, enemy.y - 16, '#00f5ff', 18);
+              const label = proj.isReflected ? `CRIT RICOCHET -${proj.damage}` : `-${proj.damage}`;
+              addFloatingText(label, enemy.x, enemy.y - 16, proj.color || '#00f5ff', proj.isReflected ? 18 : 14);
 
               p.comboHits++;
               p.comboTimer = 3.0;
               updateComboUI();
 
-              // Check if enemy killed by ricochet
+              // Check if enemy killed by projectile
               if (enemy.hp <= 0) {
-                p.enemiesSlain++;
-                document.getElementById('statEnemiesKilled').textContent = p.enemiesSlain;
-                gainExperience(enemy.xpReward);
-                grantGearXp(enemy.xpReward);
-                dropLoot(enemy.x, enemy.y);
-                gameState.enemies.splice(eIdx, 1);
+                killEnemy(enemy, eIdx);
               }
               break;
             }
@@ -4876,7 +4896,9 @@
       'b': '#0284c7', // Deep Cryo
       'E': '#eab308', // Electric Yellow
       'T': '#059669', // Slime Teal
-      't': '#047857'  // Dark Slime
+      't': '#047857', // Dark Slime
+      'F': '#f59e0b', // Fiery Gold Dragon Flame
+      'f': '#d97706'  // Deep Ember Flame
     };
 
     const SPRITE_HERO_8BIT = [
@@ -5239,68 +5261,109 @@
       ctx.fill();
 
       // 2. Active Diablo Set Auras (2-Piece, 4-Piece, 6-Piece)
-      if (p.dominantSet && p.dominantSet.count >= 2) {
-        const auraColor = p.dominantSet.color || '#22c55e';
-        const auraRot = Date.now() * 0.002;
+      const activeSets = p.activeSets && p.activeSets.length > 0 ? p.activeSets :
+                         (p.dominantSet && p.dominantSet.count >= 2 ? [p.dominantSet] : []);
+      const auraRot = Date.now() * 0.002;
 
-        // (2-Piece) Radiant Ground Rune Ring
+      // (2-Piece) Radiant Ground Rune Rings for each active set (supports hybrid 2+2 setups)
+      activeSets.forEach((set, sIdx) => {
+        const auraColor = set.color || '#22c55e';
         ctx.save();
-        ctx.rotate(auraRot);
+        ctx.rotate(auraRot * (sIdx % 2 === 0 ? 1 : -1));
         ctx.beginPath();
-        ctx.arc(0, 0, p.radius + 12, 0, Math.PI * 2);
+        ctx.arc(0, 0, p.radius + 12 + sIdx * 5, 0, Math.PI * 2);
         ctx.strokeStyle = auraColor;
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2.2;
         ctx.setLineDash([6, 6]);
         ctx.stroke();
         ctx.restore();
+      });
 
-        // (4-Piece) Orbiting Elemental Motes
-        if (p.dominantSet.count >= 4) {
-          ctx.save();
-          ctx.rotate(-auraRot * 1.5);
-          for (let m = 0; m < 4; m++) {
-            const mAng = (Math.PI / 2) * m;
-            const mx = Math.cos(mAng) * 36;
-            const my = Math.sin(mAng) * 36;
-            ctx.fillStyle = auraColor;
-            ctx.fillRect(mx - 3, my - 3, 6, 6);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(mx - 1, my - 1, 2, 2);
-          }
-          ctx.restore();
+      // (4-Piece) Orbiting Elemental Motes
+      activeSets.filter(s => s.count >= 4).forEach((set, sIdx) => {
+        const auraColor = set.color || '#22c55e';
+        ctx.save();
+        ctx.rotate(-auraRot * (1.5 + sIdx * 0.5));
+        for (let m = 0; m < 4; m++) {
+          const mAng = (Math.PI / 2) * m;
+          const dist = 36 + sIdx * 8;
+          const mx = Math.cos(mAng) * dist;
+          const my = Math.sin(mAng) * dist;
+          ctx.fillStyle = auraColor;
+          ctx.fillRect(mx - 3, my - 3, 6, 6);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(mx - 1, my - 1, 2, 2);
         }
+        ctx.restore();
+      });
 
-        // (6-Piece) Masterwork Avatar Wings & Dragon Spirit
-        if (p.dominantSet.count >= 6) {
-          ctx.save();
-          ctx.strokeStyle = auraColor;
-          ctx.lineWidth = 3;
-          ctx.shadowColor = auraColor;
-          ctx.shadowBlur = 14;
+      // (6-Piece) Masterwork Set Transformation
+      if (p.dominantSet && p.dominantSet.count >= 6) {
+        const domId = p.dominantSet.id;
+        const domColor = p.dominantSet.color || '#22c55e';
+        ctx.save();
+        ctx.strokeStyle = domColor;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = domColor;
+        ctx.shadowBlur = 14;
 
-          if (p.dominantSet.id === 'chinatown_dragon') {
-            // Celestial Fiery Dragon Serpent looping around hero
-            const dAng = Date.now() * 0.003;
-            for (let seg = 0; seg < 6; seg++) {
-              const segAng = dAng - (seg * 0.35);
-              const sx = Math.cos(segAng) * 44;
-              const sy = Math.sin(segAng) * 44;
-              ctx.fillStyle = seg === 0 ? '#f59e0b' : '#ef4444';
-              ctx.beginPath();
-              ctx.arc(sx, sy, Math.max(3, 7 - seg), 0, Math.PI * 2);
-              ctx.fill();
-            }
-          } else {
-            // Radiant Energy Wings
+        if (domId === 'chinatown_dragon') {
+          // Celestial Fiery Dragon Serpent looping around hero
+          const dAng = Date.now() * 0.003;
+          for (let seg = 0; seg < 6; seg++) {
+            const segAng = dAng - (seg * 0.35);
+            const sx = Math.cos(segAng) * 44;
+            const sy = Math.sin(segAng) * 44;
+            ctx.fillStyle = seg === 0 ? '#f59e0b' : '#ef4444';
             ctx.beginPath();
-            ctx.moveTo(-8, -10);
-            ctx.bezierCurveTo(-38, -35, -45, -5, -12, 8);
-            ctx.moveTo(8, -10);
-            ctx.bezierCurveTo(38, -35, 45, -5, 12, 8);
-            ctx.stroke();
+            ctx.arc(sx, sy, Math.max(3, 7 - seg), 0, Math.PI * 2);
+            ctx.fill();
           }
-          ctx.restore();
+        } else if (domId === 'cascade_cryomancer') {
+          // 3 Orbiting Glacial Crystal Spikes
+          const cAng = Date.now() * 0.0025;
+          for (let sp = 0; sp < 3; sp++) {
+            const ang = cAng + (Math.PI * 2 / 3) * sp;
+            const sx = Math.cos(ang) * 46;
+            const sy = Math.sin(ang) * 46;
+            ctx.save();
+            ctx.translate(sx, sy);
+            ctx.rotate(ang + Math.PI / 2);
+            ctx.fillStyle = '#e0f2fe';
+            ctx.beginPath();
+            ctx.moveTo(0, -9);
+            ctx.lineTo(4, 9);
+            ctx.lineTo(-4, 9);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else if (domId === 'bridge_city_sentinel') {
+          // Cathedral Thunderstorm Shield Barrier with electric arcs
+          ctx.beginPath();
+          ctx.arc(0, 0, p.radius + 22, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(96, 165, 250, 0.7)';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([8, 12]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          const sAng = Date.now() * 0.005;
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(Math.cos(sAng) * 34 - 2, Math.sin(sAng) * 34 - 2, 4, 4);
+          ctx.fillRect(Math.cos(sAng + Math.PI) * 34 - 2, Math.sin(sAng + Math.PI) * 34 - 2, 4, 4);
+        } else {
+          // Radiant Energy Wings (Roaster, Thornstalker, Anarchist)
+          ctx.beginPath();
+          ctx.moveTo(-8, -10);
+          ctx.bezierCurveTo(-38, -35, -45, -5, -12, 8);
+          ctx.moveTo(8, -10);
+          ctx.bezierCurveTo(38, -35, 45, -5, 12, 8);
+          ctx.stroke();
         }
+        ctx.restore();
       }
 
       // 3. Caffeine Leyline Haste Aura
@@ -5336,26 +5399,87 @@
       const flipX = Math.cos(p.angle) < 0;
       const sprite = p.isAttacking ? SPRITE_HERO_SLASH_8BIT : SPRITE_HERO_8BIT;
 
-      // Flowing Trenchcoat tails fluttering behind movement direction
+      const armorSet = eq.armor ? eq.armor.setId : null;
+      let coatColor = '#1e293b';
+      let coatAccent = '#06b6d4';
+      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; }
+      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; }
+      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; }
+      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; }
+      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; }
+      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; }
+
+      // Flowing Trenchcoat tails:
+      // When moving: flutter behind movement direction
+      // When idle: rest naturally behind hero legs
+      ctx.save();
       if (isMoving) {
         const moveAng = Math.atan2(p.vy, p.vx) + Math.PI;
-        ctx.save();
         ctx.rotate(moveAng);
-        ctx.fillStyle = eq.armor && eq.armor.setId === 'chinatown_dragon' ? '#7f1d1d' :
-                        eq.armor && eq.armor.setId === 'cascade_cryomancer' ? '#0c4a6e' :
-                        eq.armor && eq.armor.setId === 'rose_thornstalker' ? '#064e3b' :
-                        eq.armor && eq.armor.setId === 'burnside_anarchist' ? '#18181b' : '#1e293b';
+        ctx.fillStyle = coatColor;
         ctx.beginPath();
         ctx.moveTo(-10, walkBob);
         ctx.lineTo(-24, walkBob - 6);
         ctx.lineTo(-24, walkBob + 6);
         ctx.closePath();
         ctx.fill();
-        ctx.restore();
+      } else {
+        ctx.fillStyle = coatColor;
+        ctx.beginPath();
+        ctx.moveTo(-7, walkBob + 4);
+        ctx.lineTo(-9, walkBob + 17);
+        ctx.lineTo(9, walkBob + 17);
+        ctx.lineTo(7, walkBob + 4);
+        ctx.closePath();
+        ctx.fill();
       }
+      ctx.restore();
 
       // Base Hero 8-Bit Sprite
       drawPixelMatrix(ctx, sprite, 0, walkBob - 2, 2.5, flipX);
+
+      // Dynamic Chest Armor Plate Overlay
+      ctx.save();
+      ctx.fillStyle = coatColor;
+      ctx.fillRect(-7, walkBob + 1, 14, 8);
+      ctx.fillStyle = coatAccent;
+      ctx.fillRect(-4, walkBob + 3, 8, 4);
+      if (armorSet === 'chinatown_dragon') {
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillRect(-2, walkBob + 4, 4, 2);
+      } else if (armorSet === 'bridge_city_sentinel') {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-1.5, walkBob + 3.5, 3, 3);
+      } else if (armorSet === 'cascade_cryomancer') {
+        ctx.fillStyle = '#e0f2fe';
+        ctx.fillRect(-2, walkBob + 3, 4, 4);
+      }
+      ctx.restore();
+
+      // Dynamic Boots & Dash Footwear Overlay
+      const bootsSet = eq.boots ? eq.boots.setId : null;
+      let bootColor = '#334155';
+      let bootTrim = '#64748b';
+      if (bootsSet === 'stumptown_roaster') { bootColor = '#92400e'; bootTrim = '#22c55e'; }
+      else if (bootsSet === 'rose_thornstalker') { bootColor = '#065f46'; bootTrim = '#34d399'; }
+      else if (bootsSet === 'burnside_anarchist') { bootColor = '#27272a'; bootTrim = '#ef4444'; }
+      else if (bootsSet === 'cascade_cryomancer') { bootColor = '#0369a1'; bootTrim = '#7dd3fc'; }
+      else if (bootsSet === 'chinatown_dragon') { bootColor = '#991b1b'; bootTrim = '#fbbf24'; }
+      else if (bootsSet === 'bridge_city_sentinel') { bootColor = '#1d4ed8'; bootTrim = '#bfdbfe'; }
+
+      ctx.save();
+      ctx.fillStyle = bootColor;
+      ctx.fillRect(-7, walkBob + 12, 5, 5);
+      ctx.fillRect(2, walkBob + 12, 5, 5);
+      ctx.fillStyle = bootTrim;
+      ctx.fillRect(-7, walkBob + 15, 5, 2);
+      ctx.fillRect(2, walkBob + 15, 5, 2);
+
+      // Motion speed dash trails when moving or dodging
+      if (p.isDodging || (isMoving && Math.random() < 0.25)) {
+        createImpactParticles(p.x, p.y + 14, bootTrim, 1);
+      }
+      ctx.restore();
 
       // Dynamic Headgear / Visor Glow Overlay
       const headSet = eq.head ? eq.head.setId : null;
@@ -5419,7 +5543,22 @@
       // Dynamic Off-Hand Equipment
       const offSub = eq.offhand ? eq.offhand.subType : null;
       const offName = eq.offhand ? eq.offhand.name : '';
-      if (offSub === 'shield' || offName.includes('Shield') || offName.includes('Deflector') || offName.includes('Aegis')) {
+      if (offName.includes('Pearl') || offSub === 'orb') {
+        // Floating Fiery Dragon Pearl / Mystic Talisman Orb
+        ctx.save();
+        ctx.rotate(p.angle - 1.0);
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(p.radius + 6, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.arc(p.radius + 6, 0, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else if (offSub === 'shield' || offName.includes('Shield') || offName.includes('Deflector') || offName.includes('Aegis')) {
         // Holographic Riot Shield Barrier
         ctx.save();
         ctx.rotate(p.angle - 0.7);
@@ -6259,7 +6398,7 @@
         });
 
         const piecesHtml = setDef.pieces.map(pName => {
-          const isPieceEquipped = Object.values(gameState.equipped).some(eq => eq && eq.name.includes(pName.split(' ')[0]));
+          const isPieceEquipped = Object.values(gameState.equipped).some(eq => eq && (eq.name === pName || eq.name.includes(pName)));
           return `<span class="${isPieceEquipped ? 'text-emerald-400 font-bold' : 'text-slate-500'} text-[9px] block">• ${pName}</span>`;
         }).join('');
 
@@ -6434,7 +6573,31 @@
       showToast(`Unequipped ${item.name} to stash.`, "info");
     }
 
-    
+    function formatSetTooltipHtml(setId, isEquippedCard = false) {
+      if (!setId || !GEAR_SETS[setId]) return '';
+      const setDef = GEAR_SETS[setId];
+      let equippedCount = 0;
+      Object.values(gameState.equipped).forEach(eq => {
+        if (eq && eq.setId === setId) equippedCount++;
+      });
+
+      const bonusesHtml = setDef.bonuses.map(b => {
+        const active = equippedCount >= b.count;
+        const colorClass = active ? 'text-emerald-300 font-bold' : 'text-slate-500';
+        return `<div class="${colorClass} text-[7.5px] leading-tight">• ${b.text} ${active ? '✓' : ''}</div>`;
+      }).join('');
+
+      return `
+        <div class="mt-1 pt-1 border-t border-emerald-900/60 font-mono">
+          <div class="text-[8px] font-bold text-emerald-400 flex justify-between">
+            <span>${setDef.name}</span>
+            <span>(${equippedCount}/${setDef.pieces.length})</span>
+          </div>
+          <div class="space-y-0.5 mt-0.5">${bonusesHtml}</div>
+        </div>
+      `;
+    }
+
     // === DIABLO-STYLE SIDE-BY-SIDE GEAR COMPARISON TOOLTIP ===
     function generateComparisonTooltipHtml(item, colIndex) {
       if (!item) return '';
@@ -6537,7 +6700,7 @@
                 </div>
                 <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
                 <div class="text-[9px] text-emerald-400 mt-1 leading-tight">${item.bonus || ''}</div>
-                ${item.setId ? `<div class="text-[8px] text-emerald-300 font-bold mt-0.5">Set: ${GEAR_SETS[item.setId]?.name || item.setId}</div>` : ''}
+                ${item.setId ? formatSetTooltipHtml(item.setId, false) : ''}
               </div>
               <div class="text-[8px] text-slate-400 border-t border-slate-800 pt-1 mt-1 flex justify-between">
                 <span>Value: ${item.value || 50} ☕</span>
@@ -6559,7 +6722,7 @@
                   </div>
                   <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(eq.stars || 1)} Lv.${eq.level || 1}</div>
                   <div class="text-[9px] text-slate-300 mt-1 leading-tight">${eq.bonus || ''}</div>
-                  ${eq.setId ? `<div class="text-[8px] text-emerald-300 font-bold mt-0.5">Set: ${GEAR_SETS[eq.setId]?.name || eq.setId}</div>` : ''}
+                  ${eq.setId ? formatSetTooltipHtml(eq.setId, true) : ''}
                 ` : `
                   <div class="text-slate-500 text-[10px] my-auto py-3 text-center">
                     (No item currently equipped)
@@ -6781,14 +6944,33 @@
           pctx.lineWidth = 3;
           pctx.shadowColor = auraColor;
           pctx.shadowBlur = 15;
-          pctx.beginPath();
-          pctx.moveTo(cx - 15, cy - 35);
-          pctx.bezierCurveTo(cx - 55, cy - 65, cx - 65, cy - 15, cx - 20, cy - 10);
-          pctx.stroke();
-          pctx.beginPath();
-          pctx.moveTo(cx + 15, cy - 35);
-          pctx.bezierCurveTo(cx + 55, cy - 65, cx + 65, cy - 15, cx + 20, cy - 10);
-          pctx.stroke();
+          if (p.dominantSet.id === 'chinatown_dragon') {
+            // Celestial Dragon Serpent Looping Crest
+            pctx.beginPath();
+            pctx.arc(cx, cy - 25, 42, -Math.PI * 0.8, Math.PI * 0.8);
+            pctx.stroke();
+            pctx.fillStyle = '#f59e0b';
+            pctx.beginPath();
+            pctx.arc(cx, cy - 65, 8, 0, Math.PI * 2);
+            pctx.fill();
+          } else if (p.dominantSet.id === 'bridge_city_sentinel') {
+            // Cathedral Lightning Ring & Aegis
+            pctx.beginPath();
+            pctx.arc(cx, cy - 10, 56, 0, Math.PI * 2);
+            pctx.stroke();
+            pctx.fillStyle = '#93c5fd';
+            pctx.fillRect(cx - 3, cy - 68, 6, 6);
+            pctx.fillRect(cx - 3, cy + 48, 6, 6);
+          } else {
+            pctx.beginPath();
+            pctx.moveTo(cx - 15, cy - 35);
+            pctx.bezierCurveTo(cx - 55, cy - 65, cx - 65, cy - 15, cx - 20, cy - 10);
+            pctx.stroke();
+            pctx.beginPath();
+            pctx.moveTo(cx + 15, cy - 35);
+            pctx.bezierCurveTo(cx + 55, cy - 65, cx + 65, cy - 15, cx + 20, cy - 10);
+            pctx.stroke();
+          }
           pctx.restore();
         }
       }
@@ -6968,7 +7150,23 @@
         pctx.closePath();
         pctx.fill();
         pctx.stroke();
-      } else if (oSub === 'dualwield' || oName.includes('Wakizashi') || oName.includes('Dagger') || oName.includes('Pearl')) {
+      } else if (oName.includes('Pearl') || oSub === 'orb') {
+        // Floating Fiery Dragon Pearl / Mystic Talisman Orb
+        pctx.fillStyle = '#ef4444';
+        pctx.shadowColor = '#f59e0b';
+        pctx.shadowBlur = 12;
+        pctx.beginPath();
+        pctx.arc(0, 0, 10, 0, Math.PI * 2);
+        pctx.fill();
+        pctx.fillStyle = '#fbbf24';
+        pctx.beginPath();
+        pctx.arc(0, 0, 6, 0, Math.PI * 2);
+        pctx.fill();
+        pctx.fillStyle = '#ffffff';
+        pctx.beginPath();
+        pctx.arc(-2.5, -2.5, 3, 0, Math.PI * 2);
+        pctx.fill();
+      } else if (oSub === 'dualwield' || oName.includes('Wakizashi') || oName.includes('Dagger')) {
         pctx.rotate(0.5);
         pctx.fillStyle = '#475569';
         pctx.fillRect(-2, -18, 4, 10);
@@ -7264,11 +7462,17 @@
 
       p.activeSetBonuses = {};
       p.dominantSet = null;
+      p.activeSets = [];
       let maxSetCount = 0;
       Object.entries(setCounts).forEach(([sId, count]) => {
-        if (count > maxSetCount && GEAR_SETS[sId]) {
-          maxSetCount = count;
-          p.dominantSet = { id: sId, count, color: GEAR_SETS[sId].color, name: GEAR_SETS[sId].name };
+        if (GEAR_SETS[sId]) {
+          if (count >= 2) {
+            p.activeSets.push({ id: sId, count, color: GEAR_SETS[sId].color, name: GEAR_SETS[sId].name });
+          }
+          if (count > maxSetCount) {
+            maxSetCount = count;
+            p.dominantSet = { id: sId, count, color: GEAR_SETS[sId].color, name: GEAR_SETS[sId].name };
+          }
         }
       });
 
