@@ -363,10 +363,10 @@
   </main>
 
   <!-- Diablo 4 Style Paperdoll & Inventory Modal -->
-  <div id="inventoryModal" style="z-index: 60;" class="fixed inset-0 z-60 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5">
-    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-cyan-500/40 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.9)] flex flex-col max-h-[92vh]">
+  <div id="inventoryModal" style="z-index: 60;" class="fixed inset-0 z-60 bg-slate-950/65 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="glass-panel w-full max-w-4xl rounded-3xl border border-cyan-500/40 bg-slate-950/75 backdrop-blur-xl overflow-hidden shadow-[0_0_50px_rgba(0,245,255,0.15)] flex flex-col max-h-[92vh]">
       <!-- Header -->
-      <div class="px-6 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+      <div class="px-6 py-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-900/60 backdrop-blur-md">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-lg font-bold">
             ⚔️
@@ -394,7 +394,7 @@
       <div class="p-4 sm:p-6 overflow-y-auto grid grid-cols-1 lg:grid-cols-12 gap-5">
         
         <!-- LEFT: Diablo 4 Paperdoll Character Silhouette & Sockets (8 Sockets) -->
-        <div class="lg:col-span-6 flex flex-col items-center bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 relative">
+        <div class="lg:col-span-6 flex flex-col items-center bg-slate-950/50 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4 relative">
           <div class="w-full flex justify-between items-center mb-2">
             <span class="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold">Character Paperdoll Loadout</span>
             <span class="text-[9px] font-mono text-slate-400">8 Sockets • Drag & Drop • Dbl-Click</span>
@@ -625,7 +625,7 @@
           </div>
 
           <!-- Equipped Gear Mastery & Reforge Panel below paperdoll -->
-          <div id="d4InspectionCard" class="w-full mt-3 p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col gap-2">
+          <div id="d4InspectionCard" class="w-full mt-3 p-3.5 rounded-2xl bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 flex flex-col gap-2">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
                 <div id="inspectItemIcon" class="w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 flex items-center justify-center text-xl">🗡️</div>
@@ -699,7 +699,7 @@
         </div>
 
         <!-- RIGHT: Diablo-Style Tactile Grid Inventory (24 Slots 6x4) & Bag Actions (6 Columns) -->
-        <div class="lg:col-span-6 flex flex-col justify-between bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4">
+        <div class="lg:col-span-6 flex flex-col justify-between bg-slate-950/50 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-4">
           <div>
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
@@ -710,7 +710,7 @@
             </div>
 
             <!-- 6 Columns x 4 Rows Tactile Grid (24 Slots) -->
-            <div id="d4InventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 rounded-2xl bg-slate-950 border border-slate-800/90 min-h-[220px]">
+            <div id="d4InventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 rounded-2xl bg-slate-950/50 backdrop-blur-sm border border-slate-800/80 min-h-[220px]">
               <!-- Generated dynamically by renderInventoryBag() -->
             </div>
           </div>
@@ -5658,11 +5658,11 @@
                          (colInRow >= 4) ? 'right-0' : 'left-1/2 -translate-x-1/2';
 
       return `
-        <!-- DIABLO SIDE-BY-SIDE COMPARISON CARD -->
-        <div class="absolute ${verticalPosClass} ${alignClass} w-[330px] sm:w-[390px] p-2.5 rounded-2xl bg-slate-950/98 border border-cyan-500/60 shadow-[0_0_35px_rgba(0,0,0,0.95)] pointer-events-none hidden md:group-hover:flex flex-col gap-2 z-50 font-mono">
+        <!-- DIABLO SIDE-BY-SIDE COMPARISON CARD (TRANSLUCENT / SEE-THROUGH GLASSMORPHISM) -->
+        <div class="absolute ${verticalPosClass} ${alignClass} w-[330px] sm:w-[390px] p-2.5 rounded-2xl bg-slate-950/75 backdrop-blur-md border border-cyan-500/50 shadow-[0_0_30px_rgba(0,0,0,0.85)] pointer-events-none hidden md:group-hover:flex flex-col gap-2 z-50 font-mono transition-opacity">
           
           <!-- Top Stat Diff Highlight Bar -->
-          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 text-[9px]">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5 text-[9px]">
             <span class="text-cyan-400 font-bold tracking-wider uppercase flex items-center gap-1">
               <span>⚖️</span>
               <span>GEAR COMPARISON (${targetSlot.toUpperCase()})</span>
@@ -5676,7 +5676,7 @@
           <div class="grid grid-cols-2 gap-2 text-left">
             
             <!-- LEFT: Stash Item (New) -->
-            <div class="p-2 rounded-xl bg-slate-900/90 border border-cyan-500/50 flex flex-col justify-between gap-1">
+            <div class="p-2 rounded-xl bg-slate-900/60 backdrop-blur-sm border border-cyan-500/40 flex flex-col justify-between gap-1">
               <div>
                 <div class="flex items-center justify-between text-[8px] text-cyan-300 font-bold border-b border-slate-800 pb-0.5 mb-1">
                   <span>[STASH ITEM]</span>
@@ -5697,7 +5697,7 @@
             </div>
 
             <!-- RIGHT: Currently Equipped -->
-            <div class="p-2 rounded-xl bg-slate-900/90 border ${eq ? 'border-amber-500/50' : 'border-slate-800'} flex flex-col justify-between gap-1">
+            <div class="p-2 rounded-xl bg-slate-900/60 backdrop-blur-sm border ${eq ? 'border-amber-500/40' : 'border-slate-800/60'} flex flex-col justify-between gap-1">
               <div>
                 <div class="flex items-center justify-between text-[8px] ${eq ? 'text-amber-300' : 'text-slate-500'} font-bold border-b border-slate-800 pb-0.5 mb-1">
                   <span>[EQUIPPED NOW]</span>
