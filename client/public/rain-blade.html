@@ -179,6 +179,12 @@
         <span id="hudSkillPointBadge" class="hidden absolute -top-1 -right-1 bg-cyan-400 text-slate-950 font-bold rounded-full text-[9px] w-3.5 h-3.5 flex items-center justify-center animate-bounce">1</span>
       </button>
 
+      <!-- Multiplayer Room Button -->
+      <button onclick="toggleModal('multiplayerModal')" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-950/80 to-blue-950/80 hover:from-cyan-900/80 hover:to-blue-900/80 border border-cyan-500/40 text-cyan-300 hover:text-white transition-all flex items-center gap-1.5 font-mono text-xs font-bold shadow-[0_0_12px_rgba(0,245,255,0.2)] cursor-pointer" title="Co-Op Game Rooms">
+        <span class="text-sm">🌐</span>
+        <span class="hidden sm:inline" id="hudRoomBtnText">CO-OP ROOM</span>
+      </button>
+
       <button onclick="toggleModal('locationModal')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white transition-all" title="Map & Radar (M)">
         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
@@ -947,6 +953,113 @@
           <div id="classSelectionGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <!-- Filled dynamically -->
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cyber Radar Minimap (HUD Exploration) -->
+  <div id="hudMinimapContainer" class="fixed top-16 right-3 sm:right-4 z-20 pointer-events-auto flex flex-col items-end gap-1 select-none">
+    <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl bg-slate-950/90 border border-cyan-500/40 shadow-[0_0_20px_rgba(0,245,255,0.2)] overflow-hidden backdrop-blur-md">
+      <!-- Radar Sweeper Pulse -->
+      <div class="absolute inset-0 rounded-2xl pointer-events-none opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyan-400 via-transparent to-transparent"></div>
+      
+      <!-- Canvas for 2D District Topology & Radar Pings -->
+      <canvas id="hudMinimapCanvas" width="128" height="128" class="w-full h-full block"></canvas>
+      
+      <!-- Crosshairs & Grid Reticle -->
+      <div class="absolute inset-0 pointer-events-none border border-cyan-500/20 rounded-2xl flex items-center justify-center">
+        <div class="w-full h-[1px] bg-cyan-500/15"></div>
+        <div class="absolute h-full w-[1px] bg-cyan-500/15"></div>
+        <div class="w-12 h-12 rounded-full border border-cyan-500/20"></div>
+        <div class="w-20 h-20 rounded-full border border-cyan-500/10"></div>
+      </div>
+
+      <!-- District Compass Header Badge -->
+      <div class="absolute top-1 left-1.5 px-1 rounded bg-slate-900/90 border border-slate-700/60 text-[7.5px] font-mono text-cyan-300 font-bold uppercase tracking-wider" id="minimapDistrictTag">
+        BURNSIDE
+      </div>
+
+      <!-- Seed / Room Tag -->
+      <div class="absolute bottom-1 right-1.5 px-1 rounded bg-slate-900/90 border border-slate-700/60 text-[7px] font-mono text-amber-300" id="minimapSeedTag">
+        SEED: 7729
+      </div>
+    </div>
+  </div>
+
+  <!-- Multiplayer Game Room Modal -->
+  <div id="multiplayerModal" style="z-index: 60;" class="fixed inset-0 z-60 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-xl rounded-3xl border border-slate-700/80 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-6 py-3.5 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl shadow-[0_0_15px_rgba(0,245,255,0.2)]">
+            🌐
+          </div>
+          <div>
+            <h2 class="font-display font-bold text-base text-white">CO-OP MULTIPLAYER ROOMS</h2>
+            <p class="text-[11px] text-slate-400 font-mono">Meet up with friends & explore procedural Portland together</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('multiplayerModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-5 custom-scrollbar font-mono text-xs">
+        
+        <!-- Current Room Code Card -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900 to-blue-950/50 border border-cyan-500/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+          <div>
+            <div class="text-[10px] text-cyan-400 uppercase font-bold flex items-center gap-1.5">
+              <span>● ACTIVE GAME SESSION</span>
+              <span id="roomStatusBadge" class="text-emerald-400 bg-emerald-950 px-1 rounded">HOST</span>
+            </div>
+            <div class="text-2xl font-black text-white tracking-widest mt-0.5" id="currentRoomCodeDisplay">RAIN-7729</div>
+            <div class="text-[9.5px] text-slate-400">Map Seed: <span id="currentWorldSeedDisplay" class="text-amber-300">7729</span> (Diablo 3 Procedural City Layout)</div>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <button onclick="copyMultiplayerInviteLink()" class="flex-1 sm:flex-initial px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition-all shadow-[0_0_15px_rgba(0,245,255,0.3)] flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>📋</span><span>COPY INVITE LINK</span>
+            </button>
+            <button onclick="generateNewRoom()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all border border-slate-700" title="Reroll Seed / New Room">
+              🔄
+            </button>
+          </div>
+        </div>
+
+        <!-- Join Room by Code -->
+        <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+          <div class="font-bold text-white text-xs flex items-center justify-between">
+            <span>JOIN A FRIEND'S ROOM</span>
+            <span class="text-[10px] text-slate-400">Enter their 4-digit code</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="inputJoinRoomCode" type="text" placeholder="e.g. RAIN-4281" maxlength="12" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono text-sm uppercase tracking-wider focus:outline-none focus:border-cyan-400" />
+            <button onclick="joinRoomFromInput()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-glow-emerald cursor-pointer">
+              JOIN ROOM
+            </button>
+          </div>
+        </div>
+
+        <!-- Squad Roster -->
+        <div class="space-y-2">
+          <div class="font-bold text-white text-xs flex items-center justify-between">
+            <span>CONNECTED SQUAD ROSTER (2-4 PLAYERS)</span>
+            <span class="text-[10px] text-cyan-400" id="squadCountText">1 / 4 PLAYERS</span>
+          </div>
+
+          <div id="squadRosterList" class="space-y-2">
+            <!-- Populated dynamically by updateMultiplayerRosterUI() -->
+          </div>
+        </div>
+
+        <!-- How It Works Guide -->
+        <div class="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800/80 text-[10px] text-slate-400 space-y-1 leading-relaxed">
+          <div class="text-amber-300 font-bold uppercase flex items-center gap-1.5">
+            <span>ℹ️</span><span>SAME BUT DIFFERENT SEED ENGINE</span>
+          </div>
+          <div>All players in the room share the same deterministic world seed. The 5 Portland districts, Burnside Bridge, and Chinatown Gate remain anchored, while alleys, supply crates, and anomaly rifts randomize for your squad.</div>
         </div>
       </div>
     </div>
@@ -1865,6 +1978,15 @@
       isPaused: false,
       settings: {
         notificationsEnabled: false
+      },
+      worldSeed: 7729,
+      worldMap: null,
+      multiplayer: {
+        roomCode: 'RAIN-7729',
+        isHost: true,
+        peers: [],
+        channel: null,
+        lastBroadcast: 0
       },
       player: {
         x: 0,
@@ -5003,11 +5125,61 @@
           const currentSpeed = p.speed * hasteMult * chillMult;
           p.vx = (moveX / (len > 1 ? len : 1)) * currentSpeed;
           p.vy = (moveY / (len > 1 ? len : 1)) * currentSpeed;
-          p.x += p.vx;
-          p.y += p.vy;
+
+          // Smooth sliding collision with Portland World Map
+          if (gameState.worldMap) {
+            const nextX = p.x + p.vx;
+            if (gameState.worldMap.isWorldWalkable(nextX, p.y, p.radius * 0.75)) {
+              p.x = nextX;
+            }
+            const nextY = p.y + p.vy;
+            if (gameState.worldMap.isWorldWalkable(p.x, nextY, p.radius * 0.75)) {
+              p.y = nextY;
+            }
+          } else {
+            p.x += p.vx;
+            p.y += p.vy;
+          }
         } else {
           p.vx = 0;
           p.vy = 0;
+        }
+
+        // Interactive World Props (Coffee Siphon Stills, Supply Crates, Anomaly Beacons)
+        if (gameState.worldMap && gameState.worldMap.props) {
+          gameState.worldMap.props.forEach(prop => {
+            if (prop.type === 'coffee_station') {
+              const d = Math.hypot(p.x - prop.worldX - 32, p.y - prop.worldY - 32);
+              if (d < 45 && (prop.cooldown || 0) <= 0) {
+                prop.cooldown = 15;
+                p.hp = p.maxHp;
+                gameState.skills[2].activeTimer = 4.0;
+                playSound('special');
+                createImpactParticles(p.x, p.y, '#f59e0b', 20);
+                addFloatingText("⚡ CAFFEINE HYPER-OVERCLOCK!", p.x, p.y - 25, '#fbbf24', 15);
+                showToast("Sipped freshly brewed espresso still! HP restored & Haste active.", "success");
+              }
+            } else if (prop.type === 'anomaly_beacon') {
+              const d = Math.hypot(p.x - prop.worldX - 32, p.y - prop.worldY - 32);
+              if (d < 50 && !gameState.waveInProgress && !prop.active) {
+                prop.active = true;
+                showToast(`⚡ Initiated ${prop.district} Anomaly Defense!`, "warning");
+                startNextWave();
+              }
+            } else if (prop.type === 'crate' && !prop.looted && (p.isAttacking || p.isDodging)) {
+              const d = Math.hypot(p.x - prop.worldX - 32, p.y - prop.worldY - 32);
+              if (d < 55) {
+                prop.looted = true;
+                const beansWon = 25 + Math.floor(Math.random() * 45);
+                p.beans += beansWon;
+                dropLoot(prop.worldX + 32, prop.worldY + 32, 1);
+                playSound('level');
+                createImpactParticles(prop.worldX + 32, prop.worldY + 32, '#fbbf24', 25);
+                addFloatingText(`+☕ ${beansWon} BEANS`, prop.worldX + 32, prop.worldY - 10, '#fbbf24', 16);
+                showToast(`📦 Smashed Pre-Collapse Crate! Found ${beansWon} Beans & Gear!`, "success");
+              }
+            }
+          });
         }
       }
 
@@ -5444,35 +5616,506 @@
       }
     }
 
-    function drawUrbanEnvironment(cw, ch) {
-      const gridSize = 140;
-      const startX = Math.floor(gameState.camera.x / gridSize) * gridSize;
-      const startY = Math.floor(gameState.camera.y / gridSize) * gridSize;
-
-      ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-
-      for (let x = startX; x < startX + cw + gridSize; x += gridSize) {
-        ctx.moveTo(x, startY);
-        ctx.lineTo(x, startY + ch + gridSize);
-      }
-      for (let y = startY; y < startY + ch + gridSize; y += gridSize) {
-        ctx.moveTo(startX, y);
-        ctx.lineTo(startX + cw + gridSize, y);
-      }
-      ctx.stroke();
-
-      ctx.save();
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 160, 90, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(220, 140, 120, 70, 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
+    // ==============================================================
+    // 🌆 DIABLO 3 STYLE PROCEDURAL 2D PORTLAND MAP GENERATOR
+    // ==============================================================
+    function createPRNG(seed) {
+      let s = (seed || 123456789) >>> 0;
+      return function() {
+        s = (s + 0x6D2B79F5) >>> 0;
+        let t = Math.imul(s ^ (s >>> 15), 1 | s);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
     }
+
+    class PortlandMapGenerator {
+      constructor(seed = 7729) {
+        this.seed = seed;
+        this.rng = createPRNG(seed);
+        this.tileSize = 64; // px per tile
+        this.cols = 64;     // 64x64 tiles = 4096x4096 px total world
+        this.rows = 64;
+        this.width = this.cols * this.tileSize;
+        this.height = this.rows * this.tileSize;
+        this.originX = this.width / 2;  // 2048px corresponds to world (0, 0)
+        this.originY = this.height / 2; // 2048px corresponds to world (0, 0)
+
+        // Tile types:
+        // 0: STREET_ASPHALT (Walkable)
+        // 1: BUILDING_WALL (Solid block)
+        // 2: RIVER_WATER (Solid except bridges)
+        // 3: BRIDGE_DECK (Walkable)
+        // 4: SKATEPARK_CONCRETE (Walkable)
+        // 5: FOREST_GRASS (Walkable)
+        // 6: CHINATOWN_PAVING (Walkable)
+        // 7: ALLEY_BRICK (Walkable)
+        this.grid = new Uint8Array(this.cols * this.rows);
+        this.props = [];
+        this.landmarks = [];
+        this.explored = new Uint8Array(this.cols * this.rows); // Fog of war
+      }
+
+      generate() {
+        // 1. Base districts & river corridor
+        for (let r = 0; r < this.rows; r++) {
+          for (let c = 0; c < this.cols; c++) {
+            // Outer containment security barriers
+            if (r <= 2 || r >= this.rows - 3 || c <= 2 || c >= this.cols - 3) {
+              this.setTile(c, r, 1);
+              continue;
+            }
+
+            // Willamette River corridor running vertically between cols 30 and 34
+            if (c >= 30 && c <= 34) {
+              // 3 Cross-river bridges:
+              // Rows 30..33 (Burnside Bridge - Center)
+              // Rows 12..14 (Steel Bridge - North)
+              // Rows 50..52 (Hawthorne Bridge - South)
+              if ((r >= 30 && r <= 33) || (r >= 12 && r <= 14) || (r >= 50 && r <= 52)) {
+                this.setTile(c, r, 3); // Bridge deck
+              } else {
+                this.setTile(c, r, 2); // River water
+              }
+              continue;
+            }
+
+            // Districts base floor
+            if (c < 30 && r < 32) {
+              this.setTile(c, r, 6); // NW: Chinatown & Downtown
+            } else if (c > 34 && r < 32) {
+              this.setTile(c, r, 4); // NE: Eastside & Skatepark
+            } else if (c < 30 && r >= 32) {
+              this.setTile(c, r, 5); // SW: Forest Park Redwoods
+            } else {
+              this.setTile(c, r, 7); // SE: Hawthorne Undercroft
+            }
+          }
+        }
+
+        // 2. Procedural Building Blocks & Alleys (Diablo 3 street chunks)
+        for (let r = 5; r < this.rows - 5; r += 5) {
+          for (let c = 5; c < this.cols - 5; c += 5) {
+            if (c >= 28 && c <= 36) continue; // Keep river banks and bridges clear
+
+            const blockW = 3 + Math.floor(this.rng() * 2);
+            const blockH = 3 + Math.floor(this.rng() * 2);
+            const hasAlleyCut = this.rng() > 0.35;
+            const alleyDir = this.rng() > 0.5 ? 'h' : 'v';
+
+            for (let br = 0; br < blockH; br++) {
+              for (let bc = 0; bc < blockW; bc++) {
+                const tc = c + bc;
+                const tr = r + br;
+                if (tc >= this.cols - 3 || tr >= this.rows - 3) continue;
+
+                // Cut alley through building block
+                if (hasAlleyCut) {
+                  if (alleyDir === 'h' && br === Math.floor(blockH / 2)) continue;
+                  if (alleyDir === 'v' && bc === Math.floor(blockW / 2)) continue;
+                }
+
+                this.setTile(tc, tr, 1); // Solid building wall
+              }
+            }
+          }
+        }
+
+        // 3. Clear Central Burnside Plaza around (32, 32) -> world (0, 0)
+        for (let r = 28; r <= 35; r++) {
+          for (let c = 25; c <= 39; c++) {
+            if (c >= 30 && c <= 34) {
+              this.setTile(c, r, 3); // Bridge deck
+            } else {
+              this.setTile(c, r, 0); // Plaza asphalt
+            }
+          }
+        }
+
+        // 4. Iconic Macro-Landmarks
+        this.landmarks = [
+          { id: 'burnside_bridge', name: 'Burnside Bridge Hub', tileX: 32, tileY: 32, worldX: 0, worldY: 0, icon: '🌉', district: 'Burnside Hub' },
+          { id: 'chinatown_gate', name: 'Old Chinatown Gate', tileX: 16, tileY: 16, worldX: -1024, worldY: -1024, icon: '⛩️', district: 'Chinatown Anomaly' },
+          { id: 'burnside_skatepark', name: 'Eastside Skatepark', tileX: 48, tileY: 16, worldX: 1024, worldY: -1024, icon: '🛹', district: 'Eastside Industrial' },
+          { id: 'forest_park_shrine', name: 'Forest Park Redwood Sanctuary', tileX: 16, tileY: 48, worldX: -1024, worldY: 1024, icon: '🌲', district: 'Forest Park Wilds' },
+          { id: 'hawthorne_undercroft', name: 'Hawthorne Undercroft Market', tileX: 48, tileY: 48, worldX: 1024, worldY: 1024, icon: '🏮', district: 'Hawthorne Bazaar' }
+        ];
+
+        // Clear terrain around landmarks
+        this.landmarks.forEach(lm => {
+          for (let dy = -2; dy <= 2; dy++) {
+            for (let dx = -2; dx <= 2; dx++) {
+              const tx = lm.tileX + dx;
+              const ty = lm.tileY + dy;
+              if (this.getTile(tx, ty) === 1) this.setTile(tx, ty, 0);
+            }
+          }
+        });
+
+        // 5. Procedural Props: Supply Crates, Guerilla Coffee Stills, Anomaly Beacons
+        this.props = [];
+        
+        // 16 Supply Crates hidden in dead-ends/alleys
+        for (let i = 0; i < 16; i++) {
+          const tx = 5 + Math.floor(this.rng() * (this.cols - 10));
+          const ty = 5 + Math.floor(this.rng() * (this.rows - 10));
+          if (this.isWalkable(tx, ty)) {
+            this.props.push({
+              id: `crate_${i}`,
+              type: 'crate',
+              tileX: tx,
+              tileY: ty,
+              worldX: (tx - 32) * this.tileSize,
+              worldY: (ty - 32) * this.tileSize,
+              hp: 25,
+              maxHp: 25,
+              looted: false
+            });
+          }
+        }
+
+        // 6 Guerilla Coffee Siphon Stations (Health & Haste)
+        for (let i = 0; i < 6; i++) {
+          const tx = 6 + Math.floor(this.rng() * (this.cols - 12));
+          const ty = 6 + Math.floor(this.rng() * (this.rows - 12));
+          if (this.isWalkable(tx, ty)) {
+            this.props.push({
+              id: `coffee_${i}`,
+              type: 'coffee_station',
+              tileX: tx,
+              tileY: ty,
+              worldX: (tx - 32) * this.tileSize,
+              worldY: (ty - 32) * this.tileSize,
+              name: 'Steaming Siphon Still',
+              cooldown: 0
+            });
+          }
+        }
+
+        // 4 District Anomaly Beacons (Wave Event Triggers)
+        const beaconSpots = [
+          { tx: 16, ty: 22, district: 'Chinatown Anomaly' },
+          { tx: 46, ty: 22, district: 'Eastside Industrial' },
+          { tx: 18, ty: 44, district: 'Forest Park Wilds' },
+          { tx: 44, ty: 44, district: 'Hawthorne Bazaar' }
+        ];
+        beaconSpots.forEach((bs, idx) => {
+          this.props.push({
+            id: `beacon_${idx}`,
+            type: 'anomaly_beacon',
+            tileX: bs.tx,
+            tileY: bs.ty,
+            worldX: (bs.tx - 32) * this.tileSize,
+            worldY: (bs.ty - 32) * this.tileSize,
+            district: bs.district,
+            active: false,
+            rotation: 0
+          });
+        });
+      }
+
+      setTile(c, r, type) {
+        if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
+          this.grid[r * this.cols + c] = type;
+        }
+      }
+
+      getTile(c, r) {
+        if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
+          return this.grid[r * this.cols + c];
+        }
+        return 1; // Outside map is solid wall
+      }
+
+      isWalkable(c, r) {
+        const t = this.getTile(c, r);
+        return t !== 1 && t !== 2; // Not wall and not river
+      }
+
+      worldToTile(wx, wy) {
+        const c = Math.floor((wx + this.originX) / this.tileSize);
+        const r = Math.floor((wy + this.originY) / this.tileSize);
+        return { c, r };
+      }
+
+      isWorldWalkable(wx, wy, radius = 16) {
+        const points = [
+          { dx: 0, dy: 0 },
+          { dx: radius, dy: 0 },
+          { dx: -radius, dy: 0 },
+          { dx: 0, dy: radius },
+          { dx: 0, dy: -radius }
+        ];
+        for (let p of points) {
+          const { c, r } = this.worldToTile(wx + p.dx, wy + p.dy);
+          if (!this.isWalkable(c, r)) return false;
+        }
+        return true;
+      }
+
+      revealArea(wx, wy, radiusTiles = 5) {
+        const { c: centerC, r: centerR } = this.worldToTile(wx, wy);
+        for (let dr = -radiusTiles; dr <= radiusTiles; dr++) {
+          for (let dc = -radiusTiles; dc <= radiusTiles; dc++) {
+            const tc = centerC + dc;
+            const tr = centerR + dr;
+            if (tc >= 0 && tc < this.cols && tr >= 0 && tr < this.rows) {
+              this.explored[tr * this.cols + tc] = 1;
+            }
+          }
+        }
+      }
+    }
+
+    // Initialize Global Portland Map
+    function initWorldMap(seed) {
+      gameState.worldSeed = seed || (Date.now() % 100000);
+      gameState.worldMap = new PortlandMapGenerator(gameState.worldSeed);
+      gameState.worldMap.generate();
+
+      const seedTag = document.getElementById('minimapSeedTag');
+      if (seedTag) seedTag.textContent = `SEED: ${gameState.worldSeed}`;
+      const worldSeedDisplay = document.getElementById('currentWorldSeedDisplay');
+      if (worldSeedDisplay) worldSeedDisplay.textContent = gameState.worldSeed;
+    }
+
+    // Render Viewport Tiles for 2D Procedural City
+    function drawUrbanEnvironment(cw, ch) {
+      if (!gameState.worldMap) initWorldMap(gameState.worldSeed);
+      const map = gameState.worldMap;
+      const cam = gameState.camera;
+      const ts = map.tileSize;
+
+      // Viewport bounds in world space
+      const left = cam.x;
+      const top = cam.y;
+      const right = left + cw;
+      const bottom = top + ch;
+
+      // Convert to tile indices
+      const startC = Math.max(0, Math.floor((left + map.originX) / ts) - 1);
+      const endC = Math.min(map.cols - 1, Math.ceil((right + map.originX) / ts) + 1);
+      const startR = Math.max(0, Math.floor((top + map.originY) / ts) - 1);
+      const endR = Math.min(map.rows - 1, Math.ceil((bottom + map.originY) / ts) + 1);
+
+      const time = performance.now() * 0.001;
+
+      // 1. Draw Ground Tiles
+      for (let r = startR; r <= endR; r++) {
+        for (let c = startC; c <= endC; c++) {
+          const tile = map.getTile(c, r);
+          const wx = (c * ts) - map.originX;
+          const wy = (r * ts) - map.originY;
+
+          switch (tile) {
+            case 0: // Asphalt Plaza
+              ctx.fillStyle = '#090d16';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+              ctx.strokeRect(wx, wy, ts, ts);
+              // Puddle reflection
+              if ((c + r) % 5 === 0) {
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.06)';
+                ctx.beginPath();
+                ctx.ellipse(wx + ts/2, wy + ts/2, ts * 0.35, ts * 0.2, 0.2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              break;
+
+            case 1: // Building Monolith (Solid)
+              ctx.fillStyle = '#040711';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = '#1e293b';
+              ctx.lineWidth = 2;
+              ctx.strokeRect(wx, wy, ts, ts);
+              // Cyber Rooftop Vent / Detail
+              ctx.fillStyle = '#0f172a';
+              ctx.fillRect(wx + 8, wy + 8, ts - 16, ts - 16);
+              // Holographic facade strip
+              if ((c * 7 + r * 13) % 9 === 0) {
+                ctx.fillStyle = 'rgba(0, 245, 255, 0.25)';
+                ctx.fillRect(wx + 4, wy + ts - 8, ts - 8, 4);
+              } else if ((c * 11 + r * 5) % 8 === 0) {
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.25)';
+                ctx.fillRect(wx + 4, wy + ts - 8, ts - 8, 4);
+              }
+              break;
+
+            case 2: // Willamette River Water (Animated Flow)
+              const waveOff = Math.sin(time * 2 + c * 0.5 + r * 0.3) * 4;
+              ctx.fillStyle = '#03142e';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+              ctx.lineWidth = 1.5;
+              ctx.beginPath();
+              ctx.moveTo(wx, wy + ts/2 + waveOff);
+              ctx.bezierCurveTo(wx + ts/3, wy + ts/2 - 6 + waveOff, wx + (ts*2)/3, wy + ts/2 + 6 + waveOff, wx + ts, wy + ts/2 + waveOff);
+              ctx.stroke();
+              break;
+
+            case 3: // Bridge Deck (Steel Trusses)
+              ctx.fillStyle = '#1e2433';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(245, 158, 11, 0.35)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(wx, wy, ts, ts);
+              // Caution crosshatching
+              ctx.strokeStyle = 'rgba(234, 179, 8, 0.25)';
+              ctx.beginPath();
+              ctx.moveTo(wx, wy); ctx.lineTo(wx + ts, wy + ts);
+              ctx.stroke();
+              break;
+
+            case 4: // Skatepark Concrete
+              ctx.fillStyle = '#111827';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+              ctx.strokeRect(wx, wy, ts, ts);
+              // Bowl curve lines
+              if ((c + r) % 3 === 0) {
+                ctx.strokeStyle = 'rgba(249, 115, 22, 0.2)';
+                ctx.beginPath();
+                ctx.arc(wx + ts/2, wy + ts/2, ts * 0.3, 0, Math.PI);
+                ctx.stroke();
+              }
+              break;
+
+            case 5: // Forest Park Moss & Roots
+              ctx.fillStyle = '#061a12';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(16, 185, 129, 0.15)';
+              ctx.strokeRect(wx, wy, ts, ts);
+              // Bioluminescent spores
+              if ((c * 3 + r * 7) % 4 === 0) {
+                ctx.fillStyle = 'rgba(52, 211, 153, 0.3)';
+                ctx.beginPath();
+                ctx.arc(wx + ts * 0.4, wy + ts * 0.6, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              break;
+
+            case 6: // Chinatown Cobblestones
+              ctx.fillStyle = '#170c14';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(244, 63, 94, 0.2)';
+              ctx.strokeRect(wx, wy, ts, ts);
+              break;
+
+            case 7: // Hawthorne Undercroft Alley Bricks
+              ctx.fillStyle = '#140e1e';
+              ctx.fillRect(wx, wy, ts, ts);
+              ctx.strokeStyle = 'rgba(168, 85, 247, 0.2)';
+              ctx.strokeRect(wx, wy, ts, ts);
+              break;
+          }
+        }
+      }
+
+      // 2. Draw Interactive World Props (Crates, Coffee Siphons, Anomaly Beacons)
+      map.props.forEach(prop => {
+        if (prop.worldX < left - 60 || prop.worldX > right + 60 || prop.worldY < top - 60 || prop.worldY > bottom + 60) return;
+
+        if (prop.type === 'crate') {
+          if (prop.looted) return;
+          // Loot Crate
+          ctx.save();
+          ctx.translate(prop.worldX + ts/2, prop.worldY + ts/2);
+          // Golden loot aura
+          ctx.shadowColor = '#f59e0b';
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(-14, -14, 28, 28);
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(-14, -14, 28, 28);
+          // Crossed metal straps
+          ctx.beginPath();
+          ctx.moveTo(-14, -14); ctx.lineTo(14, 14);
+          ctx.moveTo(14, -14); ctx.lineTo(-14, 14);
+          ctx.stroke();
+          // Icon
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('📦', 0, 0);
+          ctx.restore();
+
+        } else if (prop.type === 'coffee_station') {
+          // Steaming Coffee Siphon Vat
+          ctx.save();
+          ctx.translate(prop.worldX + ts/2, prop.worldY + ts/2);
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath();
+          ctx.arc(0, 0, 18, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#d97706';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // Steaming exhaust puff
+          const puffY = Math.sin(time * 4) * 6;
+          ctx.fillStyle = 'rgba(254, 243, 199, 0.4)';
+          ctx.beginPath();
+          ctx.arc(0, -18 + puffY, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.font = '14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('☕', 0, 0);
+          ctx.restore();
+
+        } else if (prop.type === 'anomaly_beacon') {
+          // Anomaly Beacon Obelisk
+          prop.rotation = (prop.rotation || 0) + 0.02;
+          ctx.save();
+          ctx.translate(prop.worldX + ts/2, prop.worldY + ts/2);
+          // Rotating energy ring
+          ctx.save();
+          ctx.rotate(prop.rotation);
+          ctx.strokeStyle = '#00f5ff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 24, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = '#00f5ff';
+          ctx.fillRect(-2, -26, 4, 4);
+          ctx.fillRect(-2, 22, 4, 4);
+          ctx.restore();
+          // Core crystal
+          ctx.shadowColor = '#00f5ff';
+          ctx.shadowBlur = 15;
+          ctx.font = '20px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('⚡', 0, 0);
+          ctx.restore();
+        }
+      });
+
+      // 3. Draw Landmark Overheads
+      map.landmarks.forEach(lm => {
+        if (lm.worldX < left - 120 || lm.worldX > right + 120 || lm.worldY < top - 120 || lm.worldY > bottom + 120) return;
+        ctx.save();
+        ctx.translate(lm.worldX, lm.worldY - 35);
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1;
+        const textW = ctx.measureText(lm.name).width || 120;
+        ctx.beginPath();
+        ctx.roundRect(-textW/2 - 12, -14, textW + 24, 24, [8]);
+        ctx.fill();
+        ctx.stroke();
+        ctx.font = 'bold 11px monospace';
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${lm.icon} ${lm.name}`, 0, -2);
+        ctx.restore();
+      });
+
+      // Reveal fog around player
+      map.revealArea(gameState.player.x, gameState.player.y, 6);
+    }
+
 
     // ── 8-BIT SPRITE MATRIX DATA & ENGINE ──
     const PIXEL_PALETTE = {
@@ -6480,6 +7123,7 @@
       drawProjectiles();
       drawEnemies();
       drawPlayer();
+      drawRemotePlayers();
       drawParticles();
       drawFloatingTexts();
 
@@ -6521,6 +7165,7 @@
           try { openEmergencyRevive(); } catch (e) {}
         }
       }
+      initMultiplayer();
       requestAnimationFrame(gameLoop);
     }
 
@@ -8618,6 +9263,8 @@
       if (hudClass) hudClass.textContent = cDef.name;
 
       updateHUD();
+      updateMinimapRadar();
+      broadcastPlayerState();
     }
 
     function renderDistricts() {
@@ -10016,6 +10663,346 @@
       renderFF12LicenseBoard();
       updateHUD();
       showToast(`Combat Discipline Chosen: ${HERO_CLASSES[classId].name}!`, "success");
+    }
+
+    // ==============================================================
+    // 📡 CYBER-RADAR MINIMAP & MULTIPLAYER SQUAD NETWORKING
+    // ==============================================================
+    function updateMinimapRadar() {
+      const canvas = document.getElementById('hudMinimapCanvas');
+      if (!canvas) return;
+      const ctx2 = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx2.clearRect(0, 0, w, h);
+
+      if (!gameState.worldMap) return;
+      const map = gameState.worldMap;
+      const p = gameState.player;
+
+      // Draw explored tiles at 2px per tile
+      const scale = w / map.cols; // 128 / 64 = 2px
+      for (let r = 0; r < map.rows; r++) {
+        for (let c = 0; c < map.cols; c++) {
+          const isExp = map.explored[r * map.cols + c];
+          if (!isExp) {
+            ctx2.fillStyle = '#020617';
+            ctx2.fillRect(c * scale, r * scale, scale, scale);
+            continue;
+          }
+
+          const t = map.getTile(c, r);
+          if (t === 1) ctx2.fillStyle = '#1e293b';       // Building
+          else if (t === 2) ctx2.fillStyle = '#0284c7'; // River
+          else if (t === 3) ctx2.fillStyle = '#f59e0b'; // Bridge
+          else if (t === 5) ctx2.fillStyle = '#059669'; // Forest
+          else if (t === 4) ctx2.fillStyle = '#ea580c'; // Skatepark
+          else if (t === 6) ctx2.fillStyle = '#e11d48'; // Chinatown
+          else ctx2.fillStyle = '#0f172a';              // Street
+          ctx2.fillRect(c * scale, r * scale, scale, scale);
+        }
+      }
+
+      // Draw Landmarks
+      map.landmarks.forEach(lm => {
+        ctx2.fillStyle = '#38bdf8';
+        ctx2.beginPath();
+        ctx2.arc(lm.tileX * scale, lm.tileY * scale, 2.5, 0, Math.PI * 2);
+        ctx2.fill();
+      });
+
+      // Draw Supply Crates
+      map.props.forEach(pr => {
+        if (pr.type === 'crate' && !pr.looted && map.explored[pr.tileY * map.cols + pr.tileX]) {
+          ctx2.fillStyle = '#fbbf24';
+          ctx2.fillRect(pr.tileX * scale - 1.5, pr.tileY * scale - 1.5, 3, 3);
+        }
+      });
+
+      // Draw Enemies as red pips
+      if (gameState.enemies) {
+        ctx2.fillStyle = '#ef4444';
+        gameState.enemies.forEach(en => {
+          const { c, r } = map.worldToTile(en.x, en.y);
+          ctx2.fillRect(c * scale - 1, r * scale - 1, 2, 2);
+        });
+      }
+
+      // Draw Remote Teammates as emerald pips
+      if (gameState.multiplayer && gameState.multiplayer.peers) {
+        ctx2.fillStyle = '#10b981';
+        gameState.multiplayer.peers.forEach(peer => {
+          const { c, r } = map.worldToTile(peer.x, peer.y);
+          ctx2.beginPath();
+          ctx2.arc(c * scale, r * scale, 3, 0, Math.PI * 2);
+          ctx2.fill();
+        });
+      }
+
+      // Draw Local Hero as Cyan Directional Arrow
+      const { c: heroC, r: heroR } = map.worldToTile(p.x, p.y);
+      ctx2.save();
+      ctx2.translate(heroC * scale, heroR * scale);
+      ctx2.rotate(p.angle);
+      ctx2.fillStyle = '#00f5ff';
+      ctx2.beginPath();
+      ctx2.moveTo(4, 0);
+      ctx2.lineTo(-3, -3);
+      ctx2.lineTo(-1, 0);
+      ctx2.lineTo(-3, 3);
+      ctx2.closePath();
+      ctx2.fill();
+      ctx2.restore();
+
+      // Update District Header Tag
+      let distName = 'BURNSIDE HUB';
+      if (p.x < -200 && p.y < -200) distName = 'CHINATOWN';
+      else if (p.x > 200 && p.y < -200) distName = 'EASTSIDE SKATE';
+      else if (p.x < -200 && p.y > 200) distName = 'FOREST PARK';
+      else if (p.x > 200 && p.y > 200) distName = 'HAWTHORNE';
+      const tagEl = document.getElementById('minimapDistrictTag');
+      if (tagEl && tagEl.textContent !== distName) tagEl.textContent = distName;
+    }
+
+    // MULTIPLAYER CO-OP NETWORKING ENGINE
+    function initMultiplayer() {
+      // Check URL parameters for ?room=XYZ or ?seed=XYZ
+      const params = new URLSearchParams(window.location.search);
+      const roomParam = params.get('room');
+      const seedParam = params.get('seed');
+
+      if (roomParam) {
+        joinRoom(roomParam);
+      } else if (seedParam) {
+        initWorldMap(parseInt(seedParam, 10));
+      } else {
+        initWorldMap(7729);
+      }
+
+      // Setup BroadcastChannel for zero-latency local multi-window / tab co-op testing
+      try {
+        const chanName = `rainblade_room_${gameState.multiplayer.roomCode}`;
+        gameState.multiplayer.channel = new BroadcastChannel(chanName);
+        gameState.multiplayer.channel.onmessage = (e) => handleMultiplayerMessage(e.data);
+      } catch (err) {
+        console.warn('BroadcastChannel not supported in this runtime:', err);
+      }
+
+      updateMultiplayerRosterUI();
+    }
+
+    function generateNewRoom() {
+      const code = `RAIN-${Math.floor(1000 + Math.random() * 9000)}`;
+      gameState.multiplayer.roomCode = code;
+      const seed = parseInt(code.replace('RAIN-', ''), 10);
+      initWorldMap(seed);
+
+      const codeEl = document.getElementById('currentRoomCodeDisplay');
+      if (codeEl) codeEl.textContent = code;
+
+      // Reconnect channel
+      if (gameState.multiplayer.channel) {
+        try { gameState.multiplayer.channel.close(); } catch (e) {}
+      }
+      try {
+        gameState.multiplayer.channel = new BroadcastChannel(`rainblade_room_${code}`);
+        gameState.multiplayer.channel.onmessage = (e) => handleMultiplayerMessage(e.data);
+      } catch (e) {}
+
+      updateMultiplayerRosterUI();
+      showToast(`Created New Room: ${code}! Share with friends.`, "success");
+    }
+
+    function joinRoom(roomCode) {
+      if (!roomCode) return;
+      const cleanCode = roomCode.trim().toUpperCase();
+      gameState.multiplayer.roomCode = cleanCode;
+      gameState.multiplayer.isHost = false;
+
+      // Deterministic seed from room code
+      let seed = 7729;
+      const digits = cleanCode.replace(/\D/g, '');
+      if (digits.length > 0) seed = parseInt(digits, 10);
+      initWorldMap(seed);
+
+      const codeEl = document.getElementById('currentRoomCodeDisplay');
+      if (codeEl) codeEl.textContent = cleanCode;
+      const statusBadge = document.getElementById('roomStatusBadge');
+      if (statusBadge) {
+        statusBadge.textContent = 'GUEST PEER';
+        statusBadge.className = 'text-cyan-400 bg-cyan-950 px-1 rounded';
+      }
+
+      // Connect channel
+      if (gameState.multiplayer.channel) {
+        try { gameState.multiplayer.channel.close(); } catch (e) {}
+      }
+      try {
+        gameState.multiplayer.channel = new BroadcastChannel(`rainblade_room_${cleanCode}`);
+        gameState.multiplayer.channel.onmessage = (e) => handleMultiplayerMessage(e.data);
+      } catch (e) {}
+
+      updateMultiplayerRosterUI();
+      showToast(`Joined Co-Op Room: ${cleanCode}!`, "success");
+    }
+
+    function joinRoomFromInput() {
+      const input = document.getElementById('inputJoinRoomCode');
+      if (!input || !input.value.trim()) {
+        showToast("Please enter a room code!", "warning");
+        return;
+      }
+      joinRoom(input.value.trim());
+      input.value = '';
+    }
+
+    function copyMultiplayerInviteLink() {
+      const code = gameState.multiplayer.roomCode;
+      const url = `${window.location.origin}${window.location.pathname}?room=${code}`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast("Room invite link copied to clipboard!", "success");
+        }).catch(() => {
+          showToast(`Invite: ?room=${code}`, "info");
+        });
+      } else {
+        showToast(`Invite code: ${code}`, "info");
+      }
+      triggerTelegramHaptic('notification', 'success');
+    }
+
+    function broadcastPlayerState() {
+      if (!gameState.multiplayer.channel) return;
+      const now = performance.now();
+      if (now - gameState.multiplayer.lastBroadcast < 50) return; // 20 Hz sync
+      gameState.multiplayer.lastBroadcast = now;
+
+      const p = gameState.player;
+      const payload = {
+        type: 'PLAYER_SYNC',
+        senderId: p.name || 'Rain-Walker',
+        x: p.x,
+        y: p.y,
+        angle: p.angle,
+        hp: p.hp,
+        maxHp: p.maxHp,
+        level: p.level,
+        race: p.race,
+        heroClass: p.heroClass,
+        dominantSet: p.dominantSet,
+        isAttacking: p.isAttacking,
+        timestamp: now
+      };
+
+      try {
+        gameState.multiplayer.channel.postMessage(payload);
+      } catch (e) {}
+    }
+
+    function handleMultiplayerMessage(data) {
+      if (!data || !data.type) return;
+      if (data.type === 'PLAYER_SYNC') {
+        const peers = gameState.multiplayer.peers;
+        let peer = peers.find(item => item.senderId === data.senderId);
+        if (!peer) {
+          peer = { senderId: data.senderId };
+          peers.push(peer);
+          showToast(`${data.senderId} joined the squad!`, "info");
+          updateMultiplayerRosterUI();
+        }
+        Object.assign(peer, data);
+        peer.lastSeen = performance.now();
+      }
+    }
+
+    function updateMultiplayerRosterUI() {
+      const rosterList = document.getElementById('squadRosterList');
+      const countText = document.getElementById('squadCountText');
+      if (!rosterList) return;
+
+      const p = gameState.player;
+      const peers = gameState.multiplayer.peers.filter(pr => (performance.now() - (pr.lastSeen || 0)) < 5000);
+      const totalSquad = 1 + peers.length;
+
+      if (countText) countText.textContent = `${totalSquad} / 4 PLAYERS`;
+
+      let html = `
+        <div class="p-2.5 rounded-xl bg-slate-950/80 border border-emerald-500/40 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-500 flex items-center justify-center text-sm">
+              ${HERO_RACES[p.race]?.icon || '🧬'}
+            </div>
+            <div>
+              <div class="font-bold text-xs text-emerald-300 flex items-center gap-1.5">
+                <span>${p.name || 'Rain-Walker'} (YOU)</span>
+                <span class="text-[8.5px] px-1 rounded bg-slate-800 text-slate-300">Lv.${p.level}</span>
+              </div>
+              <div class="text-[9px] text-slate-400 font-mono">${HERO_CLASSES[p.heroClass]?.name || 'Stalker'} • ${gameState.multiplayer.isHost ? 'HOST' : 'PEER'}</div>
+            </div>
+          </div>
+          <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">ONLINE</span>
+        </div>
+      `;
+
+      peers.forEach(peer => {
+        html += `
+          <div class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-cyan-950 border border-cyan-500 flex items-center justify-center text-sm">
+                ${HERO_RACES[peer.race]?.icon || '🧬'}
+              </div>
+              <div>
+                <div class="font-bold text-xs text-cyan-300 flex items-center gap-1.5">
+                  <span>${peer.senderId}</span>
+                  <span class="text-[8.5px] px-1 rounded bg-slate-800 text-slate-300">Lv.${peer.level || 1}</span>
+                </div>
+                <div class="text-[9px] text-slate-400 font-mono">${HERO_CLASSES[peer.heroClass]?.name || 'Stalker'} • SQUADMATE</div>
+              </div>
+            </div>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">CO-OP ACTIVE</span>
+          </div>
+        `;
+      });
+
+      rosterList.innerHTML = html;
+    }
+
+    // Render Remote Teammates in Canvas
+    function drawRemotePlayers() {
+      if (!gameState.multiplayer || !gameState.multiplayer.peers) return;
+      const peers = gameState.multiplayer.peers.filter(pr => (performance.now() - (pr.lastSeen || 0)) < 4000);
+
+      peers.forEach(peer => {
+        ctx.save();
+        ctx.translate(peer.x, peer.y);
+
+        // Teammate Emerald Ring
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Direction & Body
+        ctx.rotate(peer.angle || 0);
+        ctx.fillStyle = '#06b6d4';
+        ctx.beginPath();
+        ctx.arc(0, 0, 16, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Name overhead
+        ctx.restore();
+        ctx.save();
+        ctx.translate(peer.x, peer.y - 28);
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.8)';
+        ctx.fillRect(-35, -10, 70, 14);
+        ctx.font = 'bold 9px monospace';
+        ctx.fillStyle = '#34d399';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(peer.senderId, 0, -3);
+        ctx.restore();
+      });
     }
 
     function updateSkillsUI() {
