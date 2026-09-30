@@ -210,8 +210,8 @@
   </header>
 
   <main class="relative flex-1 w-full h-full overflow-hidden bg-slate-950 select-none">
-    <!-- Floating On-Screen Quick Pause Button (Mobile & Desktop Fallback) -->
-    <button onclick="togglePause()" class="absolute top-3 right-3 z-30 flex sm:hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-mono font-black text-xs shadow-lg active:scale-90" title="Pause">
+    <!-- Floating On-Screen Quick Pause Button (Mobile & Desktop Fallback - Translucent) -->
+    <button onclick="togglePause()" class="absolute top-3 right-3 z-30 flex sm:hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/80 hover:bg-amber-400 active:bg-amber-400 backdrop-blur-xs border border-amber-400/40 text-slate-950 font-mono font-black text-xs shadow-md active:scale-90" title="Pause">
       <span>⏸️</span>
       <span>PAUSE</span>
     </button>
@@ -219,13 +219,13 @@
     <!-- Main Game Canvas -->
     <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
 
-    <!-- Experience Gauge -->
-    <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none">
+    <!-- Experience Gauge (Translucent) -->
+    <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none opacity-80">
       <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1 px-1">
         <span>PACIFIC LEYLINE RESONANCE (XP)</span>
         <span id="hudXpText">0 / 180 XP</span>
       </div>
-      <div class="w-full bg-slate-900/90 h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-700/60 p-[1px]">
+      <div class="w-full bg-slate-900/50 backdrop-blur-xs h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-700/50 p-[1px]">
         <div id="hudXpBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full transition-all duration-200" style="width: 0%"></div>
       </div>
     </div>
@@ -240,47 +240,47 @@
       </div>
     </div>
 
-    <!-- Wave Announcement Banner -->
-    <div id="waveAlertBanner" class="absolute top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 text-center w-11/12 max-w-md">
-      <div class="glass-panel px-6 py-2.5 rounded-2xl border border-rose-500/60 shadow-glow-rose">
-        <div id="waveAlertTitle" class="font-display font-extrabold text-sm sm:text-base text-rose-400 uppercase tracking-wider">NEW WAVE INCOMING</div>
-        <div id="waveAlertSub" class="font-mono text-[11px] text-slate-300">Escalating Portland Leyline Density</div>
+    <!-- Wave Announcement Banner (Translucent / See-Through Glassmorphic) -->
+    <div id="waveAlertBanner" class="absolute top-12 sm:top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 text-center w-10/12 max-w-sm">
+      <div class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl border border-rose-500/40 bg-slate-950/45 backdrop-blur-xs shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+        <div id="waveAlertTitle" class="font-display font-extrabold text-xs sm:text-sm text-rose-400 uppercase tracking-wider">NEW WAVE INCOMING</div>
+        <div id="waveAlertSub" class="font-mono text-[10px] sm:text-[11px] text-slate-300/90">Escalating Portland Leyline Density</div>
       </div>
     </div>
 
-    <!-- Mobile Touch Controls -->
+    <!-- Mobile Touch Controls (Translucent Glassmorphic Controls for Complete Battle Visibility) -->
     <div id="touchControls" class="absolute inset-0 pointer-events-none z-10 hidden flex justify-between p-6 items-end pb-12" style="touch-action: none;">
       <!-- Virtual Joystick -->
-      <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/50 border border-slate-700/60 relative pointer-events-auto flex items-center justify-center backdrop-blur-sm" style="touch-action: none;">
-        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/80 shadow-glow-emerald border border-white/40" style="touch-action: none;"></div>
+      <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/35 border border-slate-700/40 relative pointer-events-auto flex items-center justify-center backdrop-blur-xs" style="touch-action: none;">
+        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/70 shadow-glow-emerald border border-white/40" style="touch-action: none;"></div>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex flex-col gap-2.5 pointer-events-auto items-end">
         <div class="flex gap-2">
-          <button id="btnSkill1Touch" class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-cyan-500/50 text-cyan-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-lg">
+          <button id="btnSkill1Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-cyan-500/40 text-cyan-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
             <span class="text-xs">Q</span>
             <span class="text-[8px] text-slate-400">Rain</span>
           </button>
-          <button id="btnSkill2Touch" class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-amber-500/50 text-amber-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-lg">
+          <button id="btnSkill2Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-amber-500/40 text-amber-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
             <span class="text-xs">E</span>
             <span class="text-[8px] text-slate-400">Coffee</span>
           </button>
-          <button id="btnSkill3Touch" class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-rose-500/50 text-rose-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-lg">
+          <button id="btnSkill3Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-rose-500/40 text-rose-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
             <span class="text-xs">R</span>
             <span class="text-[8px] text-slate-400">Briar</span>
           </button>
-          <button id="btnTrinketTouch" onclick="triggerTrinket()" class="w-11 h-11 rounded-2xl bg-slate-900/80 border border-fuchsia-500/50 text-fuchsia-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-lg">
+          <button id="btnTrinketTouch" onclick="triggerTrinket()" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-fuchsia-500/40 text-fuchsia-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
             <span class="text-xs">T</span>
             <span class="text-[8px] text-slate-400">Trinket</span>
           </button>
         </div>
 
         <div class="flex gap-2.5">
-          <button id="btnDodgeTouch" class="w-12 h-12 rounded-2xl bg-indigo-950/80 border border-indigo-500/50 text-indigo-300 font-bold flex flex-col items-center justify-center active:scale-90 shadow-lg">
+          <button id="btnDodgeTouch" class="w-12 h-12 rounded-2xl bg-indigo-950/50 backdrop-blur-xs border border-indigo-500/40 text-indigo-300 font-bold flex flex-col items-center justify-center active:scale-90 shadow-md">
             <span class="text-xs">Roll</span>
           </button>
-          <button id="btnAttackTouch" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-slate-950 font-black flex flex-col items-center justify-center active:scale-90 shadow-glow-emerald border border-white/40">
+          <button id="btnAttackTouch" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600/90 to-teal-400/90 text-slate-950 font-black opacity-90 active:opacity-100 flex flex-col items-center justify-center active:scale-90 shadow-glow-emerald border border-white/40">
             <span class="text-xs font-mono font-black">SLASH</span>
           </button>
         </div>
@@ -288,10 +288,10 @@
     </div>
 
     <!-- Desktop Skill Hotbar Dock -->
-    <div class="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 z-10 glass-panel px-4 py-2 rounded-2xl border border-slate-700/80 items-center gap-3 shadow-2xl">
+    <div class="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 z-10 bg-slate-950/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700/70 items-center gap-3 shadow-xl">
       <!-- Slash Attack -->
       <div class="flex flex-col items-center cursor-pointer" onclick="triggerAttack()">
-        <div class="w-11 h-11 rounded-xl bg-slate-800/90 border border-emerald-500/60 flex items-center justify-center text-emerald-400 shadow-sm relative">
+        <div class="w-11 h-11 rounded-xl bg-slate-800/70 border border-emerald-500/60 flex items-center justify-center text-emerald-400 shadow-sm relative">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.828 2.828a2 2 0 01-2.828 0L3 11.828a2 2 0 010-2.828L5.828 6.172a2 2 0 012.828 0L12 9.414"/>
           </svg>
@@ -302,7 +302,7 @@
 
       <!-- Skill 1: Rain Cleave -->
       <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerSkill(1)">
-        <div id="skillSlot1" class="w-11 h-11 rounded-xl bg-slate-800/90 border border-cyan-500/60 flex items-center justify-center text-cyan-300 shadow-sm relative overflow-hidden">
+        <div id="skillSlot1" class="w-11 h-11 rounded-xl bg-slate-800/70 border border-cyan-500/60 flex items-center justify-center text-cyan-300 shadow-sm relative overflow-hidden">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
           </svg>
@@ -314,7 +314,7 @@
 
       <!-- Skill 2: Espresso Surge -->
       <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerSkill(2)">
-        <div id="skillSlot2" class="w-11 h-11 rounded-xl bg-slate-800/90 border border-amber-500/60 flex items-center justify-center text-amber-300 shadow-sm relative overflow-hidden">
+        <div id="skillSlot2" class="w-11 h-11 rounded-xl bg-slate-800/70 border border-amber-500/60 flex items-center justify-center text-amber-300 shadow-sm relative overflow-hidden">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
@@ -326,7 +326,7 @@
 
       <!-- Skill 3: Briar Cyclone -->
       <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerSkill(3)">
-        <div id="skillSlot3" class="w-11 h-11 rounded-xl bg-slate-800/90 border border-rose-500/60 flex items-center justify-center text-rose-300 shadow-sm relative overflow-hidden">
+        <div id="skillSlot3" class="w-11 h-11 rounded-xl bg-slate-800/70 border border-rose-500/60 flex items-center justify-center text-rose-300 shadow-sm relative overflow-hidden">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
@@ -338,7 +338,7 @@
 
       <!-- Active Urban Trinket -->
       <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerTrinket()">
-        <div id="skillSlotTrinket" class="w-11 h-11 rounded-xl bg-slate-800/90 border border-fuchsia-500/60 flex items-center justify-center text-fuchsia-300 shadow-sm relative overflow-hidden">
+        <div id="skillSlotTrinket" class="w-11 h-11 rounded-xl bg-slate-800/70 border border-fuchsia-500/60 flex items-center justify-center text-fuchsia-300 shadow-sm relative overflow-hidden">
           <span id="hudTrinketIcon" class="text-xl">🎫</span>
           <div id="cooldownOverlayTrinket" class="absolute inset-0 bg-slate-950/80 transition-all flex items-center justify-center text-[10px] font-mono text-fuchsia-300 font-bold hidden">15.0</div>
           <span class="absolute -bottom-1 -right-1 bg-slate-950 border border-slate-700 text-[8px] font-mono rounded px-1 text-slate-300">T</span>
@@ -348,7 +348,7 @@
 
       <!-- Dodge Roll -->
       <div class="flex flex-col items-center relative cursor-pointer" onclick="triggerDodge()">
-        <div class="w-11 h-11 rounded-xl bg-slate-800/90 border border-indigo-500/60 flex items-center justify-center text-indigo-300 shadow-sm relative overflow-hidden">
+        <div class="w-11 h-11 rounded-xl bg-slate-800/70 border border-indigo-500/60 flex items-center justify-center text-indigo-300 shadow-sm relative overflow-hidden">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
@@ -358,8 +358,8 @@
       </div>
     </div>
 
-    <!-- Notification Toast Container -->
-    <div id="toastContainer" class="absolute top-14 right-4 z-30 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+    <!-- Notification Toast Container (Translucent & Compact, Positioned Away from Combat Arena) -->
+    <div id="toastContainer" class="absolute top-12 sm:top-14 right-2 sm:right-4 z-30 flex flex-col items-end gap-1.5 pointer-events-none max-w-[280px] sm:max-w-sm w-auto"></div>
   </main>
 
   <!-- Diablo 4 Style Paperdoll & Inventory Modal -->
@@ -959,13 +959,13 @@
         </div>
 
         <!-- Notification Toggle Switch (OFF by Default) -->
-        <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between font-mono">
+        <div class="p-3 rounded-2xl bg-slate-900/60 backdrop-blur-sm border border-slate-800/80 flex items-center justify-between font-mono">
           <div>
             <div class="text-xs font-bold text-white flex items-center gap-1.5">
               <span id="notifToggleIcon">🔕</span>
-              <span>Loot & Cooldown Popups</span>
+              <span>In-Game Combat Popups</span>
             </div>
-            <div class="text-[9px] text-slate-400">Toggle "found loot", energy warnings & cooldown toasts</div>
+            <div class="text-[9px] text-slate-400">Toggle battle details, loot drops & cooldown toasts</div>
           </div>
           <button id="toggleNotifsBtn" onclick="toggleNotifications()" class="px-3 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 font-bold text-xs transition-all cursor-pointer">
             OFF
@@ -1743,7 +1743,7 @@
       }
       document.getElementById('audioIconOn').classList.toggle('hidden', !gameState.audioEnabled);
       document.getElementById('audioIconOff').classList.toggle('hidden', gameState.audioEnabled);
-      showToast(gameState.audioEnabled ? "Dark Dubstep Engine Active" : "Audio Muted", "info");
+      showToast(gameState.audioEnabled ? "Dark Dubstep Engine Active" : "Audio Muted", "info", true);
     }
 
     const canvas = document.getElementById('gameCanvas');
@@ -2432,7 +2432,7 @@
       setTimeout(() => {
         banner.classList.add('opacity-0', '-translate-y-4');
         banner.classList.remove('opacity-100', 'translate-y-0');
-      }, 2600);
+      }, 1800);
     }
 
     function startNextWave() {
@@ -6575,7 +6575,9 @@
       localStorage.setItem('portland_notifications_enabled', gameState.settings.notificationsEnabled ? 'true' : 'false');
       updateNotifToggleButton();
       if (gameState.settings.notificationsEnabled) {
-        showToast("Loot & Cooldown Popups: ON", "info");
+        showToast("In-Game Combat Popups: ON", "info", true);
+      } else {
+        showToast("In-Game Combat Popups: OFF (Clean Battle View)", "info", true);
       }
     }
 
@@ -6787,41 +6789,65 @@
       }
     }
 
-    function showToast(message, type = 'info') {
-      if (!gameState.settings?.notificationsEnabled) {
+    function showToast(message, type = 'info', force = false) {
+      if (!force && !gameState.settings?.notificationsEnabled) {
         const msg = (message || '').toLowerCase();
-        // User request: notifications that say you found this, or energy level, or cool off not cooled off yet - OFF by default!
-        // Also suppress any "cleared" toasts
-        if (
-          msg.includes('found loot') ||
-          msg.includes('caffeination') ||
-          msg.includes('energy') ||
-          msg.includes('cooldown') ||
-          msg.includes('cooled off') ||
-          msg.includes('cleared')
-        ) {
+        // Allow crucial milestones and explicit user modal actions
+        const isMilestone = msg.includes('level up') || msg.includes('apex boss slain');
+        const isModalAction = msg.includes('equipped') || msg.includes('unequipped') || 
+                              msg.includes('swapped') || msg.includes('scrapped') || 
+                              msg.includes('reforged') || msg.includes('checkpoint') ||
+                              msg.includes('mastered') || msg.includes('infused');
+        
+        if (!isMilestone && !isModalAction) {
+          // In combat / gameplay, suppress routine toasts: skills, cooldowns, energy, gadgets, loot drops, reforge-ready
           return;
         }
       }
 
       const container = document.getElementById('toastContainer');
       if (!container) return;
+
+      // Keep only up to 2 active toasts so it never clutters mobile/telegram combat
+      while (container.children.length >= 2) {
+        container.removeChild(container.firstChild);
+      }
+
       const toast = document.createElement('div');
 
-      let borderCol = 'border-emerald-500/40';
+      let borderCol = 'border-emerald-500/30';
       let textCol = 'text-emerald-300';
-      if (type === 'warning') { borderCol = 'border-amber-500/50'; textCol = 'text-amber-300'; }
-      if (type === 'rose') { borderCol = 'border-rose-500/50'; textCol = 'text-rose-300'; }
+      let glowCol = 'shadow-[0_0_12px_rgba(16,185,129,0.15)]';
+      if (type === 'warning') {
+        borderCol = 'border-amber-500/40';
+        textCol = 'text-amber-300';
+        glowCol = 'shadow-[0_0_12px_rgba(245,158,11,0.15)]';
+      } else if (type === 'rose') {
+        borderCol = 'border-rose-500/40';
+        textCol = 'text-rose-300';
+        glowCol = 'shadow-[0_0_12px_rgba(244,63,94,0.15)]';
+      } else if (type === 'cyan') {
+        borderCol = 'border-cyan-500/40';
+        textCol = 'text-cyan-300';
+        glowCol = 'shadow-[0_0_12px_rgba(6,182,212,0.15)]';
+      }
 
-      toast.className = `glass-panel px-4 py-2.5 rounded-2xl border ${borderCol} flex items-center justify-between shadow-xl transition-all duration-300 transform translate-x-12 opacity-0`;
-      toast.innerHTML = `<span class="text-xs font-mono ${textCol} font-semibold">${message}</span>`;
+      // Translucent glassmorphic see-through styling:
+      // bg-slate-950/45 backdrop-blur-xs with pointer-events-none and compact padding
+      toast.className = `pointer-events-none px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border ${borderCol} bg-slate-950/45 backdrop-blur-xs flex items-center justify-between gap-2 ${glowCol} transition-all duration-200 transform translate-x-6 opacity-0 w-auto max-w-full`;
+      toast.innerHTML = `<span class="text-[11px] sm:text-xs font-mono ${textCol} font-medium tracking-wide pointer-events-none drop-shadow-sm">${message}</span>`;
       container.appendChild(toast);
 
-      setTimeout(() => toast.classList.remove('translate-x-12', 'opacity-0'), 20);
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-x-6', 'opacity-0');
+        toast.classList.add('opacity-90');
+      });
+
       setTimeout(() => {
         toast.classList.add('opacity-0', '-translate-y-2');
-        setTimeout(() => toast.remove(), 350);
-      }, 2800);
+        toast.classList.remove('opacity-90');
+        setTimeout(() => toast.remove(), 250);
+      }, 1900);
     }
 
     // ── TELEGRAM MINI APP PRODUCTION SUITE ──
