@@ -442,6 +442,9 @@
               </div>
               <div class="text-[11px] font-mono text-cyan-400 font-bold mt-1 tracking-widest drop-shadow" id="d4HeroNameDisplay">RAIN-WALKER</div>
               <div class="text-[9px] font-mono text-slate-400">OPERATIVE LVL <span id="d4HeroLvlDisplay" class="text-amber-300 font-bold">1</span> • <span id="d4HeroSetCountDisplay" class="text-emerald-400 font-bold">NO SET</span></div>
+              <button onclick="openRaceClassCustomizer()" class="mt-1 px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-900/60 to-cyan-900/60 hover:from-purple-800 hover:to-cyan-800 border border-purple-500/40 text-[8.5px] font-mono font-bold text-purple-300 flex items-center gap-1 cursor-pointer transition-all active:scale-95 shadow-sm" title="Customize Playable Race, Class & View S.P.E.C.I.A.L. Synergies">
+                <span>🧬</span><span id="d4RaceClassBadge">SYNTH • STALKER</span><span>✎</span>
+              </button>
             </div>
 
             <!-- 1. Top Center: Head / Cyber-Visor -->
@@ -735,13 +738,13 @@
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
                 <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">GRID INVENTORY STASH</span>
-                <span id="bagGridSlotsText" class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">0 / 24 SLOTS</span>
+                <span id="bagGridSlotsText" class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800">0 / 24 SLOTS (+1/LVL)</span>
               </div>
               <span class="text-[9px] font-mono text-cyan-400">Click item to inspect / equip</span>
             </div>
 
             <!-- 6 Columns x 4 Rows Tactile Grid (24 Slots) -->
-            <div id="d4InventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 rounded-2xl bg-slate-950/50 backdrop-blur-sm border border-slate-800/80 min-h-[220px]">
+            <div id="d4InventoryGrid" class="grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 rounded-2xl bg-slate-950/50 backdrop-blur-sm border border-slate-800/80 min-h-[220px] max-h-[380px] overflow-y-auto custom-scrollbar">
               <!-- Generated dynamically by renderInventoryBag() -->
             </div>
           </div>
@@ -762,6 +765,9 @@
 
       </div>
     </div>
+
+    <!-- Diablo-Style Floating Hover Comparison Tooltip (Clamped to Screen) -->
+    <div id="itemCompareTooltip" class="fixed pointer-events-none hidden z-[120] transition-opacity duration-150 select-none"></div>
   </div>
 
   <!-- Skills Modal -->
@@ -775,13 +781,13 @@
             </svg>
           </div>
           <div>
-            <h2 class="font-display font-bold text-base text-white">SKILLS & DISCIPLINES</h2>
-            <p class="text-[11px] text-slate-400 font-mono">Invest Skill Points earned by conquering anomaly waves</p>
+            <h2 class="font-display font-bold text-base text-white">RPG PROGRESSION & DISCIPLINES</h2>
+            <p class="text-[11px] text-slate-400 font-mono">Fallout S.P.E.C.I.A.L. Perks • D4 Skill Runes • Race & Class Synergies</p>
           </div>
         </div>
         <div class="flex items-center gap-3">
           <div class="px-3 py-1 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 font-mono text-xs font-bold">
-            POINTS: <span id="modalSkillPointsAvail">1</span>
+            SKILL PTS: <span id="modalSkillPointsAvail">1</span> • PERK PTS: <span id="modalPerkPointsAvail">1</span>
           </div>
           <button onclick="toggleModal('skillsModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
             ✕
@@ -789,8 +795,72 @@
         </div>
       </div>
 
-      <div class="p-6 overflow-y-auto space-y-4" id="d3SkillTreeContainer">
-        <!-- Container filled dynamically by updateSkillsUI() with Diablo 3 category cards & runes -->
+      <!-- 3-Way RPG Progression Tabs -->
+      <div class="flex items-center border-b border-slate-800 bg-slate-950/60 px-6 pt-2 gap-2 flex-wrap">
+        <button id="btnTabActiveSkills" onclick="switchSkillsTab('activeSkills')" class="px-4 py-2 border-b-2 border-cyan-400 text-cyan-300 font-mono text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>⚡</span><span>D4 ACTIVE SKILLS & RUNES</span>
+        </button>
+        <button id="btnTabSpecialPerks" onclick="switchSkillsTab('specialPerks')" class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-mono text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>⚛️</span><span>FALLOUT S.P.E.C.I.A.L. PERK CHART</span>
+        </button>
+        <button id="btnTabRaceClass" onclick="switchSkillsTab('raceClass')" class="px-4 py-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-mono text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>🧬</span><span>RACE & CLASS SPECS</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: D4 Active Skills -->
+      <div id="tabActiveSkills" class="p-6 overflow-y-auto space-y-4">
+        <div class="space-y-4" id="d3SkillTreeContainer">
+          <!-- Container filled dynamically by updateSkillsUI() with Diablo 3 category cards & runes -->
+        </div>
+      </div>
+
+      <!-- Tab 2: Fallout 4 S.P.E.C.I.A.L. Perk Chart -->
+      <div id="tabSpecialPerks" class="p-6 overflow-y-auto space-y-4 hidden">
+        <div class="flex items-center justify-between bg-slate-900/80 p-3 rounded-2xl border border-amber-500/40 font-mono flex-wrap gap-2">
+          <div>
+            <div class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+              <span>⚛️</span><span>FALLOUT 4 S.P.E.C.I.A.L. PERK MATRIX</span>
+            </div>
+            <div class="text-[10px] text-slate-400">Races grant native affinities (+2/+1). Invest Perk Points to unlock tiered passive powers.</div>
+          </div>
+          <div class="px-3 py-1 rounded-xl bg-amber-950/60 border border-amber-500/50 text-amber-300 text-xs font-bold">
+            AVAILABLE PERK PTS: <span id="specialPerkPtsDisplay">1</span>
+          </div>
+        </div>
+        <div id="specialPerkChartContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-2.5">
+          <!-- Dynamically populated by renderSpecialPerksUI() -->
+        </div>
+      </div>
+
+      <!-- Tab 3: Race & Class Specs & Synergies -->
+      <div id="tabRaceClass" class="p-6 overflow-y-auto space-y-5 hidden">
+        <!-- Live Synergy Header Card -->
+        <div id="synergyHeroHeaderCard" class="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 via-slate-900 to-cyan-950/60 border border-purple-500/50 font-mono">
+          <!-- Filled by renderRaceClassUI() -->
+        </div>
+
+        <!-- 6 Playable Races -->
+        <div>
+          <div class="text-xs font-mono uppercase text-emerald-400 font-bold mb-2 flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><span>🧬</span><span>SELECT PLAYABLE LINEAGE / RACE</span></span>
+            <span class="text-[10px] text-slate-400">Grants S.P.E.C.I.A.L. affinities & passive survival traits</span>
+          </div>
+          <div id="raceSelectionGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <!-- Filled dynamically -->
+          </div>
+        </div>
+
+        <!-- 5 Playable Classes -->
+        <div>
+          <div class="text-xs font-mono uppercase text-cyan-400 font-bold mb-2 flex items-center justify-between">
+            <span class="flex items-center gap-1.5"><span>⚔️</span><span>SELECT COMBAT DISCIPLINE / CLASS</span></span>
+            <span class="text-[10px] text-slate-400">Determines weapon mastery, primary role & combat skills</span>
+          </div>
+          <div id="classSelectionGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <!-- Filled dynamically -->
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1198,64 +1268,7 @@
       }
     };
 
-    // === 4 SELECTABLE CYBERPUNK HERO CLASSES ===
-    const HERO_CLASSES = {
-      stalker: {
-        id: 'stalker',
-        name: 'Rain Blade Stalker',
-        role: 'Agile Katana Specialist',
-        icon: '🥷',
-        desc: 'Master of the atmospheric katana. Excels at high-speed bullet ricochet and swift blade dashes.',
-        hpBonus: 0,
-        armorBonus: 0,
-        speedBonus: 0.10,
-        attackBonus: 4,
-        critBonus: 0.05,
-        ricochetBonus: 0.35,
-        passive: '+35% Blade Ricochet Speed & Extended Slash Arc'
-      },
-      enforcer: {
-        id: 'enforcer',
-        name: 'Burnside Heavy Enforcer',
-        role: 'Frontline Kinetic Tank',
-        icon: '🛡️',
-        desc: 'Urban brawler clad in heavy tactical plate. Wields kinetic riot shields with high damage absorption.',
-        hpBonus: 80,
-        armorBonus: 22,
-        speedBonus: -0.05,
-        attackBonus: 0,
-        critBonus: 0.0,
-        blockBonus: 0.25,
-        passive: '+80 Base HP, +22 Armor, +25% Shield Block Chance'
-      },
-      technomancer: {
-        id: 'technomancer',
-        name: 'Leyline Technomancer',
-        role: 'Coffee Plasma Caster',
-        icon: '⚡',
-        desc: 'Harnesses Portland anomaly leyline channels to unleash high-energy espresso shockwaves.',
-        hpBonus: -20,
-        armorBonus: -4,
-        speedBonus: 0.05,
-        attackBonus: 10,
-        energyBonus: 40,
-        critBonus: 0.10,
-        passive: '+40 Coffee Energy, +10 Attack, Slashes fire Plasma Bolts'
-      },
-      rogue: {
-        id: 'rogue',
-        name: 'Rose City Shadow Rogue',
-        role: 'Lethal Dual-Wield Assassin',
-        icon: '🗡️',
-        desc: 'Operates from the shadows with twin blades, landing devastating critical strikes and thorn bleeds.',
-        hpBonus: 10,
-        armorBonus: 4,
-        speedBonus: 0.20,
-        attackBonus: 6,
-        critBonus: 0.18,
-        passive: '+18% Crit Chance, +20% Move Speed, Slashes inflict Briar Bleed'
-      }
-    };
+
 
     const PORTLAND_DISTRICTS = [
       {
@@ -1315,6 +1328,452 @@
       }
     ];
 
+    
+    // === 6 PLAYABLE LINEAGES / RACES WITH S.P.E.C.I.A.L. AFFINITIES ===
+    const HERO_RACES = {
+      synth: {
+        id: 'synth',
+        name: 'Synthetic Cyber-Cyborg',
+        icon: '🤖',
+        tagline: 'Titanium Chassis & Overclocked Processing',
+        desc: 'Advanced synthetic android forged in the underground tech-districts of Portland. Operates on precision circuitry with high-voltage shielding.',
+        affinities: { I: 2, A: 1 }, // +2 Intelligence, +1 Agility
+        passiveName: 'EMP Pulse Matrix',
+        passiveDesc: 'Dashing discharges a localized electromagnetic burst. Energy shields absorb 15% more damage.',
+        skinTone: '#94a3b8',
+        eyeColor: '#00f5ff',
+        auraColor: '#06b6d4',
+        statBonus: { armor: 10, energy: 30, speedBonus: 0.05 }
+      },
+      mutant: {
+        id: 'mutant',
+        name: 'Willamette River Mutant / Ghoul',
+        icon: '☣️',
+        tagline: 'Toxic Sludge Resilience & Feral Fury',
+        desc: 'Hardened survivor altered by industrial runoff and radioactive rain. Immune to toxins and regenerates flesh when soaked in water.',
+        affinities: { E: 2, S: 1 }, // +2 Endurance, +1 Strength
+        passiveName: 'Feral Radiation Rush',
+        passiveDesc: 'Immune to acid/toxic puddles. When health falls below 35%, gain +30% attack speed and +4 HP/s regen.',
+        skinTone: '#65a30d',
+        eyeColor: '#a3e635',
+        auraColor: '#22c55e',
+        statBonus: { hp: 70, regenRate: 2.5, thornsDamage: 15 }
+      },
+      cryptid: {
+        id: 'cryptid',
+        name: 'Cascadian Cryptid / Woodsman',
+        icon: '🌲',
+        tagline: 'Primeval Sasquatch Blood & Barkskin Vigor',
+        desc: 'Ancient inhabitant of the dense Forest Park canopy. Wields gargantuan physical prowess and natural timber plating.',
+        affinities: { S: 2, E: 1 }, // +2 Strength, +1 Endurance
+        passiveName: 'Colossal Reach & Barkskin',
+        passiveDesc: 'Melee slash arc is 25% larger. Natural barkskin deflects 15% of incoming physical damage.',
+        skinTone: '#78350f',
+        eyeColor: '#f59e0b',
+        auraColor: '#10b981',
+        statBonus: { hp: 100, attack: 10, armor: 12 }
+      },
+      human: {
+        id: 'human',
+        name: 'Downtown Neon Human / Street Punk',
+        icon: '🏙️',
+        tagline: 'Street Grit, Lucky Scrounging & Adaptability',
+        desc: 'Resourceful Portland street survivor driven by adrenaline and sheer luck. Finds extra loot in every anomaly cache.',
+        affinities: { L: 2, C: 1 }, // +2 Luck, +1 Caffeine
+        passiveName: 'Lucky Scrounger & Grit',
+        passiveDesc: '+35% Coffee Bean loot drop yield. Gains +1 bonus Perk Point every 4 character levels.',
+        skinTone: '#fed7aa',
+        eyeColor: '#38bdf8',
+        auraColor: '#f43f5e',
+        statBonus: { critBonus: 0.08, beanBonus: 0.35, speedBonus: 0.05 }
+      },
+      dragonborn: {
+        id: 'dragonborn',
+        name: 'Old Town Wyrm-Blood / Dragonborn',
+        icon: '🐉',
+        tagline: 'Celestial Flame Breath & Ancient Lineage',
+        desc: 'Heir to the mystical dragon leylines beneath Portland Chinatown. Channeling blazing draconic breath into every swing.',
+        affinities: { S: 2, P: 1 }, // +2 Strength, +1 Perception
+        passiveName: 'Draconic Combustion',
+        passiveDesc: 'Critical strikes ignite targets with dragon flames for 3s. Equipped gear set bonuses are 20% more potent.',
+        skinTone: '#991b1b',
+        eyeColor: '#fbbf24',
+        auraColor: '#f97316',
+        statBonus: { attack: 14, critBonus: 0.06, hp: 45 }
+      },
+      barista: {
+        id: 'barista',
+        name: 'Stumptown Bio-Barista',
+        icon: '☕',
+        tagline: 'Hyper-Caffeinated Leyline Synthesist',
+        desc: 'Master coffee alchemist infused with roasted dark matter. Operates at permanent hyper-velocity with steam-fueled bursts.',
+        affinities: { C: 2, I: 1 }, // +2 Caffeine, +1 Intelligence
+        passiveName: 'Nitro Espresso Overdrive',
+        passiveDesc: 'Movement speed increases as combo counter climbs. Dash recharge delay reduced by 30%.',
+        skinTone: '#d97706',
+        eyeColor: '#fef08a',
+        auraColor: '#eab308',
+        statBonus: { speedBonus: 0.15, energy: 40, attack: 8 }
+      }
+    };
+
+    // === 5 EXPANDED PLAYABLE COMBAT DISCIPLINES / CLASSES ===
+    const HERO_CLASSES = {
+      stalker: {
+        id: 'stalker',
+        name: 'Rain Blade Stalker',
+        role: 'Agile Katana Specialist',
+        icon: '🥷',
+        desc: 'Master of the atmospheric katana. Excels at high-speed bullet ricochet, lethal dash executions and swift bleed arcs.',
+        hpBonus: 0,
+        armorBonus: 4,
+        speedBonus: 0.10,
+        attackBonus: 8,
+        critBonus: 0.08,
+        ricochetBonus: 0.35,
+        passive: '+35% Blade Ricochet Speed & Extended Slash Arc'
+      },
+      enforcer: {
+        id: 'enforcer',
+        name: 'Burnside Heavy Enforcer',
+        role: 'Frontline Kinetic Tank',
+        icon: '🛡️',
+        desc: 'Urban brawler clad in heavy tactical plate. Wields kinetic riot shields with high damage absorption and Tesla shockwaves.',
+        hpBonus: 95,
+        armorBonus: 26,
+        speedBonus: -0.04,
+        attackBonus: 2,
+        critBonus: 0.0,
+        blockBonus: 0.28,
+        passive: '+95 Base HP, +26 Armor, +28% Shield Block Chance'
+      },
+      technomancer: {
+        id: 'technomancer',
+        name: 'Leyline Technomancer',
+        role: 'Coffee Plasma Caster',
+        icon: '⚡',
+        desc: 'Harnesses Portland anomaly leyline channels to unleash high-energy espresso shockwaves and chaining lightning arcs.',
+        hpBonus: -15,
+        armorBonus: 0,
+        speedBonus: 0.06,
+        attackBonus: 14,
+        energyBonus: 50,
+        critBonus: 0.10,
+        passive: '+50 Coffee Energy, +14 Attack, Slashes fire Plasma Bolts'
+      },
+      rogue: {
+        id: 'rogue',
+        name: 'Rose City Shadow Rogue',
+        role: 'Lethal Dual-Wield Assassin',
+        icon: '🗡️',
+        desc: 'Operates from the shadows with twin blades, landing devastating critical strikes, smoke phantasm dashes and thorn bleeds.',
+        hpBonus: -10,
+        armorBonus: 2,
+        speedBonus: 0.14,
+        attackBonus: 10,
+        critBonus: 0.15,
+        passive: '+15% Crit Chance, +14% Move Speed, Backstabs deal 2x DMG'
+      },
+      druid: {
+        id: 'druid',
+        name: 'Cascadian Forest Shaman',
+        role: 'Primeval Flora Manipulator',
+        icon: '🌿',
+        desc: 'Channels primal Pacific Northwest botanical forces, summoning razor briar cyclones and spore mists that poison foes.',
+        hpBonus: 50,
+        armorBonus: 12,
+        speedBonus: 0.04,
+        attackBonus: 8,
+        energyBonus: 30,
+        critBonus: 0.04,
+        passive: '+50 HP, +12 Armor, Briar Cyclone damage increased by 40%'
+      }
+    };
+
+    // === UNIQUE RACE + CLASS HYBRID SYNERGIES ===
+    const RACE_CLASS_SYNERGIES = {
+      synth_stalker: {
+        title: 'Cyber-Blade Phantom',
+        badge: '⚡ LASER SLASH',
+        desc: 'Katana slashes unleash focused laser cutter beams that pierce through multiple enemies; +15% Attack Speed.',
+        statBonus: { attack: 10, speedBonus: 0.05, critBonus: 0.05 }
+      },
+      synth_enforcer: {
+        title: 'Overclocked Titan',
+        badge: '🛡️ EMP SHIELD',
+        desc: 'Taking heavy damage discharges an EMP shockwave that stuns surrounding foes; shield absorption +40%.',
+        statBonus: { armor: 20, hp: 50, blockBonus: 0.10 }
+      },
+      synth_technomancer: {
+        title: 'Quantum Gridlock',
+        badge: '🔋 INFINITE CELL',
+        desc: 'Energy capacity increased by +40; skill cooldowns tick 20% faster when moving.',
+        statBonus: { energy: 40, attack: 12 }
+      },
+      synth_rogue: {
+        title: 'Nanoweave Infiltrator',
+        badge: '👤 STEALTH PHASE',
+        desc: 'Dashing activates holographic cloaking for 1.2s; exiting cloak guarantees a critical strike.',
+        statBonus: { critBonus: 0.12, speedBonus: 0.08 }
+      },
+      synth_druid: {
+        title: 'Bionic Grove Keeper',
+        badge: '🤖 BRIAR DRONES',
+        desc: 'Briar cyclones spawn autonomous mechanical thorn drones that track down distant enemies.',
+        statBonus: { hp: 40, attack: 8, armor: 10 }
+      },
+
+      mutant_stalker: {
+        title: 'Sludge Viper',
+        badge: '🧪 CAUSTIC EDGE',
+        desc: 'Blade slashes afflict enemies with toxic melt, dealing 40% additional damage over 3 seconds.',
+        statBonus: { attack: 12, thornsDamage: 20 }
+      },
+      mutant_enforcer: {
+        title: 'Juggernaut Abomination',
+        badge: '🥩 BIOMASS HEAL',
+        desc: 'Slain enemies burst into bio-sludge healing the mutant for 5% max HP; knockback immunity.',
+        statBonus: { hp: 90, armor: 18 }
+      },
+      mutant_technomancer: {
+        title: 'Radioactive Chemist',
+        badge: '☢️ HAZARD BURST',
+        desc: 'Plasma attacks explode into green radioactive mist clouds that linger and choke enemies.',
+        statBonus: { attack: 15, energy: 30 }
+      },
+      mutant_rogue: {
+        title: 'Caustic Guerrilla',
+        badge: '☣️ TOXIC DASH',
+        desc: 'Dashes leave glowing radioactive puddles that dissolve enemy armor by 30%.',
+        statBonus: { speedBonus: 0.10, critBonus: 0.08 }
+      },
+      mutant_druid: {
+        title: 'Feral Bog Shaman',
+        badge: '🌧️ RAIN REGEN',
+        desc: 'Health regeneration triples to +8 HP/s during perpetual Portland rain; +50 Thorns.',
+        statBonus: { regenRate: 4, thornsDamage: 30, hp: 60 }
+      },
+
+      cryptid_stalker: {
+        title: 'Wild Hunt Apex',
+        badge: '🐾 360° CLEAVE',
+        desc: 'Blade attacks cleave in a full 360-degree whirlwind; slaying an enemy grants a brief speed surge.',
+        statBonus: { attack: 14, hp: 40 }
+      },
+      cryptid_enforcer: {
+        title: 'Primeval Mountain Fortress',
+        badge: '🗿 TITAN ARMOR',
+        desc: '+35 Flat Armor; incoming stun, freeze and knockback effects are reduced by 80%.',
+        statBonus: { armor: 35, hp: 80, blockBonus: 0.15 }
+      },
+      cryptid_technomancer: {
+        title: 'Seismic Leyline Shaman',
+        badge: '🌋 FAULT PULSE',
+        desc: 'Espresso shockwaves shatter the pavement, releasing volcanic fissures beneath enemies.',
+        statBonus: { attack: 16, hp: 50 }
+      },
+      cryptid_rogue: {
+        title: 'Shadow Apex Predator',
+        badge: '🩸 GORE POUNCE',
+        desc: 'Dashing into an enemy triggers a vicious pounce deal 250% damage and causing heavy stagger.',
+        statBonus: { attack: 12, critBonus: 0.10 }
+      },
+      cryptid_druid: {
+        title: 'Ancient Timber Colossus',
+        badge: '🌲 GIANT TEMPEST',
+        desc: 'Briar Cyclone radius is doubled; gain permanent +20 Flat Barkskin Armor.',
+        statBonus: { hp: 110, armor: 20 }
+      },
+
+      human_stalker: {
+        title: 'Street Blade Legend',
+        badge: '🎯 PRECISION FLOW',
+        desc: 'Combo strings never decay during active combat; critical hits refund 10 Energy.',
+        statBonus: { critBonus: 0.10, speedBonus: 0.06 }
+      },
+      human_enforcer: {
+        title: 'Riot Pacifier',
+        badge: '🛡️ 100% REFLECT',
+        desc: 'Shield blocks reflect 100% of projectile damage directly back at the attacker.',
+        statBonus: { armor: 22, blockBonus: 0.15, hp: 50 }
+      },
+      human_technomancer: {
+        title: 'Perpetual Overdrive',
+        badge: '☕ BEAN FUELED',
+        desc: 'Collecting coffee beans grants a stacking +2% attack power & speed buff (up to 15 stacks).',
+        statBonus: { attack: 12, energy: 35, speedBonus: 0.05 }
+      },
+      human_rogue: {
+        title: 'Burnside Anarchist',
+        badge: '💣 PIPE BOMBS',
+        desc: 'Dashing drops homemade pipe bombs that detonate for massive fire damage; +40% Bean Loot.',
+        statBonus: { critBonus: 0.12, speedBonus: 0.10, beanBonus: 0.40 }
+      },
+      human_druid: {
+        title: 'Rose City Guerrilla Botanist',
+        badge: '🌹 ROSE BLOOM',
+        desc: 'Killing enemies causes fragrant Portland rosebeds to bloom, granting continuous healing.',
+        statBonus: { regenRate: 3, hp: 50, attack: 10 }
+      },
+
+      dragonborn_stalker: {
+        title: 'Wyrm-Fang Kenshi',
+        badge: '🔥 DRAGON CRESCENT',
+        desc: 'Katana slashes launch blazing crescent dragon flames that incinerate enemy armor.',
+        statBonus: { attack: 18, critBonus: 0.08 }
+      },
+      dragonborn_enforcer: {
+        title: 'Dragon-Scale Bastion',
+        badge: '🐲 INFERNAL ROAR',
+        desc: 'Blocking an attack erupts in a 360-degree fiery dragon roar knocking back all nearby foes.',
+        statBonus: { armor: 25, hp: 60, blockBonus: 0.12 }
+      },
+      dragonborn_technomancer: {
+        title: 'Draconic Pyromancer',
+        badge: '⚡ BLUE FLAME',
+        desc: 'Plasma spells ignite enemies with eternal blue dragon fire that spreads to adjacent foes.',
+        statBonus: { attack: 20, energy: 40 }
+      },
+      dragonborn_rogue: {
+        title: 'Infernal Ash Stalker',
+        badge: '💥 COMBUSTION',
+        desc: 'Striking an enemy from behind triggers a thermal combustion dealing 300% weapon damage.',
+        statBonus: { critBonus: 0.15, attack: 14 }
+      },
+      dragonborn_druid: {
+        title: 'Elder Wyrm Shaman',
+        badge: '🐉 DRAKE SPIRIT',
+        desc: 'Briar Cyclone summons swirling celestial flame spirits that incinerate projectiles.',
+        statBonus: { attack: 14, hp: 60, armor: 15 }
+      },
+
+      barista_stalker: {
+        title: 'Espresso Blademaster',
+        badge: '⚡ HYPER CUTS',
+        desc: 'Attack speed scales dynamically with current stored coffee beans (+1% per 100 beans up to +25%).',
+        statBonus: { speedBonus: 0.12, attack: 10 }
+      },
+      barista_enforcer: {
+        title: 'Steam Boiler Tank',
+        badge: '💨 STEAM JETS',
+        desc: 'Superheated steam vents automatically damage and blind all enemies in close melee range.',
+        statBonus: { armor: 20, hp: 70, thornsDamage: 25 }
+      },
+      barista_technomancer: {
+        title: 'Grand Barista Alchemist',
+        badge: '☕ TRIPLE SHOT',
+        desc: 'Plasma abilities fire 3 diverging espresso bolts instead of 1; skill cooldowns halved.',
+        statBonus: { attack: 18, energy: 60 }
+      },
+      barista_rogue: {
+        title: 'Nitro Sprinter',
+        badge: '🚀 NITRO RUSH',
+        desc: 'Movement speed increased by 25%; dashing leaves blazing caffeine trails that speed up allies.',
+        statBonus: { speedBonus: 0.20, critBonus: 0.10 }
+      },
+      barista_druid: {
+        title: 'Cold-Brew Cryo Druid',
+        badge: '❄️ FLASH FREEZE',
+        desc: 'Skills blast enemies with liquid nitrogen, freezing them solid in ice blocks for 2.5 seconds.',
+        statBonus: { hp: 50, attack: 12, armor: 10 }
+      }
+    };
+
+    // === FALLOUT 4 S.P.E.C.I.A.L. PERK MATRIX (7 ATTRIBUTES x 4 PERKS) ===
+    const FALLOUT_SPECIAL_PERKS = {
+      S: {
+        letter: 'S',
+        title: 'STRENGTH',
+        color: '#f97316',
+        icon: '💪',
+        desc: 'Physical blade brutality, weapon damage, stagger power, and armor breaking.',
+        perks: [
+          { id: 's1', name: 'Iron Grip', desc: '+8 Base Attack, +10% Stagger power against brutes.', maxRank: 3, reqSpecial: 1, bonusPerRank: { attack: 8 } },
+          { id: 's2', name: 'Heavy Cleave', desc: '+25% Slash Hitbox Width, +15% Physical Slash Damage.', maxRank: 3, reqSpecial: 3, bonusPerRank: { attack: 12 } },
+          { id: 's3', name: "Titan's Might", desc: 'Attacks reduce target armor rating by 30% for 4 seconds.', maxRank: 3, reqSpecial: 5, bonusPerRank: { attack: 16 } },
+          { id: 's4', name: 'Earthshaker', desc: 'Every 5th slash triggers a seismic shockwave knocking down enemies.', maxRank: 1, reqSpecial: 7, bonusPerRank: { attack: 25 } }
+        ]
+      },
+      P: {
+        letter: 'P',
+        title: 'PERCEPTION',
+        color: '#38bdf8',
+        icon: '👁️',
+        desc: 'Target tracking, weakpoint critical strikes, projectile deflection and radar awareness.',
+        perks: [
+          { id: 'p1', name: 'Keen Senses', desc: '+6% Critical Hit Chance, +20% Critical Damage.', maxRank: 3, reqSpecial: 1, bonusPerRank: { critBonus: 0.06 } },
+          { id: 'p2', name: 'Deflection Master', desc: '+25% Projectile Deflection Arc & Deflected projectile speed.', maxRank: 3, reqSpecial: 3, bonusPerRank: { ricochetBonus: 0.25 } },
+          { id: 'p3', name: 'V.A.T.S. Radar', desc: 'Highlights elite enemy weakpoints, dealing 1.5x damage to them.', maxRank: 3, reqSpecial: 5, bonusPerRank: { critBonus: 0.10 } },
+          { id: 'p4', name: 'Sniper Focus', desc: 'Strikes at the tip of your blade deal double critical damage.', maxRank: 1, reqSpecial: 7, bonusPerRank: { critBonus: 0.15 } }
+        ]
+      },
+      E: {
+        letter: 'E',
+        title: 'ENDURANCE',
+        color: '#10b981',
+        icon: '🛡️',
+        desc: 'Biological resistance, maximum health pool, barkskin plating and health regeneration.',
+        perks: [
+          { id: 'e1', name: 'Lead Belly & Toughness', desc: '+50 Max Health, +12 Armor Rating.', maxRank: 3, reqSpecial: 1, bonusPerRank: { hp: 50, armor: 12 } },
+          { id: 'e2', name: 'Rain Hydro-Regen', desc: '+3.5 HP/second natural health recovery in Portland rain.', maxRank: 3, reqSpecial: 3, bonusPerRank: { regenRate: 3.5 } },
+          { id: 'e3', name: 'Toxic Sludge Immunity', desc: 'Immune to ground hazards; hazard pools heal for 2% HP/s.', maxRank: 3, reqSpecial: 5, bonusPerRank: { armor: 15, hp: 40 } },
+          { id: 'e4', name: 'Ghoulish Resilience', desc: 'When below 30% HP, gain 50% damage reduction for 6 seconds.', maxRank: 1, reqSpecial: 7, bonusPerRank: { hp: 100, armor: 25 } }
+        ]
+      },
+      C: {
+        letter: 'C',
+        title: 'CAFFEINE',
+        color: '#eab308',
+        icon: '☕',
+        desc: 'Espresso resource acceleration, coffee bean wealth, vendor discounts and combo momentum.',
+        perks: [
+          { id: 'c1', name: 'Barista Discount', desc: 'Reforge and shop bean costs reduced by 25%.', maxRank: 3, reqSpecial: 1, bonusPerRank: { beanDiscount: 0.25 } },
+          { id: 'c2', name: 'Bean Tycoon', desc: '+35% more Coffee Beans found from slayed enemies.', maxRank: 3, reqSpecial: 3, bonusPerRank: { beanBonus: 0.35 } },
+          { id: 'c3', name: 'Hype Conductor', desc: 'Combo hit strings boost attack power by +2% per combo step.', maxRank: 3, reqSpecial: 5, bonusPerRank: { attack: 14 } },
+          { id: 'c4', name: 'Adrenaline Surge', desc: 'Activating any skill grants +25% Move & Attack speed for 4s.', maxRank: 1, reqSpecial: 7, bonusPerRank: { speedBonus: 0.15, attack: 20 } }
+        ]
+      },
+      I: {
+        letter: 'I',
+        title: 'INTELLIGENCE',
+        color: '#06b6d4',
+        icon: '🧠',
+        desc: 'Cybernetic overclocking, maximum energy battery, gemstone synergy and gadget efficiency.',
+        perks: [
+          { id: 'i1', name: 'Cyber-Overclock', desc: 'All active skill cooldowns reduced by 15%.', maxRank: 3, reqSpecial: 1, bonusPerRank: { cooldownReduction: 0.15 } },
+          { id: 'i2', name: 'Gemstone Resonance', desc: 'All socketed gemstone stat bonuses increased by 50%.', maxRank: 3, reqSpecial: 3, bonusPerRank: { gemBonusMult: 0.50 } },
+          { id: 'i3', name: 'Gadgeteer Master', desc: 'Trinket active cooldown halved; +35 Maximum Coffee Energy.', maxRank: 3, reqSpecial: 5, bonusPerRank: { energy: 35 } },
+          { id: 'i4', name: 'EMP Overload', desc: 'Taking damage has a 20% chance to discharge a full EMP blast.', maxRank: 1, reqSpecial: 7, bonusPerRank: { energy: 50, attack: 18 } }
+        ]
+      },
+      A: {
+        letter: 'A',
+        title: 'AGILITY',
+        color: '#ec4899',
+        icon: '⚡',
+        desc: 'Movement speed, dash invulnerability window, attack cadence and swift assassinations.',
+        perks: [
+          { id: 'a1', name: 'Action Hero', desc: '+12% Movement Speed, Dash charges 25% faster.', maxRank: 3, reqSpecial: 1, bonusPerRank: { speedBonus: 0.12 } },
+          { id: 'a2', name: 'Ghost Step', desc: 'Dash invulnerability window extended by 0.35 seconds.', maxRank: 3, reqSpecial: 3, bonusPerRank: { dodgeIframe: 0.35 } },
+          { id: 'a3', name: 'Blitz Strike', desc: 'Dashing through enemies strikes them for 180% weapon damage.', maxRank: 3, reqSpecial: 5, bonusPerRank: { attack: 15 } },
+          { id: 'a4', name: 'Flurry Execution', desc: 'Slaying an enemy with a blade slash instantly resets Dash cooldown.', maxRank: 1, reqSpecial: 7, bonusPerRank: { speedBonus: 0.10, critBonus: 0.10 } }
+        ]
+      },
+      L: {
+        letter: 'L',
+        title: 'LUCK',
+        color: '#a855f7',
+        icon: '🍀',
+        desc: 'Lucky hit procs, rare & legendary gear drop rate, cascading crits and miracle wards.',
+        perks: [
+          { id: 'l1', name: 'Scrounger & Fortune', desc: '+35% Magic Find for Legendary & Epic gear loot drops.', maxRank: 3, reqSpecial: 1, bonusPerRank: { magicFind: 0.35 } },
+          { id: 'l2', name: 'Lucky Ricochet', desc: 'Deflected enemy projectiles split into 3 homing shards.', maxRank: 3, reqSpecial: 3, bonusPerRank: { ricochetBonus: 0.35 } },
+          { id: 'l3', name: 'Critical Cascade', desc: 'Critical hits have a 35% chance to unleash an instant bonus slash.', maxRank: 3, reqSpecial: 5, bonusPerRank: { critBonus: 0.12 } },
+          { id: 'l4', name: 'Mysterious Stranger', desc: 'Lucky Hit: A neon phantom sniper shoots an enemy for 10x damage!', maxRank: 1, reqSpecial: 7, bonusPerRank: { critBonus: 0.15, attack: 20 } }
+        ]
+      }
+    };
+
     const gameState = {
       isPaused: false,
       settings: {
@@ -1340,6 +1799,11 @@
         skillPoints: 1,
         name: 'Rain-Walker',
         classTitle: 'Portland Stalker',
+        race: 'synth',
+        heroClass: 'stalker',
+        perkPoints: 2,
+        perks: { s1: 1, p1: 1 },
+        specialStats: { S: 1, P: 1, E: 1, C: 1, I: 3, A: 2, L: 1 },
         baseAttack: 18,
         armor: 8,
         isAttacking: false,
@@ -1659,6 +2123,11 @@
       audioEnabled: false,
       lastTimestamp: performance.now(),
     };
+
+    function getInventoryCapacity() {
+      const lvl = Math.max(1, (gameState && gameState.player && gameState.player.level) ? gameState.player.level : 1);
+      return 24 + (lvl - 1);
+    }
 
     let audioInitialized = false;
     let inMemorySaveState = null;
@@ -2855,6 +3324,11 @@
         p.xp -= p.xpNext;
         p.level++;
         p.skillPoints++;
+        p.perkPoints = (p.perkPoints || 0) + 1; // +1 Fallout S.P.E.C.I.A.L. Perk Point per level!
+        if (p.race === 'human' && p.level % 4 === 0) {
+          p.perkPoints++; // Human Adaptability bonus perk point!
+          showToast('🍀 Human Adaptability: +1 BONUS S.P.E.C.I.A.L. Perk Point!', 'success');
+        }
         p.xpNext = Math.round(p.xpNext * 1.45);
         p.maxHp += 25;
         p.hp = p.maxHp;
@@ -2862,9 +3336,12 @@
         p.energy = p.maxEnergy;
         p.baseAttack += 4;
 
+        const newStashCap = getInventoryCapacity();
         playSound('level');
         triggerLevelUpCelebration(p.level);
-        showToast(`LEVEL UP! You are now Level ${p.level}`, "success");
+        showToast(`LEVEL UP! You are now Level ${p.level} (+1 Stash Slot: ${newStashCap} Max, +1 Perk Point)`, "success");
+        try { renderInventoryBag(); } catch(e) {}
+        try { updateSkillsUI(); } catch(e) {}
       }
       updateHUD();
     }
@@ -4046,7 +4523,7 @@
           activeAbility: randomItem.activeAbility || null
         };
 
-        if (gameState.inventory.length < 24) {
+        if (gameState.inventory.length < getInventoryCapacity()) {
           gameState.inventory.push(newItem);
           showToast(`Found Loot: ${newItem.name} [${newItem.tier}]!`, 'success');
           document.getElementById('hudInventoryBadge').classList.remove('hidden');
@@ -4105,7 +4582,7 @@
           value: randomItem.value || 75
         };
 
-        if (gameState.inventory.length < 16) {
+        if (gameState.inventory.length < getInventoryCapacity()) {
           gameState.inventory.push(newItem);
           showToast(`Found Loot: ${newItem.name} [${newItem.tier}]!`, "success");
           document.getElementById('hudInventoryBadge').classList.remove('hidden');
@@ -5272,54 +5749,92 @@
     function drawPlayer() {
       const p = gameState.player;
       const eq = gameState.equipped;
+      const rDef = HERO_RACES[p.race] || HERO_RACES.synth;
+      const cDef = HERO_CLASSES[p.heroClass] || HERO_CLASSES.stalker;
 
       ctx.save();
       ctx.translate(p.x, p.y);
 
       // 1. 8-Bit Ground Shadow
       ctx.beginPath();
-      ctx.ellipse(0, p.radius * 0.8, p.radius * 0.9, p.radius * 0.35, 0, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.ellipse(0, p.radius * 0.8, p.radius * 0.95, p.radius * 0.38, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
       ctx.fill();
 
-      // 2. Active Diablo Set Auras (2-Piece, 4-Piece, 6-Piece)
+      // 2. Active Diablo Set Auras (2-Piece, 4-Piece, 6-Piece Multi-Tier Radiant FX)
       const activeSets = p.activeSets && p.activeSets.length > 0 ? p.activeSets :
                          (p.dominantSet && p.dominantSet.count >= 2 ? [p.dominantSet] : []);
       const auraRot = Date.now() * 0.002;
 
-      // (2-Piece) Radiant Ground Rune Rings for each active set (supports hybrid 2+2 setups)
+      // (Tier 1: 2-Piece) Radiant Counter-Rotating Runic Circles & Ground Elemental Mist
       activeSets.forEach((set, sIdx) => {
         const auraColor = set.color || '#22c55e';
         ctx.save();
+        const mistGrad = ctx.createRadialGradient(0, 0, p.radius * 0.5, 0, 0, p.radius + 28 + sIdx * 6);
+        mistGrad.addColorStop(0, auraColor + '35');
+        mistGrad.addColorStop(0.7, auraColor + '15');
+        mistGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = mistGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius + 28 + sIdx * 6, 0, Math.PI * 2);
+        ctx.fill();
+
         ctx.rotate(auraRot * (sIdx % 2 === 0 ? 1 : -1));
         ctx.beginPath();
-        ctx.arc(0, 0, p.radius + 12 + sIdx * 5, 0, Math.PI * 2);
+        ctx.arc(0, 0, p.radius + 15 + sIdx * 6, 0, Math.PI * 2);
         ctx.strokeStyle = auraColor;
-        ctx.lineWidth = 2.2;
-        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([8, 8]);
+        ctx.stroke();
+
+        ctx.fillStyle = auraColor;
+        for (let g = 0; g < 8; g++) {
+          const gAng = (Math.PI / 4) * g;
+          const gx = Math.cos(gAng) * (p.radius + 15 + sIdx * 6);
+          const gy = Math.sin(gAng) * (p.radius + 15 + sIdx * 6);
+          ctx.fillRect(gx - 2, gy - 2, 4, 4);
+        }
+
+        ctx.rotate(-auraRot * 2);
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius + 8 + sIdx * 4, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 6]);
         ctx.stroke();
         ctx.restore();
       });
 
-      // (4-Piece) Orbiting Elemental Motes
+      // (Tier 2: 4-Piece) Orbiting Elemental Motes & Vertical Ascending Light Rays
       activeSets.filter(s => s.count >= 4).forEach((set, sIdx) => {
         const auraColor = set.color || '#22c55e';
         ctx.save();
-        ctx.rotate(-auraRot * (1.5 + sIdx * 0.5));
+        for (let ray = -2; ray <= 2; ray++) {
+          const rayX = ray * 7;
+          const rayH = 26 + Math.sin(Date.now() * 0.006 + ray) * 8;
+          ctx.fillStyle = auraColor + '40';
+          ctx.fillRect(rayX - 1.5, -p.radius - rayH, 3, rayH);
+        }
+
+        ctx.rotate(-auraRot * (1.6 + sIdx * 0.5));
         for (let m = 0; m < 4; m++) {
           const mAng = (Math.PI / 2) * m;
-          const dist = 36 + sIdx * 8;
+          const dist = 40 + sIdx * 8;
           const mx = Math.cos(mAng) * dist;
           const my = Math.sin(mAng) * dist;
           ctx.fillStyle = auraColor;
-          ctx.fillRect(mx - 3, my - 3, 6, 6);
+          ctx.beginPath();
+          ctx.arc(mx, my, 4.5, 0, Math.PI * 2);
+          ctx.fill();
           ctx.fillStyle = '#ffffff';
-          ctx.fillRect(mx - 1, my - 1, 2, 2);
+          ctx.beginPath();
+          ctx.arc(mx, my, 2, 0, Math.PI * 2);
+          ctx.fill();
         }
         ctx.restore();
       });
 
-      // (6-Piece) Masterwork Set Transformation
+      // (Tier 3: 6-Piece) Masterwork Set Transformation
       if (p.dominantSet && p.dominantSet.count >= 6) {
         const domId = p.dominantSet.id;
         const domColor = p.dominantSet.color || '#22c55e';
@@ -5327,62 +5842,84 @@
         ctx.strokeStyle = domColor;
         ctx.lineWidth = 3;
         ctx.shadowColor = domColor;
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 16;
 
         if (domId === 'chinatown_dragon') {
-          // Celestial Fiery Dragon Serpent looping around hero
           const dAng = Date.now() * 0.003;
-          for (let seg = 0; seg < 6; seg++) {
-            const segAng = dAng - (seg * 0.35);
-            const sx = Math.cos(segAng) * 44;
-            const sy = Math.sin(segAng) * 44;
-            ctx.fillStyle = seg === 0 ? '#f59e0b' : '#ef4444';
+          for (let seg = 0; seg < 12; seg++) {
+            const segAng = dAng - (seg * 0.28);
+            const rOffset = 46 + Math.sin(seg * 0.6 + Date.now() * 0.005) * 8;
+            const sx = Math.cos(segAng) * rOffset;
+            const sy = Math.sin(segAng) * rOffset;
+            ctx.fillStyle = seg === 0 ? '#fbbf24' : (seg % 2 === 0 ? '#ef4444' : '#f97316');
             ctx.beginPath();
-            ctx.arc(sx, sy, Math.max(3, 7 - seg), 0, Math.PI * 2);
+            ctx.arc(sx, sy, Math.max(3, 8 - (seg * 0.4)), 0, Math.PI * 2);
             ctx.fill();
+            if (seg === 0) {
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(sx - 1.5, sy - 1.5, 3, 3);
+            }
           }
         } else if (domId === 'cascade_cryomancer') {
-          // 3 Orbiting Glacial Crystal Spikes
+          ctx.beginPath();
+          ctx.arc(0, 0, 52, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+          ctx.lineWidth = 4;
+          ctx.stroke();
           const cAng = Date.now() * 0.0025;
-          for (let sp = 0; sp < 3; sp++) {
-            const ang = cAng + (Math.PI * 2 / 3) * sp;
-            const sx = Math.cos(ang) * 46;
-            const sy = Math.sin(ang) * 46;
+          for (let sp = 0; sp < 4; sp++) {
+            const ang = cAng + (Math.PI / 2) * sp;
+            const sx = Math.cos(ang) * 48;
+            const sy = Math.sin(ang) * 48;
             ctx.save();
             ctx.translate(sx, sy);
             ctx.rotate(ang + Math.PI / 2);
             ctx.fillStyle = '#e0f2fe';
             ctx.beginPath();
-            ctx.moveTo(0, -9);
-            ctx.lineTo(4, 9);
-            ctx.lineTo(-4, 9);
+            ctx.moveTo(0, -12);
+            ctx.lineTo(5, 10);
+            ctx.lineTo(-5, 10);
             ctx.closePath();
             ctx.fill();
             ctx.strokeStyle = '#38bdf8';
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 1.8;
             ctx.stroke();
             ctx.restore();
           }
         } else if (domId === 'bridge_city_sentinel') {
-          // Cathedral Thunderstorm Shield Barrier with electric arcs
           ctx.beginPath();
-          ctx.arc(0, 0, p.radius + 22, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(96, 165, 250, 0.7)';
-          ctx.lineWidth = 2.5;
-          ctx.setLineDash([8, 12]);
+          for (let h = 0; h < 6; h++) {
+            const hAng = (Math.PI / 3) * h + auraRot;
+            const hx = Math.cos(hAng) * 48;
+            const hy = Math.sin(hAng) * 48;
+            if (h === 0) ctx.moveTo(hx, hy);
+            else ctx.lineTo(hx, hy);
+          }
+          ctx.closePath();
+          ctx.strokeStyle = '#60a5fa';
+          ctx.lineWidth = 3;
           ctx.stroke();
-          ctx.setLineDash([]);
-          const sAng = Date.now() * 0.005;
+          const sAng = Date.now() * 0.008;
           ctx.fillStyle = '#ffffff';
-          ctx.fillRect(Math.cos(sAng) * 34 - 2, Math.sin(sAng) * 34 - 2, 4, 4);
-          ctx.fillRect(Math.cos(sAng + Math.PI) * 34 - 2, Math.sin(sAng + Math.PI) * 34 - 2, 4, 4);
+          ctx.fillRect(Math.cos(sAng) * 48 - 2, Math.sin(sAng) * 48 - 2, 5, 5);
+          ctx.fillRect(Math.cos(sAng + Math.PI) * 48 - 2, Math.sin(sAng + Math.PI) * 48 - 2, 5, 5);
+        } else if (domId === 'rose_thornstalker') {
+          ctx.rotate(Date.now() * 0.005);
+          for (let pIdx = 0; pIdx < 8; pIdx++) {
+            const pAngle = (Math.PI / 4) * pIdx;
+            const px = Math.cos(pAngle) * 50;
+            const py = Math.sin(pAngle) * 50;
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(px - 4, py - 4, 8, 8);
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(px - 2, py - 2, 4, 4);
+          }
         } else {
-          // Radiant Energy Wings (Roaster, Thornstalker, Anarchist)
           ctx.beginPath();
-          ctx.moveTo(-8, -10);
-          ctx.bezierCurveTo(-38, -35, -45, -5, -12, 8);
-          ctx.moveTo(8, -10);
-          ctx.bezierCurveTo(38, -35, 45, -5, 12, 8);
+          ctx.moveTo(-10, -12);
+          ctx.bezierCurveTo(-45, -42, -55, -8, -14, 10);
+          ctx.moveTo(10, -12);
+          ctx.bezierCurveTo(45, -42, 55, -8, 14, 10);
           ctx.stroke();
         }
         ctx.restore();
@@ -5391,10 +5928,10 @@
       // 3. Caffeine Leyline Haste Aura
       if (gameState.skills[2].activeTimer > 0) {
         ctx.beginPath();
-        ctx.arc(0, 0, p.radius + 14, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.85)';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([4, 4]);
+        ctx.arc(0, 0, p.radius + 15, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.9)';
+        ctx.lineWidth = 3.5;
+        ctx.setLineDash([5, 5]);
         ctx.stroke();
         ctx.setLineDash([]);
       }
@@ -5403,37 +5940,37 @@
       if (gameState.skills[3].activeTimer > 0 || (p.activeSetBonuses && p.activeSetBonuses['rose_6'])) {
         ctx.save();
         ctx.rotate(p.slashArc || Date.now() * 0.01);
-        for (let b = 0; b < 4; b++) {
-          const bAngle = (Math.PI / 2) * b;
-          const bx = Math.cos(bAngle) * 52;
-          const by = Math.sin(bAngle) * 52;
+        for (let b = 0; b < 5; b++) {
+          const bAngle = (Math.PI * 2 / 5) * b;
+          const bx = Math.cos(bAngle) * 54;
+          const by = Math.sin(bAngle) * 54;
           ctx.fillStyle = '#f43f5e';
-          ctx.fillRect(bx - 3, by - 3, 7, 7);
+          ctx.fillRect(bx - 3.5, by - 3.5, 7, 7);
           ctx.fillStyle = '#ffffff';
-          ctx.fillRect(bx - 1, by - 1, 3, 3);
+          ctx.fillRect(bx - 1.5, by - 1.5, 3, 3);
         }
         ctx.restore();
       }
 
-      // 5. 8-Bit Hero Sprite with Walk Bob & Dynamic Attire
+      // 5. Hero Sprite with Walk Bob & Dramatic Attire Overhaul
       const isMoving = Math.abs(p.vx) > 0.1 || Math.abs(p.vy) > 0.1;
-      const walkBob = isMoving ? Math.sin(Date.now() * 0.015) * 2.5 : 0;
+      const walkBob = isMoving ? Math.sin(Date.now() * 0.015) * 2.8 : 0;
       const flipX = Math.cos(p.angle) < 0;
       const sprite = p.isAttacking ? SPRITE_HERO_SLASH_8BIT : SPRITE_HERO_8BIT;
 
       const armorSet = eq.armor ? eq.armor.setId : null;
       let coatColor = '#1e293b';
       let coatAccent = '#06b6d4';
-      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; }
-      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; }
-      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; }
-      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; }
-      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; }
-      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; }
+      let pauldronTrim = '#38bdf8';
 
-      // Flowing Trenchcoat tails:
-      // When moving: flutter behind movement direction
-      // When idle: rest naturally behind hero legs
+      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; pauldronTrim = '#eab308'; }
+      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; pauldronTrim = '#f43f5e'; }
+      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; pauldronTrim = '#22c55e'; }
+      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; pauldronTrim = '#e0f2fe'; }
+      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; pauldronTrim = '#fbbf24'; }
+      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; pauldronTrim = '#60a5fa'; }
+
+      // MASSIVE BILLOWING TRENCHCOAT / CAPE TAILS (32px)
       ctx.save();
       if (isMoving) {
         const moveAng = Math.atan2(p.vy, p.vx) + Math.PI;
@@ -5441,44 +5978,63 @@
         ctx.fillStyle = coatColor;
         ctx.beginPath();
         ctx.moveTo(-10, walkBob);
-        ctx.lineTo(-24, walkBob - 6);
-        ctx.lineTo(-24, walkBob + 6);
+        ctx.lineTo(-32, walkBob - 9);
+        ctx.lineTo(-30, walkBob);
+        ctx.lineTo(-32, walkBob + 9);
         ctx.closePath();
         ctx.fill();
+        ctx.fillStyle = coatAccent;
+        ctx.fillRect(-32, walkBob - 8, 3, 16);
       } else {
         ctx.fillStyle = coatColor;
         ctx.beginPath();
-        ctx.moveTo(-7, walkBob + 4);
-        ctx.lineTo(-9, walkBob + 17);
-        ctx.lineTo(9, walkBob + 17);
-        ctx.lineTo(7, walkBob + 4);
+        ctx.moveTo(-10, walkBob + 4);
+        ctx.lineTo(-13, walkBob + 22);
+        ctx.lineTo(13, walkBob + 22);
+        ctx.lineTo(10, walkBob + 4);
         ctx.closePath();
         ctx.fill();
+        ctx.fillStyle = coatAccent;
+        ctx.fillRect(-13, walkBob + 20, 26, 3);
       }
+      ctx.restore();
+
+      // HEAVY SHOULDERS / PAULDRONS (12px wings flanking hero)
+      ctx.save();
+      ctx.fillStyle = coatColor;
+      ctx.fillRect(-18, walkBob - 4, 8, 8);
+      ctx.fillRect(10, walkBob - 4, 8, 8);
+      ctx.fillStyle = pauldronTrim;
+      ctx.fillRect(-19, walkBob - 5, 9, 3);
+      ctx.fillRect(10, walkBob - 5, 9, 3);
       ctx.restore();
 
       // Base Hero 8-Bit Sprite
       drawPixelMatrix(ctx, sprite, 0, walkBob - 2, 2.5, flipX);
 
-      // Dynamic Chest Armor Plate Overlay
+      // Racial Skin Tone Shading Overlay
+      if (rDef.skinTone) {
+        ctx.save();
+        ctx.fillStyle = rDef.skinTone;
+        ctx.globalAlpha = 0.45;
+        ctx.fillRect(-6, walkBob - 16, 12, 10);
+        ctx.restore();
+      }
+
+      // HEAVY CHEST ARMOR & GLOWING HEART REACTOR CORE
       ctx.save();
       ctx.fillStyle = coatColor;
-      ctx.fillRect(-7, walkBob + 1, 14, 8);
+      ctx.fillRect(-8, walkBob, 16, 9);
       ctx.fillStyle = coatAccent;
-      ctx.fillRect(-4, walkBob + 3, 8, 4);
-      if (armorSet === 'chinatown_dragon') {
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillRect(-2, walkBob + 4, 4, 2);
-      } else if (armorSet === 'bridge_city_sentinel') {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(-1.5, walkBob + 3.5, 3, 3);
-      } else if (armorSet === 'cascade_cryomancer') {
-        ctx.fillStyle = '#e0f2fe';
-        ctx.fillRect(-2, walkBob + 3, 4, 4);
-      }
+      ctx.fillRect(-6, walkBob + 2, 12, 5);
+      const corePulsing = Math.sin(Date.now() * 0.006) * 1.5;
+      ctx.fillStyle = rDef.eyeColor || '#00f5ff';
+      ctx.shadowColor = rDef.auraColor || '#00f5ff';
+      ctx.shadowBlur = 8;
+      ctx.fillRect(-2.5, walkBob + 3.5 - corePulsing * 0.5, 5, 3 + corePulsing);
       ctx.restore();
 
-      // Dynamic Boots & Dash Footwear Overlay
+      // HEAVY BOOTS & ELEMENTAL DASH TRAILS
       const bootsSet = eq.boots ? eq.boots.setId : null;
       let bootColor = '#334155';
       let bootTrim = '#64748b';
@@ -5491,57 +6047,66 @@
 
       ctx.save();
       ctx.fillStyle = bootColor;
-      ctx.fillRect(-7, walkBob + 12, 5, 5);
-      ctx.fillRect(2, walkBob + 12, 5, 5);
+      ctx.fillRect(-8, walkBob + 12, 6, 6);
+      ctx.fillRect(2, walkBob + 12, 6, 6);
       ctx.fillStyle = bootTrim;
-      ctx.fillRect(-7, walkBob + 15, 5, 2);
-      ctx.fillRect(2, walkBob + 15, 5, 2);
+      ctx.fillRect(-8, walkBob + 16, 6, 2.5);
+      ctx.fillRect(2, walkBob + 16, 6, 2.5);
 
-      // Motion speed dash trails when moving or dodging
-      if (p.isDodging || (isMoving && Math.random() < 0.25)) {
-        createImpactParticles(p.x, p.y + 14, bootTrim, 1);
+      if (p.isDodging || (isMoving && Math.random() < 0.35)) {
+        createImpactParticles(p.x, p.y + 15, bootTrim, 1);
       }
       ctx.restore();
 
-      // Dynamic Headgear / Visor Glow Overlay
+      // TOWERING HEADPIECE / HORNS / VISOR OVERLAY
       const headSet = eq.head ? eq.head.setId : null;
       ctx.save();
-      if (headSet === 'chinatown_dragon') {
-        ctx.fillStyle = '#fbbf24'; // Golden Dragon Kabuto Horns
-        ctx.fillRect(-10, walkBob - 26, 4, 8);
-        ctx.fillRect(6, walkBob - 26, 4, 8);
-        ctx.fillStyle = '#ef4444'; // Red visor slit
-        ctx.fillRect(-6, walkBob - 18, 12, 3);
-      } else if (headSet === 'cascade_cryomancer') {
-        ctx.fillStyle = '#38bdf8'; // Frost cowl glow
-        ctx.shadowColor = '#00f5ff';
+      if (headSet === 'chinatown_dragon' || p.race === 'dragonborn') {
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(-11, walkBob - 16); ctx.lineTo(-17, walkBob - 28); ctx.lineTo(-7, walkBob - 20); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(11, walkBob - 16); ctx.lineTo(17, walkBob - 28); ctx.lineTo(7, walkBob - 20); ctx.fill();
+        ctx.fillStyle = '#ef4444';
+        ctx.shadowColor = '#f59e0b';
         ctx.shadowBlur = 8;
-        ctx.fillRect(-7, walkBob - 19, 14, 3);
-      } else if (headSet === 'burnside_anarchist') {
-        ctx.fillStyle = '#71717a'; // Dual Respirator filters
-        ctx.fillRect(-9, walkBob - 14, 5, 5);
-        ctx.fillRect(4, walkBob - 14, 5, 5);
-        ctx.fillStyle = '#22c55e'; // Green visor line
-        ctx.fillRect(-6, walkBob - 19, 12, 3);
-      } else if (headSet === 'rose_thornstalker') {
-        ctx.fillStyle = '#10b981'; // Briar Antlers
-        ctx.fillRect(-11, walkBob - 26, 3, 9);
-        ctx.fillRect(8, walkBob - 26, 3, 9);
-        ctx.fillStyle = '#f43f5e';
-        ctx.fillRect(-5, walkBob - 19, 10, 3);
-      } else if (headSet === 'bridge_city_sentinel') {
-        ctx.fillStyle = '#93c5fd'; // Sentinel Visor
-        ctx.shadowColor = '#60a5fa';
+        ctx.fillRect(-6, walkBob - 19, 12, 3.5);
+      } else if (headSet === 'cascade_cryomancer') {
+        ctx.fillStyle = '#38bdf8';
+        ctx.shadowColor = '#00f5ff';
         ctx.shadowBlur = 10;
-        ctx.fillRect(-8, walkBob - 19, 16, 4);
+        ctx.fillRect(-8, walkBob - 26, 3, 8);
+        ctx.fillRect(-3, walkBob - 29, 3, 11);
+        ctx.fillRect(2, walkBob - 29, 3, 11);
+        ctx.fillRect(6, walkBob - 26, 3, 8);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-7, walkBob - 19, 14, 3);
+      } else if (headSet === 'burnside_anarchist' || p.race === 'mutant') {
+        ctx.fillStyle = '#71717a';
+        ctx.fillRect(-10, walkBob - 14, 5, 5);
+        ctx.fillRect(5, walkBob - 14, 5, 5);
+        ctx.fillStyle = '#22c55e';
+        ctx.shadowColor = '#22c55e';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(-6, walkBob - 19, 12, 3);
+      } else if (headSet === 'rose_thornstalker' || p.race === 'cryptid') {
+        ctx.fillStyle = '#10b981';
+        ctx.fillRect(-13, walkBob - 28, 4, 11);
+        ctx.fillRect(9, walkBob - 28, 4, 11);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(-6, walkBob - 19, 12, 3);
+      } else if (headSet === 'bridge_city_sentinel') {
+        ctx.fillStyle = '#93c5fd';
+        ctx.shadowColor = '#60a5fa';
+        ctx.shadowBlur = 12;
+        ctx.fillRect(-9, walkBob - 20, 18, 4.5);
       } else {
-        // Default Stumptown Visor
-        ctx.fillStyle = '#00f5ff';
+        ctx.fillStyle = rDef.eyeColor || '#00f5ff';
         ctx.fillRect(-7, walkBob - 19, 14, 3);
       }
       ctx.restore();
 
-      // Dynamic Main-Hand Weapon Blade Shape & Glow
+      // GIANT 34px-46px GLOWING ELEMENTAL BLADE
       ctx.save();
       ctx.rotate(p.angle);
       const wepSet = eq.weapon ? eq.weapon.setId : null;
@@ -5554,61 +6119,61 @@
       else if (wepSet === 'burnside_anarchist' || wepName.includes('Machete')) { bColor = '#94a3b8'; bGlow = '#34d399'; }
       else if (wepSet === 'bridge_city_sentinel' || wepName.includes('Tesla')) { bColor = '#60a5fa'; bGlow = '#ffffff'; }
 
+      const bladeLen = p.isAttacking ? 44 : 32;
       ctx.shadowColor = bGlow;
-      ctx.shadowBlur = 10;
+      ctx.shadowBlur = 14;
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(p.radius - 3, -6, 5, 12);
       ctx.fillStyle = p.isAttacking ? '#ffffff' : bColor;
-      ctx.fillRect(p.radius - 2, -2, p.isAttacking ? 24 : 18, 5);
+      ctx.fillRect(p.radius + 1, -3, bladeLen, 6);
       ctx.fillStyle = bGlow;
-      ctx.fillRect(p.radius + 2, -1, p.isAttacking ? 20 : 14, 3);
+      ctx.fillRect(p.radius + 4, -1.5, bladeLen - 3, 3);
       ctx.restore();
 
-      // Dynamic Off-Hand Equipment
+      // DYNAMIC OFF-HAND EQUIPMENT
       const offSub = eq.offhand ? eq.offhand.subType : null;
       const offName = eq.offhand ? eq.offhand.name : '';
       if (offName.includes('Pearl') || offSub === 'orb') {
-        // Floating Fiery Dragon Pearl / Mystic Talisman Orb
         ctx.save();
         ctx.rotate(p.angle - 1.0);
         ctx.fillStyle = '#ef4444';
         ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 14;
         ctx.beginPath();
-        ctx.arc(p.radius + 6, 0, 7, 0, Math.PI * 2);
+        ctx.arc(p.radius + 7, 0, 8, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
-        ctx.arc(p.radius + 6, 0, 4, 0, Math.PI * 2);
+        ctx.arc(p.radius + 7, 0, 4.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       } else if (offSub === 'shield' || offName.includes('Shield') || offName.includes('Deflector') || offName.includes('Aegis')) {
-        // Holographic Riot Shield Barrier
         ctx.save();
         ctx.rotate(p.angle - 0.7);
         ctx.strokeStyle = '#06b6d4';
-        ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
-        ctx.lineWidth = 2.5;
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.4)';
+        ctx.lineWidth = 3;
         ctx.shadowColor = '#00f5ff';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 12;
         ctx.beginPath();
-        ctx.arc(p.radius + 2, 0, 16, -Math.PI / 2, Math.PI / 2);
+        ctx.arc(p.radius + 3, 0, 18, -Math.PI / 2, Math.PI / 2);
         ctx.stroke();
         ctx.fill();
         ctx.restore();
       } else if (offSub === 'dualwield' || offName.includes('Wakizashi') || offName.includes('Dagger')) {
-        // Reverse-Grip Dual Wakizashi
         ctx.save();
         ctx.rotate(p.angle - 1.2);
         ctx.fillStyle = '#34d399';
         ctx.shadowColor = '#34d399';
-        ctx.shadowBlur = 8;
-        ctx.fillRect(p.radius - 2, -1, 14, 3);
+        ctx.shadowBlur = 10;
+        ctx.fillRect(p.radius - 2, -2, 18, 4);
         ctx.restore();
       }
 
       ctx.restore();
     }
 
-    function drawEnemies() {
+        function drawEnemies() {
       gameState.enemies.forEach(e => {
         ctx.save();
         ctx.translate(e.x, e.y);
@@ -6356,12 +6921,203 @@
       showToast(summary, "success");
     }
 
+    
+    // === DIABLO-STYLE FLOATING ITEM COMPARISON TOOLTIP SYSTEM ===
+    function showItemHoverTooltip(item, e, isEquippedSlot = false, equippedSlotKey = null) {
+      if (!item) return;
+      const tooltip = document.getElementById('itemCompareTooltip');
+      if (!tooltip) return;
+
+      let targetSlot = item.type ? item.type.toLowerCase() : '';
+      if (targetSlot === 'gadget') targetSlot = 'trinket';
+      if (targetSlot === 'shield' || targetSlot === 'dualwield') targetSlot = 'offhand';
+      if (targetSlot === 'ring' || targetSlot === 'ring1' || targetSlot === 'ring2') {
+        targetSlot = (!gameState.equipped.ring1 && gameState.equipped.ring2) ? 'ring2' : 'ring1';
+      }
+
+      const eq = isEquippedSlot ? item : (gameState.equipped ? gameState.equipped[targetSlot] : null);
+      const compareWithEq = !isEquippedSlot && eq;
+
+      // Calculate Stat Differences
+      const diffs = [];
+      if (compareWithEq) {
+        const itemDmg = item.damage || item.statVal || 0;
+        const eqDmg = eq.damage || eq.statVal || 0;
+        if (itemDmg || eqDmg) diffs.push({ label: 'Attack', diff: itemDmg - eqDmg, unit: '' });
+
+        const itemHp = item.hp || 0;
+        const eqHp = eq.hp || 0;
+        if (itemHp || eqHp) diffs.push({ label: 'Max HP', diff: itemHp - eqHp, unit: '' });
+
+        const itemDef = item.armor || 0;
+        const eqDef = eq.armor || 0;
+        if (itemDef || eqDef) diffs.push({ label: 'Armor', diff: itemDef - eqDef, unit: '' });
+
+        const itemSpd = Math.round((item.speedBonus || 0) * 100);
+        const eqSpd = Math.round((eq.speedBonus || 0) * 100);
+        if (itemSpd || eqSpd) diffs.push({ label: 'Speed', diff: itemSpd - eqSpd, unit: '%' });
+
+        const itemCrit = Math.round((item.critChance || 0) * 100);
+        const eqCrit = Math.round((eq.critChance || 0) * 100);
+        if (itemCrit || eqCrit) diffs.push({ label: 'Crit', diff: itemCrit - eqCrit, unit: '%' });
+      }
+
+      const diffsHtml = diffs.map(df => {
+        if (df.diff > 0) return `<span class="text-emerald-400 font-bold text-[9px] bg-emerald-950/80 border border-emerald-500/50 px-1.5 py-0.5 rounded shadow-sm">▲ +${df.diff}${df.unit} ${df.label}</span>`;
+        if (df.diff < 0) return `<span class="text-rose-400 font-bold text-[9px] bg-rose-950/80 border border-rose-500/50 px-1.5 py-0.5 rounded shadow-sm">▼ ${df.diff}${df.unit} ${df.label}</span>`;
+        return `<span class="text-slate-400 text-[9px] bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded">= ${df.label}</span>`;
+      }).join(' ');
+
+      let contentHtml = '';
+      if (isEquippedSlot) {
+        contentHtml = `
+          <div class="w-[280px] p-3 rounded-2xl bg-slate-950/95 backdrop-blur-md border border-amber-500/60 shadow-[0_0_30px_rgba(0,0,0,0.9)] font-mono flex flex-col gap-2">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-[9px] font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                <span>🛡️</span><span>EQUIPPED [${(equippedSlotKey || item.type).toUpperCase()}]</span>
+              </span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${item.tier === 'Legendary' ? 'text-amber-300 bg-amber-950/60 border border-amber-500/40' : item.tier === 'Epic' ? 'text-purple-300 bg-purple-950/60 border border-purple-500/40' : 'text-cyan-300 bg-cyan-950/60 border border-cyan-500/40'}">${item.tier}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${item.icon || '🗡️'}</span>
+              <div>
+                <div class="text-xs font-bold text-white leading-tight">${item.name}</div>
+                <div class="text-[9px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+              </div>
+            </div>
+            <div class="text-[10px] text-emerald-400 font-semibold bg-slate-900/80 p-2 rounded-xl border border-slate-800">${item.bonus || 'Standard gear'}</div>
+            ${item.setId ? formatSetTooltipHtml(item.setId, true) : ''}
+            <div class="border-t border-slate-800 pt-1.5 flex items-center justify-between text-[8px] text-slate-400">
+              <span>Value: ${item.value || 50} ☕</span>
+              <span class="text-cyan-400 font-bold">CLICK TO INSPECT</span>
+            </div>
+          </div>
+        `;
+      } else if (compareWithEq) {
+        contentHtml = `
+          <div class="w-[360px] sm:w-[420px] p-3 rounded-2xl bg-slate-950/95 backdrop-blur-md border border-cyan-500/60 shadow-[0_0_35px_rgba(0,0,0,0.95)] font-mono flex flex-col gap-2">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 text-[9px]">
+              <span class="text-cyan-300 font-bold tracking-wider uppercase flex items-center gap-1">
+                <span>⚖️</span><span>STASH COMPARISON (${targetSlot.toUpperCase()})</span>
+              </span>
+              <div class="flex gap-1 flex-wrap justify-end">
+                ${diffsHtml}
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-left">
+              <!-- Stash Item -->
+              <div class="p-2 rounded-xl bg-slate-900/80 border border-cyan-500/50 flex flex-col justify-between gap-1">
+                <div>
+                  <div class="flex items-center justify-between text-[8px] text-cyan-300 font-bold border-b border-slate-800 pb-0.5 mb-1">
+                    <span>[NEW STASH ITEM]</span>
+                    <span>${item.tier}</span>
+                  </div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1">
+                    <span>${item.icon || '🗡️'}</span>
+                    <span class="truncate">${item.name}</span>
+                  </div>
+                  <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+                  <div class="text-[9px] text-emerald-400 mt-1 leading-tight">${item.bonus || ''}</div>
+                  ${item.setId ? formatSetTooltipHtml(item.setId, false) : ''}
+                </div>
+                <div class="text-[8px] text-slate-400 border-t border-slate-800 pt-1 mt-1 flex justify-between">
+                  <span>${item.value || 50} ☕</span>
+                  <span class="text-cyan-300 font-bold">2X-CLICK: EQUIP</span>
+                </div>
+              </div>
+              <!-- Equipped Item -->
+              <div class="p-2 rounded-xl bg-slate-900/80 border border-amber-500/40 flex flex-col justify-between gap-1">
+                <div>
+                  <div class="flex items-center justify-between text-[8px] text-amber-300 font-bold border-b border-slate-800 pb-0.5 mb-1">
+                    <span>[EQUIPPED NOW]</span>
+                    <span>${eq.tier}</span>
+                  </div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1">
+                    <span>${eq.icon || '🛡️'}</span>
+                    <span class="truncate">${eq.name}</span>
+                  </div>
+                  <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(eq.stars || 1)} Lv.${eq.level || 1}</div>
+                  <div class="text-[9px] text-slate-300 mt-1 leading-tight">${eq.bonus || ''}</div>
+                  ${eq.setId ? formatSetTooltipHtml(eq.setId, true) : ''}
+                </div>
+                <div class="text-[8px] text-slate-400 border-t border-slate-800 pt-1 mt-1 flex justify-between">
+                  <span>${eq.value || 50} ☕</span>
+                  <span class="text-amber-400 font-bold">CURRENT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        contentHtml = `
+          <div class="w-[280px] p-3 rounded-2xl bg-slate-950/95 backdrop-blur-md border border-cyan-500/60 shadow-[0_0_30px_rgba(0,0,0,0.9)] font-mono flex flex-col gap-2">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <span class="text-[9px] font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1">
+                <span>📦</span><span>STASH [${item.type.toUpperCase()}]</span>
+              </span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${item.tier === 'Legendary' ? 'text-amber-300 bg-amber-950/60 border border-amber-500/40' : item.tier === 'Epic' ? 'text-purple-300 bg-purple-950/60 border border-purple-500/40' : 'text-cyan-300 bg-cyan-950/60 border border-cyan-500/40'}">${item.tier}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">${item.icon || '🗡️'}</span>
+              <div>
+                <div class="text-xs font-bold text-white leading-tight">${item.name}</div>
+                <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+              </div>
+            </div>
+            <div class="text-[10px] text-emerald-400 font-semibold bg-slate-900/80 p-2 rounded-xl border border-slate-800">${item.bonus || 'Standard gear'}</div>
+            ${item.setId ? formatSetTooltipHtml(item.setId, false) : ''}
+            <div class="border-t border-slate-800 pt-1.5 flex items-center justify-between text-[8px] text-slate-400">
+              <span>Value: ${item.value || 50} ☕</span>
+              <span class="text-emerald-400 font-bold">SLOT EMPTY (+100% UPGRADE)</span>
+            </div>
+          </div>
+        `;
+      }
+
+      tooltip.innerHTML = contentHtml;
+      tooltip.classList.remove('hidden');
+      positionHoverTooltip(e);
+    }
+
+    function moveItemHoverTooltip(e) {
+      positionHoverTooltip(e);
+    }
+
+    function hideItemHoverTooltip() {
+      const tooltip = document.getElementById('itemCompareTooltip');
+      if (tooltip) tooltip.classList.add('hidden');
+    }
+
+    function positionHoverTooltip(e) {
+      const tooltip = document.getElementById('itemCompareTooltip');
+      if (!tooltip || tooltip.classList.contains('hidden')) return;
+
+      const tooltipWidth = tooltip.offsetWidth || 360;
+      const tooltipHeight = tooltip.offsetHeight || 220;
+      const pad = 16;
+
+      let x = e.clientX + pad;
+      let y = e.clientY + pad;
+
+      if (x + tooltipWidth > window.innerWidth - pad) {
+        x = e.clientX - tooltipWidth - pad;
+      }
+      if (y + tooltipHeight > window.innerHeight - pad) {
+        y = window.innerHeight - tooltipHeight - pad;
+      }
+      x = Math.max(pad, x);
+      y = Math.max(pad, y);
+
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+    }
+
     function inspectStashItem(index) {
       const item = gameState.inventory[index];
       if (!item) return;
       activeInspectSlot = null;
       currentInspectedItemRef = item;
-      displayItemInCard(item, false);
+      displayItemInCard(item, false, null, index);
     }
 
     function inspectEquipSlot(slot) {
@@ -6403,7 +7159,7 @@
       if (gemModal) gemModal.classList.add('hidden');
     }
 
-    function displayItemInCard(item, isEquipped = false, slot = null) {
+    function displayItemInCard(item, isEquipped = false, slot = null, stashIndex = null) {
       const nameEl = document.getElementById('inspectItemName');
       const iconEl = document.getElementById('inspectItemIcon');
       const statsEl = document.getElementById('inspectItemStats');
@@ -6485,7 +7241,71 @@
         }
       }
 
-      // Gemstone Sockets Display
+
+      // MOBILE & TELEGRAM SIDE-BY-SIDE COMPARISON & QUICK ACTION BUTTONS
+      let mobileActionHtml = '';
+      if (!isEquipped) {
+        let tSlot = item.type ? item.type.toLowerCase() : '';
+        if (tSlot === 'gadget') tSlot = 'trinket';
+        if (tSlot === 'shield' || tSlot === 'dualwield') tSlot = 'offhand';
+        if (tSlot === 'ring' || tSlot === 'ring1' || tSlot === 'ring2') {
+          tSlot = (!gameState.equipped.ring1 && gameState.equipped.ring2) ? 'ring2' : 'ring1';
+        }
+        const eqItem = gameState.equipped ? gameState.equipped[tSlot] : null;
+
+        let compDiffs = '';
+        if (eqItem) {
+          const dAtk = (item.damage || item.statVal || 0) - (eqItem.damage || eqItem.statVal || 0);
+          const dHp = (item.hp || 0) - (eqItem.hp || 0);
+          const dArm = (item.armor || 0) - (eqItem.armor || 0);
+          if (dAtk !== 0) compDiffs += `<span class="${dAtk > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold text-[9px]">${dAtk > 0 ? '▲ +' : '▼ '}${dAtk} Atk</span> `;
+          if (dHp !== 0) compDiffs += `<span class="${dHp > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold text-[9px]">${dHp > 0 ? '▲ +' : '▼ '}${dHp} HP</span> `;
+          if (dArm !== 0) compDiffs += `<span class="${dArm > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold text-[9px]">${dArm > 0 ? '▲ +' : '▼ '}${dArm} Arm</span> `;
+        }
+
+        const sIdx = stashIndex !== null ? stashIndex : gameState.inventory.indexOf(item);
+        mobileActionHtml = `
+          <div class="mt-2 pt-2 border-t border-cyan-900/60 font-mono space-y-2">
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="text-cyan-300 font-bold uppercase tracking-wider">VS EQUIPPED [${tSlot.toUpperCase()}]:</span>
+              <div class="flex gap-1">${compDiffs || '<span class="text-emerald-400 font-bold text-[9px]">+100% EMPTY UPGRADE</span>'}</div>
+            </div>
+            ${eqItem ? `
+              <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800 text-[10px] text-slate-300 flex items-center justify-between">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span>${eqItem.icon || '🛡️'}</span>
+                  <span class="truncate">${eqItem.name} (Lv.${eqItem.level || 1})</span>
+                </div>
+                <span class="text-amber-400 font-bold text-[9px] shrink-0">CURRENT</span>
+              </div>
+            ` : `
+              <div class="text-[9px] text-slate-500 italic p-1 bg-slate-950/50 rounded text-center">(No item currently equipped in this socket)</div>
+            `}
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button onclick="equipItem(${sIdx})" class="py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 font-bold text-xs shadow-glow-cyan active:scale-95 cursor-pointer flex items-center justify-center gap-1">
+                <span>⚡</span><span>EQUIP ITEM</span>
+              </button>
+              <button onclick="quickScrapItem(${sIdx})" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-rose-950/80 border border-slate-700 hover:border-rose-500/50 text-rose-300 font-bold text-xs active:scale-95 cursor-pointer flex items-center justify-center gap-1">
+                <span>♻️</span><span>SCRAP (+${item.value || 50} ☕)</span>
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        mobileActionHtml = `
+          <div class="mt-2 pt-2 border-t border-slate-800 flex justify-end">
+            <button onclick="unequipSlot('${slot || activeInspectSlot}')" class="py-1 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[10px] font-mono active:scale-95 cursor-pointer">
+              📦 Unequip to Stash Bag
+            </button>
+          </div>
+        `;
+      }
+
+      if (statsEl) {
+        statsEl.innerHTML = `<div>${item.bonus || ''}</div>${setDetailsHtml}${mobileActionHtml}`;
+      }
+
+            // Gemstone Sockets Display
       const socketsContainer = document.getElementById('inspectItemSocketsContainer');
       const socketsList = document.getElementById('inspectItemSocketsList');
       const btnSocketGem = document.getElementById('btnSocketGem');
@@ -6590,7 +7410,7 @@
       const item = gameState.equipped[slot];
       if (!item) return;
 
-      if (gameState.inventory.length >= 24) {
+      if (gameState.inventory.length >= getInventoryCapacity()) {
         showToast("Stash is full! Scrap or organize items first.", "rose");
         return;
       }
@@ -6784,10 +7604,10 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const totalCapacity = 24;
+      const totalCapacity = getInventoryCapacity();
       const bagCount = gameState.inventory.length;
       const capEl = document.getElementById('bagGridSlotsText');
-      if (capEl) capEl.textContent = `${bagCount} / ${totalCapacity} SLOTS`;
+      if (capEl) capEl.textContent = `${bagCount} / ${totalCapacity} SLOTS (+1/LVL)`;
 
       const beansEl = document.getElementById('invBeansDisplay');
       if (beansEl) beansEl.textContent = `${gameState.player.beans} ☕`;
@@ -6840,12 +7660,14 @@
             }
           };
 
+          slotEl.onmouseenter = (e) => showItemHoverTooltip(item, e);
+          slotEl.onmousemove = (e) => moveItemHoverTooltip(e);
+          slotEl.onmouseleave = () => hideItemHoverTooltip();
+
           slotEl.innerHTML = `
             <span class="text-[8px] font-mono font-bold text-slate-400 self-start">${item.type.slice(0,3).toUpperCase()}</span>
             <span class="text-2xl my-auto select-none">${item.icon}</span>
             <span class="text-[8px] font-mono text-amber-300 font-bold bg-slate-950/80 px-1 rounded">${'★'.repeat(item.stars || 1)}</span>
-
-            ${generateComparisonTooltipHtml(item, i)}
           `;
         } else {
           // Empty tactile grid slot: accepts drop
@@ -6946,61 +7768,60 @@
       const h = canvas.height;
       const eq = gameState.equipped;
       const p = gameState.player;
+      const rDef = HERO_RACES[p.race] || HERO_RACES.synth;
 
       pctx.clearRect(0, 0, w, h);
 
       const cx = w / 2;
       const cy = h / 2 + 10;
 
-      // 1. Aura Glow Backdrop
+      // 1. Multi-Tier Aura Glow Backdrop
       if (p.dominantSet && p.dominantSet.count >= 2) {
         const auraColor = p.dominantSet.color || '#22c55e';
-        const grad = pctx.createRadialGradient(cx, cy - 20, 20, cx, cy - 20, 75);
-        grad.addColorStop(0, auraColor + '44');
-        grad.addColorStop(0.7, auraColor + '18');
+        const grad = pctx.createRadialGradient(cx, cy - 20, 20, cx, cy - 20, 80);
+        grad.addColorStop(0, auraColor + '55');
+        grad.addColorStop(0.7, auraColor + '20');
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         pctx.fillStyle = grad;
         pctx.fillRect(0, 0, w, h);
 
         pctx.beginPath();
-        pctx.arc(cx, cy - 10, 48, 0, Math.PI * 2);
-        pctx.strokeStyle = auraColor + '88';
-        pctx.lineWidth = 2;
-        pctx.setLineDash([4, 4]);
+        pctx.arc(cx, cy - 10, 52, 0, Math.PI * 2);
+        pctx.strokeStyle = auraColor + 'aa';
+        pctx.lineWidth = 2.5;
+        pctx.setLineDash([5, 5]);
         pctx.stroke();
         pctx.setLineDash([]);
 
         if (p.dominantSet.count >= 6) {
           pctx.save();
           pctx.strokeStyle = auraColor;
-          pctx.lineWidth = 3;
+          pctx.lineWidth = 3.5;
           pctx.shadowColor = auraColor;
-          pctx.shadowBlur = 15;
+          pctx.shadowBlur = 18;
           if (p.dominantSet.id === 'chinatown_dragon') {
-            // Celestial Dragon Serpent Looping Crest
             pctx.beginPath();
-            pctx.arc(cx, cy - 25, 42, -Math.PI * 0.8, Math.PI * 0.8);
+            pctx.arc(cx, cy - 25, 46, -Math.PI * 0.85, Math.PI * 0.85);
             pctx.stroke();
-            pctx.fillStyle = '#f59e0b';
+            pctx.fillStyle = '#fbbf24';
             pctx.beginPath();
-            pctx.arc(cx, cy - 65, 8, 0, Math.PI * 2);
+            pctx.arc(cx, cy - 70, 9, 0, Math.PI * 2);
             pctx.fill();
           } else if (p.dominantSet.id === 'bridge_city_sentinel') {
-            // Cathedral Lightning Ring & Aegis
             pctx.beginPath();
-            pctx.arc(cx, cy - 10, 56, 0, Math.PI * 2);
+            pctx.arc(cx, cy - 10, 60, 0, Math.PI * 2);
             pctx.stroke();
             pctx.fillStyle = '#93c5fd';
-            pctx.fillRect(cx - 3, cy - 68, 6, 6);
-            pctx.fillRect(cx - 3, cy + 48, 6, 6);
+            pctx.fillRect(cx - 4, cy - 72, 8, 8);
+            pctx.fillRect(cx - 4, cy + 50, 8, 8);
           } else {
             pctx.beginPath();
             pctx.moveTo(cx - 15, cy - 35);
-            pctx.bezierCurveTo(cx - 55, cy - 65, cx - 65, cy - 15, cx - 20, cy - 10);
+            pctx.bezierCurveTo(cx - 60, cy - 70, cx - 70, cy - 15, cx - 20, cy - 10);
             pctx.stroke();
             pctx.beginPath();
             pctx.moveTo(cx + 15, cy - 35);
-            pctx.bezierCurveTo(cx + 55, cy - 65, cx + 65, cy - 15, cx + 20, cy - 10);
+            pctx.bezierCurveTo(cx + 60, cy - 70, cx + 70, cy - 15, cx + 20, cy - 10);
             pctx.stroke();
           }
           pctx.restore();
@@ -7009,36 +7830,48 @@
 
       // 2. Ground Shadow
       pctx.beginPath();
-      pctx.ellipse(cx, cy + 68, 36, 12, 0, 0, Math.PI * 2);
-      pctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+      pctx.ellipse(cx, cy + 68, 40, 14, 0, 0, Math.PI * 2);
+      pctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
       pctx.fill();
 
-      // 3. Flowing Trenchcoat / Duster Tails
+      // 3. Flowing Trenchcoat / Duster Tails (Extra Wide)
       const armorSet = eq.armor ? eq.armor.setId : null;
       let coatColor = '#1e293b';
       let coatAccent = '#06b6d4';
-      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; }
-      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; }
-      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; }
-      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; }
-      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; }
-      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; }
+      let pauldronTrim = '#38bdf8';
+      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; pauldronTrim = '#eab308'; }
+      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; pauldronTrim = '#f43f5e'; }
+      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; pauldronTrim = '#22c55e'; }
+      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; pauldronTrim = '#e0f2fe'; }
+      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; pauldronTrim = '#fbbf24'; }
+      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; pauldronTrim = '#60a5fa'; }
 
       pctx.fillStyle = coatColor;
       pctx.beginPath();
-      pctx.moveTo(cx - 18, cy + 10);
-      pctx.lineTo(cx - 28, cy + 55);
-      pctx.lineTo(cx + 28, cy + 55);
-      pctx.lineTo(cx + 18, cy + 10);
+      pctx.moveTo(cx - 20, cy + 10);
+      pctx.lineTo(cx - 34, cy + 58);
+      pctx.lineTo(cx + 34, cy + 58);
+      pctx.lineTo(cx + 20, cy + 10);
       pctx.closePath();
       pctx.fill();
 
-      // 4. Legs
+      pctx.fillStyle = coatAccent;
+      pctx.fillRect(cx - 34, cy + 54, 68, 4);
+
+      // 4. Heavy Shoulder Pauldrons
+      pctx.fillStyle = coatColor;
+      pctx.fillRect(cx - 28, cy - 24, 12, 12);
+      pctx.fillRect(cx + 16, cy - 24, 12, 12);
+      pctx.fillStyle = pauldronTrim;
+      pctx.fillRect(cx - 29, cy - 26, 14, 4);
+      pctx.fillRect(cx + 15, cy - 26, 14, 4);
+
+      // 5. Legs
       pctx.fillStyle = '#0f172a';
       pctx.fillRect(cx - 15, cy + 20, 11, 38);
       pctx.fillRect(cx + 4, cy + 20, 11, 38);
 
-      // 5. Boots
+      // 6. Boots
       const bootsSet = eq.boots ? eq.boots.setId : null;
       let bootColor = '#334155';
       let bootTrim = '#64748b';
@@ -7056,14 +7889,21 @@
       pctx.fillRect(cx - 17, cy + 62, 14, 4);
       pctx.fillRect(cx + 3, cy + 62, 14, 4);
 
-      // 6. Torso & Chest Armor Plate
+      // 7. Torso & Heavy Chest Armor Plate
       pctx.fillStyle = coatColor;
       pctx.fillRect(cx - 16, cy - 25, 32, 45);
 
       pctx.fillStyle = coatAccent;
-      pctx.fillRect(cx - 10, cy - 20, 20, 25);
+      pctx.fillRect(cx - 11, cy - 20, 22, 25);
       pctx.fillStyle = '#050508';
-      pctx.fillRect(cx - 8, cy - 18, 16, 21);
+      pctx.fillRect(cx - 9, cy - 18, 18, 21);
+
+      // Glowing heart reactor core
+      pctx.fillStyle = rDef.eyeColor || '#00f5ff';
+      pctx.shadowColor = rDef.auraColor || '#00f5ff';
+      pctx.shadowBlur = 10;
+      pctx.fillRect(cx - 4, cy - 12, 8, 8);
+      pctx.shadowBlur = 0;
 
       // Belt
       pctx.fillStyle = '#475569';
@@ -7071,23 +7911,24 @@
       pctx.fillStyle = '#fbbf24';
       pctx.fillRect(cx - 4, cy + 15, 8, 8);
 
-      // 7. Head & Headgear
-      pctx.fillStyle = '#ffc0a0';
+      // 8. Head & Racial Skin Tone
+      pctx.fillStyle = rDef.skinTone || '#ffc0a0';
       pctx.fillRect(cx - 11, cy - 50, 22, 22);
 
+      // Headgear
       const headSet = eq.head ? eq.head.setId : null;
       const headName = eq.head ? eq.head.name : '';
-      if (headSet === 'chinatown_dragon' || headName.includes('Kabuto')) {
+      if (headSet === 'chinatown_dragon' || headName.includes('Kabuto') || p.race === 'dragonborn') {
         pctx.fillStyle = '#b91c1c';
         pctx.fillRect(cx - 14, cy - 58, 28, 16);
         pctx.fillStyle = '#fbbf24';
         pctx.beginPath();
-        pctx.moveTo(cx - 14, cy - 55); pctx.lineTo(cx - 24, cy - 70); pctx.lineTo(cx - 10, cy - 58); pctx.fill();
+        pctx.moveTo(cx - 14, cy - 55); pctx.lineTo(cx - 26, cy - 74); pctx.lineTo(cx - 10, cy - 58); pctx.fill();
         pctx.beginPath();
-        pctx.moveTo(cx + 14, cy - 55); pctx.lineTo(cx + 24, cy - 70); pctx.lineTo(cx + 10, cy - 58); pctx.fill();
+        pctx.moveTo(cx + 14, cy - 55); pctx.lineTo(cx + 26, cy - 74); pctx.lineTo(cx + 10, cy - 58); pctx.fill();
         pctx.fillStyle = '#ef4444';
         pctx.fillRect(cx - 8, cy - 44, 16, 4);
-      } else if (headSet === 'burnside_anarchist' || headName.includes('Respirator')) {
+      } else if (headSet === 'burnside_anarchist' || headName.includes('Respirator') || p.race === 'mutant') {
         pctx.fillStyle = '#18181b';
         pctx.fillRect(cx - 13, cy - 54, 26, 18);
         pctx.fillStyle = '#22c55e';
@@ -7095,14 +7936,14 @@
         pctx.fillStyle = '#71717a';
         pctx.fillRect(cx - 14, cy - 38, 7, 7);
         pctx.fillRect(cx + 7, cy - 38, 7, 7);
-      } else if (headSet === 'rose_thornstalker' || headName.includes('Cryptid') || headName.includes('Briar')) {
+      } else if (headSet === 'rose_thornstalker' || headName.includes('Cryptid') || headName.includes('Briar') || p.race === 'cryptid') {
         pctx.fillStyle = '#064e3b';
         pctx.fillRect(cx - 12, cy - 54, 24, 22);
         pctx.strokeStyle = '#10b981';
-        pctx.lineWidth = 3;
+        pctx.lineWidth = 3.5;
         pctx.beginPath();
-        pctx.moveTo(cx - 10, cy - 54); pctx.lineTo(cx - 20, cy - 70);
-        pctx.moveTo(cx + 10, cy - 54); pctx.lineTo(cx + 20, cy - 70);
+        pctx.moveTo(cx - 10, cy - 54); pctx.lineTo(cx - 24, cy - 74);
+        pctx.moveTo(cx + 10, cy - 54); pctx.lineTo(cx + 24, cy - 74);
         pctx.stroke();
         pctx.fillStyle = '#34d399';
         pctx.fillRect(cx - 7, cy - 44, 4, 4);
@@ -7111,7 +7952,7 @@
         pctx.fillStyle = '#0369a1';
         pctx.fillRect(cx - 14, cy - 56, 28, 26);
         pctx.fillStyle = '#e0f2fe';
-        pctx.fillRect(cx - 10, cy - 58, 20, 5);
+        pctx.fillRect(cx - 11, cy - 62, 22, 7);
         pctx.fillStyle = '#38bdf8';
         pctx.fillRect(cx - 8, cy - 44, 16, 3);
       } else if (headSet === 'bridge_city_sentinel' || headName.includes('Sentinel')) {
@@ -7122,11 +7963,11 @@
       } else {
         pctx.fillStyle = '#0f172a';
         pctx.fillRect(cx - 13, cy - 55, 26, 20);
-        pctx.fillStyle = '#06b6d4';
+        pctx.fillStyle = rDef.eyeColor || '#06b6d4';
         pctx.fillRect(cx - 9, cy - 45, 18, 4);
       }
 
-      // 8. Main-Hand Weapon
+      // 9. Main-Hand Weapon (55px Massive Blade)
       const wSet = eq.weapon ? eq.weapon.setId : null;
       const wName = eq.weapon ? eq.weapon.name : '';
       pctx.save();
@@ -7147,20 +7988,22 @@
         bladeColor = '#60a5fa'; bladeGlow = '#ffffff';
       }
 
+      // Hilt & Guard
       pctx.fillStyle = '#475569';
-      pctx.fillRect(-3, 10, 6, 14);
+      pctx.fillRect(-3, 10, 6, 15);
       pctx.fillStyle = '#fbbf24';
-      pctx.fillRect(-6, 8, 12, 3);
+      pctx.fillRect(-8, 8, 16, 4);
 
+      // Blade & Glow
       pctx.shadowColor = bladeGlow;
-      pctx.shadowBlur = 12;
+      pctx.shadowBlur = 14;
       pctx.fillStyle = bladeColor;
-      pctx.fillRect(-2, -45, 4, 53);
+      pctx.fillRect(-3, -52, 6, 60);
       pctx.fillStyle = bladeGlow;
-      pctx.fillRect(-1, -43, 2, 50);
+      pctx.fillRect(-1.5, -50, 3, 56);
       pctx.restore();
 
-      // 9. Off-Hand Equipment
+      // 10. Off-Hand Equipment
       const oSub = eq.offhand ? eq.offhand.subType : null;
       const oName = eq.offhand ? eq.offhand.name : '';
 
@@ -7168,35 +8011,34 @@
       pctx.translate(cx - 26, cy);
       if (oSub === 'shield' || oName.includes('Shield') || oName.includes('Deflector') || oName.includes('Aegis')) {
         pctx.strokeStyle = '#06b6d4';
-        pctx.fillStyle = 'rgba(6, 182, 212, 0.25)';
-        pctx.lineWidth = 2.5;
+        pctx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+        pctx.lineWidth = 3;
         pctx.shadowColor = '#00f5ff';
-        pctx.shadowBlur = 14;
+        pctx.shadowBlur = 16;
         pctx.beginPath();
-        pctx.moveTo(0, -28);
-        pctx.lineTo(16, -14);
-        pctx.lineTo(16, 16);
-        pctx.lineTo(0, 30);
-        pctx.lineTo(-16, 16);
-        pctx.lineTo(-16, -14);
+        pctx.moveTo(0, -32);
+        pctx.lineTo(18, -16);
+        pctx.lineTo(18, 18);
+        pctx.lineTo(0, 34);
+        pctx.lineTo(-18, 18);
+        pctx.lineTo(-18, -16);
         pctx.closePath();
         pctx.fill();
         pctx.stroke();
       } else if (oName.includes('Pearl') || oSub === 'orb') {
-        // Floating Fiery Dragon Pearl / Mystic Talisman Orb
         pctx.fillStyle = '#ef4444';
         pctx.shadowColor = '#f59e0b';
-        pctx.shadowBlur = 12;
+        pctx.shadowBlur = 14;
         pctx.beginPath();
-        pctx.arc(0, 0, 10, 0, Math.PI * 2);
+        pctx.arc(0, 0, 11, 0, Math.PI * 2);
         pctx.fill();
         pctx.fillStyle = '#fbbf24';
         pctx.beginPath();
-        pctx.arc(0, 0, 6, 0, Math.PI * 2);
+        pctx.arc(0, 0, 7, 0, Math.PI * 2);
         pctx.fill();
         pctx.fillStyle = '#ffffff';
         pctx.beginPath();
-        pctx.arc(-2.5, -2.5, 3, 0, Math.PI * 2);
+        pctx.arc(-3, -3, 3.5, 0, Math.PI * 2);
         pctx.fill();
       } else if (oSub === 'dualwield' || oName.includes('Wakizashi') || oName.includes('Dagger')) {
         pctx.rotate(0.5);
@@ -7204,13 +8046,13 @@
         pctx.fillRect(-2, -18, 4, 10);
         pctx.fillStyle = '#34d399';
         pctx.shadowColor = '#34d399';
-        pctx.shadowBlur = 8;
-        pctx.fillRect(-1.5, -8, 3, 28);
+        pctx.shadowBlur = 10;
+        pctx.fillRect(-2, -8, 4, 32);
       }
       pctx.restore();
     }
 
-    function updateEquippedUI() {
+        function updateEquippedUI() {
       const eq = gameState.equipped;
       const hero = gameState.player;
 
@@ -7230,6 +8072,13 @@
         }
       }
 
+      // Update Race & Class Badge in Paperdoll
+      const rBadge = document.getElementById('d4RaceClassBadge');
+      if (rBadge) {
+        const rName = (HERO_RACES[hero.race] || HERO_RACES.synth).name.split(' ')[0].toUpperCase();
+        const cName = (HERO_CLASSES[hero.heroClass] || HERO_CLASSES.stalker).name.split(' ')[0].toUpperCase();
+        rBadge.textContent = `${rName} • ${cName}`;
+      }
       renderPaperdollAvatar();
 
       // Update all 10 D4 Paperdoll Sockets
@@ -7251,6 +8100,12 @@
         const iconEl = document.getElementById(iconId);
         const lvlEl = document.getElementById(lvlId);
         const boxEl = document.getElementById(boxId);
+
+        if (boxEl) {
+          boxEl.onmouseenter = (e) => { if (it) showItemHoverTooltip(it, e, true, slot); };
+          boxEl.onmousemove = (e) => { if (it) moveItemHoverTooltip(e); };
+          boxEl.onmouseleave = () => hideItemHoverTooltip();
+        }
 
         if (it) {
           if (iconEl) iconEl.textContent = it.icon || defIcon;
@@ -7399,9 +8254,11 @@
       const p = gameState.player;
       const eq = gameState.equipped;
 
-      // 1. Base Class Stats
+      // 1. Base Class & Racial Lineage Stats
       const classId = p.heroClass || 'stalker';
       const cDef = HERO_CLASSES[classId] || HERO_CLASSES.stalker;
+      const raceId = p.race || 'synth';
+      const rDef = HERO_RACES[raceId] || HERO_RACES.synth;
 
       let totalAttack = 18 + (p.level * 4) + (cDef.attackBonus || 0);
       let totalArmor = 8 + (p.level * 2) + (cDef.armorBonus || 0);
@@ -7409,6 +8266,50 @@
       let speedMult = 1.0 + (cDef.speedBonus || 0);
       let critBonus = cDef.critBonus || 0;
       let blockBonus = cDef.blockBonus || 0;
+
+      // Apply Race Stat Bonuses
+      if (rDef.statBonus) {
+        if (rDef.statBonus.attack) totalAttack += rDef.statBonus.attack;
+        if (rDef.statBonus.armor) totalArmor += rDef.statBonus.armor;
+        if (rDef.statBonus.hp) extraHp += rDef.statBonus.hp;
+        if (rDef.statBonus.speedBonus) speedMult += rDef.statBonus.speedBonus;
+        if (rDef.statBonus.critBonus) critBonus += rDef.statBonus.critBonus;
+        if (rDef.statBonus.regenRate) p.regenRate = (p.regenRate || 0) + rDef.statBonus.regenRate;
+        if (rDef.statBonus.thornsDamage) p.thornsDamage = (p.thornsDamage || 0) + rDef.statBonus.thornsDamage;
+      }
+
+      // Apply Race + Class Synergy Bonuses
+      const synKey = `${raceId}_${classId}`;
+      const synDef = RACE_CLASS_SYNERGIES[synKey];
+      if (synDef && synDef.statBonus) {
+        if (synDef.statBonus.attack) totalAttack += synDef.statBonus.attack;
+        if (synDef.statBonus.armor) totalArmor += synDef.statBonus.armor;
+        if (synDef.statBonus.hp) extraHp += synDef.statBonus.hp;
+        if (synDef.statBonus.speedBonus) speedMult += synDef.statBonus.speedBonus;
+        if (synDef.statBonus.critBonus) critBonus += synDef.statBonus.critBonus;
+        if (synDef.statBonus.blockBonus) blockBonus += synDef.statBonus.blockBonus;
+        if (synDef.statBonus.regenRate) p.regenRate = (p.regenRate || 0) + synDef.statBonus.regenRate;
+        if (synDef.statBonus.thornsDamage) p.thornsDamage = (p.thornsDamage || 0) + synDef.statBonus.thornsDamage;
+      }
+
+      // Apply Fallout 4 S.P.E.C.I.A.L. Perks
+      if (p.perks) {
+        Object.entries(p.perks).forEach(([perkId, rank]) => {
+          if (rank > 0) {
+            Object.values(FALLOUT_SPECIAL_PERKS).forEach(statCol => {
+              const found = statCol.perks.find(pk => pk.id === perkId);
+              if (found && found.bonusPerRank) {
+                if (found.bonusPerRank.attack) totalAttack += found.bonusPerRank.attack * rank;
+                if (found.bonusPerRank.armor) totalArmor += found.bonusPerRank.armor * rank;
+                if (found.bonusPerRank.hp) extraHp += found.bonusPerRank.hp * rank;
+                if (found.bonusPerRank.speedBonus) speedMult += found.bonusPerRank.speedBonus * rank;
+                if (found.bonusPerRank.critBonus) critBonus += found.bonusPerRank.critBonus * rank;
+                if (found.bonusPerRank.regenRate) p.regenRate = (p.regenRate || 0) + (found.bonusPerRank.regenRate * rank);
+              }
+            });
+          }
+        });
+      }
 
       // 2. Calculate Equipped Gear Stats (10 Sockets)
       if (eq.head) {
@@ -7718,10 +8619,306 @@
       showToast(`${skill.name}: Equipped Rune [${skill.runes[runeIdx].name}]`, "success");
     }
 
+    
+    // === FALLOUT 4 S.P.E.C.I.A.L. & RACE/CLASS SELECTION ENGINE ===
+    let activeSkillsTab = 'activeSkills';
+
+    function switchSkillsTab(tabId) {
+      activeSkillsTab = tabId;
+      const tabs = ['activeSkills', 'specialPerks', 'raceClass'];
+      tabs.forEach(t => {
+        const tabEl = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btnEl = document.getElementById('btnTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (t === tabId) {
+          if (tabEl) tabEl.classList.remove('hidden');
+          if (btnEl) {
+            btnEl.classList.add('border-cyan-400', 'text-cyan-300');
+            btnEl.classList.remove('border-transparent', 'text-slate-400');
+          }
+        } else {
+          if (tabEl) tabEl.classList.add('hidden');
+          if (btnEl) {
+            btnEl.classList.remove('border-cyan-400', 'text-cyan-300');
+            btnEl.classList.add('border-transparent', 'text-slate-400');
+          }
+        }
+      });
+
+      if (tabId === 'specialPerks') renderSpecialPerksUI();
+      if (tabId === 'raceClass') renderRaceClassUI();
+      if (tabId === 'activeSkills') updateSkillsUI();
+    }
+
+    function openRaceClassCustomizer() {
+      toggleModal('skillsModal');
+      switchSkillsTab('raceClass');
+    }
+
+    function renderSpecialPerksUI() {
+      const container = document.getElementById('specialPerkChartContainer');
+      if (!container) return;
+      const p = gameState.player;
+      p.perks = p.perks || {};
+      p.perkPoints = p.perkPoints !== undefined ? p.perkPoints : 1;
+
+      const perkPtsEl = document.getElementById('specialPerkPtsDisplay');
+      if (perkPtsEl) perkPtsEl.textContent = p.perkPoints;
+      const modalPtsEl = document.getElementById('modalPerkPointsAvail');
+      if (modalPtsEl) modalPtsEl.textContent = p.perkPoints;
+
+      const rDef = HERO_RACES[p.race] || HERO_RACES.synth;
+      const affinities = rDef.affinities || {};
+
+      let html = '';
+      const letters = ['S', 'P', 'E', 'C', 'I', 'A', 'L'];
+      letters.forEach(letter => {
+        const colDef = FALLOUT_SPECIAL_PERKS[letter];
+        const raceBonus = affinities[letter] || 0;
+        
+        // Calculate total allocated ranks in this column
+        let columnRanks = 0;
+        colDef.perks.forEach(pk => columnRanks += (p.perks[pk.id] || 0));
+        const effectiveScore = 1 + raceBonus + columnRanks;
+
+        let perksHtml = '';
+        colDef.perks.forEach((pk, idx) => {
+          const currentRank = p.perks[pk.id] || 0;
+          const isMax = currentRank >= pk.maxRank;
+          const isUnlocked = effectiveScore >= pk.reqSpecial;
+          const canAfford = p.perkPoints > 0 && !isMax && isUnlocked;
+
+          perksHtml += `
+            <div class="p-2.5 rounded-xl border flex flex-col justify-between gap-1.5 transition-all ${
+              currentRank > 0 ? 'bg-slate-900/90 border-amber-500/60 shadow-[0_0_10px_rgba(245,158,11,0.2)]' :
+              (isUnlocked ? 'bg-slate-950/70 border-slate-700/80 hover:border-slate-500' : 'bg-slate-950/40 border-slate-900 opacity-50')
+            }">
+              <div>
+                <div class="flex items-center justify-between text-[10px] font-bold">
+                  <span class="${currentRank > 0 ? 'text-amber-300' : 'text-slate-300'} truncate">${pk.name}</span>
+                  <span class="text-[9px] px-1 rounded bg-slate-950 border border-slate-800 ${currentRank > 0 ? 'text-amber-400 font-bold' : 'text-slate-500'}">
+                    ${currentRank}/${pk.maxRank}
+                  </span>
+                </div>
+                <div class="text-[8.5px] text-slate-400 font-mono mt-0.5 leading-tight">${pk.desc}</div>
+              </div>
+              <div class="flex items-center justify-between border-t border-slate-800/80 pt-1 text-[8px] font-mono">
+                <span class="${effectiveScore >= pk.reqSpecial ? 'text-emerald-400 font-bold' : 'text-rose-400'}">REQ: ${letter} ${pk.reqSpecial}</span>
+                <button onclick="buySpecialPerk('${letter}', '${pk.id}')" class="px-2 py-0.5 rounded text-[8.5px] font-bold transition-all ${
+                  isMax ? 'bg-slate-800 text-slate-500 pointer-events-none' :
+                  (canAfford ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-glow-amber cursor-pointer animate-pulse' : 'bg-slate-800 text-slate-500 pointer-events-none')
+                }">
+                  ${isMax ? 'MAX' : '+ RANK'}
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `
+          <div class="flex flex-col gap-2 p-2.5 rounded-2xl bg-slate-900/70 border border-slate-800 font-mono">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+              <div class="flex items-center gap-1.5">
+                <span class="text-base">${colDef.icon}</span>
+                <div>
+                  <div class="text-[11px] font-bold" style="color: ${colDef.color};">${colDef.letter}. ${colDef.title}</div>
+                  <div class="text-[8px] text-slate-400">${raceBonus > 0 ? `+${raceBonus} Racial Affinity` : 'Base Attribute'}</div>
+                </div>
+              </div>
+              <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 text-white">${effectiveScore}</span>
+            </div>
+            <div class="space-y-2 mt-1">
+              ${perksHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function buySpecialPerk(statKey, perkId) {
+      const p = gameState.player;
+      p.perks = p.perks || {};
+      p.perkPoints = p.perkPoints || 0;
+      if (p.perkPoints <= 0) {
+        showToast("No Perk Points available! Level up to earn more.", "warning");
+        return;
+      }
+
+      const colDef = FALLOUT_SPECIAL_PERKS[statKey];
+      if (!colDef) return;
+      const pk = colDef.perks.find(item => item.id === perkId);
+      if (!pk) return;
+
+      const currentRank = p.perks[perkId] || 0;
+      if (currentRank >= pk.maxRank) return;
+
+      const rDef = HERO_RACES[p.race] || HERO_RACES.synth;
+      const affinities = rDef.affinities || {};
+      const raceBonus = affinities[statKey] || 0;
+      let colRanks = 0;
+      colDef.perks.forEach(item => colRanks += (p.perks[item.id] || 0));
+      const effectiveScore = 1 + raceBonus + colRanks;
+
+      if (effectiveScore < pk.reqSpecial) {
+        showToast(`Requires ${statKey} score of ${pk.reqSpecial}!`, "warning");
+        return;
+      }
+
+      p.perks[perkId] = currentRank + 1;
+      p.perkPoints--;
+
+      playSound('level');
+      playDubstepBassDrop(12);
+      createImpactParticles(p.x, p.y, colDef.color, 16);
+      triggerTelegramHaptic('success');
+
+      recalcPlayerStats();
+      renderSpecialPerksUI();
+      updateHUD();
+      showToast(`⚡ Upgraded Perk: ${pk.name} (Rank ${p.perks[perkId]}/${pk.maxRank})!`, "success");
+    }
+
+    function renderRaceClassUI() {
+      const p = gameState.player;
+      p.race = p.race || 'synth';
+      p.heroClass = p.heroClass || 'stalker';
+
+      const currentRace = HERO_RACES[p.race] || HERO_RACES.synth;
+      const currentClass = HERO_CLASSES[p.heroClass] || HERO_CLASSES.stalker;
+      const synKey = `${p.race}_${p.heroClass}`;
+      const synergy = RACE_CLASS_SYNERGIES[synKey] || {
+        title: `${currentRace.name.split(' ')[0]} ${currentClass.name.split(' ')[0]}`,
+        badge: '✨ HYBRID VIGOR',
+        desc: 'Custom synthesized combat harmony boosting total attributes.',
+        statBonus: { attack: 8, hp: 40 }
+      };
+
+      // 1. Synergy Header Card
+      const headerCard = document.getElementById('synergyHeroHeaderCard');
+      if (headerCard) {
+        headerCard.innerHTML = `
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-2xl bg-slate-950 border-2 border-purple-500/70 flex items-center justify-center text-3xl shadow-[0_0_20px_rgba(168,85,247,0.4)]">
+                ${currentRace.icon}
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-900/60 border border-purple-500/50 text-purple-300 uppercase tracking-widest">${synergy.badge}</span>
+                  <span class="text-[10px] text-cyan-400 font-bold">${currentRace.name} + ${currentClass.name}</span>
+                </div>
+                <div class="text-base font-bold text-white mt-0.5">${synergy.title}</div>
+                <div class="text-[10px] text-slate-300 mt-1 leading-tight max-w-xl">${synergy.desc}</div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2 text-[9px] bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 shrink-0">
+              <div class="text-emerald-400 font-bold">RACE TRAIT: ${currentRace.passiveName}</div>
+              <div class="text-cyan-400 font-bold">CLASS PASSIVE: ${currentClass.role}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. 6 Playable Races Grid
+      const raceGrid = document.getElementById('raceSelectionGrid');
+      if (raceGrid) {
+        let rHtml = '';
+        Object.values(HERO_RACES).forEach(r => {
+          const isSelected = p.race === r.id;
+          const affStr = Object.entries(r.affinities).map(([k, v]) => `+${v} ${k}`).join(', ');
+
+          rHtml += `
+            <div onclick="selectRace('${r.id}')" class="p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+              isSelected ? 'bg-emerald-950/40 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+            }">
+              <div>
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">${r.icon}</span>
+                    <span class="${isSelected ? 'text-emerald-300' : 'text-white'}">${r.name}</span>
+                  </div>
+                  ${isSelected ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-slate-950 font-black">ACTIVE</span>' : ''}
+                </div>
+                <div class="text-[9px] font-mono text-cyan-400 font-semibold mt-1">AFFINITY: ${affStr}</div>
+                <div class="text-[9px] text-slate-400 mt-1 leading-tight">${r.desc}</div>
+              </div>
+              <div class="border-t border-slate-800/80 pt-1.5 text-[8.5px] font-mono text-emerald-400">
+                <span class="font-bold">TRAIT:</span> ${r.passiveName}
+              </div>
+            </div>
+          `;
+        });
+        raceGrid.innerHTML = rHtml;
+      }
+
+      // 3. 5 Playable Classes Grid
+      const classGrid = document.getElementById('classSelectionGrid');
+      if (classGrid) {
+        let cHtml = '';
+        Object.values(HERO_CLASSES).forEach(c => {
+          const isSelected = p.heroClass === c.id;
+
+          cHtml += `
+            <div onclick="selectClass('${c.id}')" class="p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+              isSelected ? 'bg-cyan-950/40 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)] ring-1 ring-cyan-400' : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+            }">
+              <div>
+                <div class="flex items-center justify-between text-xs font-bold">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">${c.icon}</span>
+                    <span class="${isSelected ? 'text-cyan-300' : 'text-white'}">${c.name}</span>
+                  </div>
+                  ${isSelected ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500 text-slate-950 font-black">ACTIVE</span>' : ''}
+                </div>
+                <div class="text-[9px] font-mono text-amber-300 font-semibold mt-1">ROLE: ${c.role}</div>
+                <div class="text-[9px] text-slate-400 mt-1 leading-tight">${c.desc}</div>
+              </div>
+              <div class="border-t border-slate-800/80 pt-1.5 text-[8.5px] font-mono text-cyan-400">
+                <span class="font-bold">BONUS:</span> ${c.passive}
+              </div>
+            </div>
+          `;
+        });
+        classGrid.innerHTML = cHtml;
+      }
+    }
+
+    function selectRace(raceId) {
+      if (!HERO_RACES[raceId]) return;
+      gameState.player.race = raceId;
+      playSound('parry');
+      triggerTelegramHaptic('selection');
+      recalcPlayerStats();
+      updateEquippedUI();
+      renderRaceClassUI();
+      renderSpecialPerksUI();
+      updateHUD();
+      showToast(`Lineage Chosen: ${HERO_RACES[raceId].name}!`, "success");
+    }
+
+    function selectClass(classId) {
+      if (!HERO_CLASSES[classId]) return;
+      gameState.player.heroClass = classId;
+      playSound('parry');
+      triggerTelegramHaptic('selection');
+      recalcPlayerStats();
+      updateEquippedUI();
+      renderRaceClassUI();
+      renderSpecialPerksUI();
+      updateHUD();
+      showToast(`Combat Discipline Chosen: ${HERO_CLASSES[classId].name}!`, "success");
+    }
+
     function updateSkillsUI() {
       const avail = gameState.player.skillPoints;
       const pointEl = document.getElementById('modalSkillPointsAvail');
       if (pointEl) pointEl.textContent = avail;
+      const perkPts = gameState.player.perkPoints || 0;
+      const perkEl = document.getElementById('modalPerkPointsAvail');
+      if (perkEl) perkEl.textContent = perkPts;
+      const specEl = document.getElementById('specialPerkPtsDisplay');
+      if (specEl) specEl.textContent = perkPts;
 
       const container = document.getElementById('d3SkillTreeContainer');
       if (!container) return;
@@ -7838,6 +9035,11 @@
           Tone.Transport.pause();
         }
         if (modalId === 'inventoryModal') renderInventoryBag();
+      if (modalId === 'skillsModal') {
+        updateSkillsUI();
+        renderSpecialPerksUI();
+        renderRaceClassUI();
+      }
         if (modalId === 'skillsModal') updateSkillsUI();
         if (modalId === 'locationModal') renderDistricts();
       } else {
