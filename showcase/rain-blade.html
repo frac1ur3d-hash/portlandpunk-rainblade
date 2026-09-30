@@ -210,6 +210,35 @@
   </header>
 
   <main class="relative flex-1 w-full h-full overflow-hidden bg-slate-950 select-none">
+    <!-- ROTATE DEVICE TO HORIZONTAL / LANDSCAPE OVERLAY (MOBILE & TELEGRAM) -->
+    <div id="rotateDeviceOverlay" class="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 text-center select-none transition-all">
+      <div class="relative w-24 h-24 mb-6 flex items-center justify-center">
+        <!-- Animated Rotating Phone Frame -->
+        <div class="w-14 h-24 border-2 border-cyan-400 rounded-2xl flex flex-col items-center justify-between p-1.5 shadow-[0_0_25px_rgba(6,182,212,0.6)] animate-pulse">
+          <div class="w-4 h-1 bg-cyan-400/80 rounded-full mt-0.5"></div>
+          <div class="text-2xl select-none">⚔️</div>
+          <div class="w-2.5 h-2.5 rounded-full border border-cyan-400/80 mb-0.5"></div>
+        </div>
+        <div class="absolute -right-2 -bottom-2 text-3xl animate-bounce">🔄</div>
+      </div>
+
+      <h2 class="font-display font-black text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-emerald-300 to-amber-400 tracking-wider mb-2">
+        TURN PHONE HORIZONTAL
+      </h2>
+      <p class="text-sm font-mono text-slate-300 max-w-xs mb-5 leading-relaxed">
+        Rotate your device sideways to <span class="text-cyan-300 font-bold">Landscape mode</span> to play Rain Blade with full combat visibility and twin-stick controls.
+      </p>
+
+      <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-cyan-950/70 border border-cyan-500/40 text-cyan-300 text-xs font-mono mb-6 shadow-sm">
+        <span>📱</span>
+        <span>Make sure Auto-Rotate is enabled in phone settings</span>
+      </div>
+
+      <button onclick="dismissRotateOverlay()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white font-mono text-xs transition-all active:scale-95 cursor-pointer">
+        Continue in Portrait Anyway ➔
+      </button>
+    </div>
+
     <!-- Floating On-Screen Quick Pause Button (Mobile & Desktop Fallback - Translucent) -->
     <button onclick="togglePause()" class="absolute top-2.5 right-2.5 z-30 flex sm:hidden items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/40 hover:bg-amber-400/70 active:bg-amber-400 backdrop-blur-xs border border-amber-400/30 text-amber-200 font-mono font-bold text-[11px] shadow-sm active:scale-90 opacity-70 hover:opacity-100 transition-opacity" title="Pause">
       <span>⏸️</span>
@@ -1750,22 +1779,55 @@
     const ctx = canvas.getContext('2d');
 
     let cachedCanvasRect = { left: 0, top: 0, width: 800, height: 600 };
+    let userDismissedRotateOverlay = false;
+
+    function checkOrientation() {
+      const overlay = document.getElementById('rotateDeviceOverlay');
+      if (!overlay) return;
+
+      const isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0 || isTelegramMobile || window.innerWidth < 1024);
+      const isPortrait = window.innerHeight > window.innerWidth;
+
+      if (isMobile && isPortrait && !userDismissedRotateOverlay) {
+        overlay.classList.remove('hidden');
+      } else {
+        overlay.classList.add('hidden');
+      }
+    }
+
+    function dismissRotateOverlay() {
+      userDismissedRotateOverlay = true;
+      const overlay = document.getElementById('rotateDeviceOverlay');
+      if (overlay) overlay.classList.add('hidden');
+    }
+
     function resizeCanvas() {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = canvas.getBoundingClientRect();
+      const winW = window.innerWidth || document.documentElement.clientWidth || 800;
+      const winH = window.innerHeight || document.documentElement.clientHeight || 600;
+      const rect = canvas ? canvas.getBoundingClientRect() : { left: 0, top: 0, width: winW, height: winH };
+      const rawW = rect.width > 0 ? rect.width : winW;
+      const rawH = rect.height > 0 ? rect.height : winH;
+
       cachedCanvasRect = {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width || window.innerWidth,
-        height: rect.height || window.innerHeight
+        left: rect.left || 0,
+        top: rect.top || 0,
+        width: Math.max(320, Math.floor(rawW)),
+        height: Math.max(240, Math.floor(rawH))
       };
       gameState.canvasWidth = cachedCanvasRect.width;
       gameState.canvasHeight = cachedCanvasRect.height;
-      canvas.width = Math.floor(gameState.canvasWidth * dpr);
-      canvas.height = Math.floor(gameState.canvasHeight * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (canvas && ctx) {
+        canvas.width = Math.floor(gameState.canvasWidth * dpr);
+        canvas.height = Math.floor(gameState.canvasHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      checkOrientation();
     }
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(resizeCanvas, 150);
+    });
 
     window.addEventListener('keydown', (e) => {
       gameState.keys[e.key.toLowerCase()] = true;
@@ -4821,10 +4883,10 @@
 
       drawRainOverlay(w, h);
 
-      if (gameState.bassPulse > 0) {
+      if (gameState.bassPulse > 0 && w > 10 && h > 10) {
         ctx.save();
         ctx.globalAlpha = gameState.bassPulse * 0.45;
-        const grad = ctx.createRadialGradient(w / 2, h / 2, w * 0.3, w / 2, h / 2, w * 0.7);
+        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.max(1, w * 0.3), w / 2, h / 2, Math.max(2, w * 0.7));
         grad.addColorStop(0, 'rgba(6, 182, 212, 0)');
         grad.addColorStop(1, 'rgba(16, 185, 129, 0.65)');
         ctx.fillStyle = grad;
@@ -4834,12 +4896,18 @@
     }
 
     function gameLoop(timestamp) {
-      const dt = Math.min((timestamp - gameState.lastTimestamp) / 1000, 0.1);
-      gameState.lastTimestamp = timestamp;
+      try {
+        const now = timestamp || performance.now();
+        const dt = Math.min((now - (gameState.lastTimestamp || now)) / 1000, 0.1);
+        gameState.lastTimestamp = now;
 
-      update(dt);
-      render();
-
+        if (!gameState.isPaused) {
+          update(dt);
+        }
+        render();
+      } catch (err) {
+        console.error('GameLoop frame error:', err);
+      }
       requestAnimationFrame(gameLoop);
     }
 
@@ -6799,19 +6867,17 @@
     }
 
     function showToast(message, type = 'info', force = false) {
-      if (!force && !gameState.settings?.notificationsEnabled) {
-        const msg = (message || '').toLowerCase();
-        // Allow crucial milestones and explicit user modal actions
-        const isMilestone = msg.includes('level up') || msg.includes('apex boss slain');
-        const isModalAction = msg.includes('equipped') || msg.includes('unequipped') || 
-                              msg.includes('swapped') || msg.includes('scrapped') || 
-                              msg.includes('reforged') || msg.includes('checkpoint') ||
-                              msg.includes('mastered') || msg.includes('infused');
-        
-        if (!isMilestone && !isModalAction) {
-          // In combat / gameplay, suppress routine toasts: skills, cooldowns, energy, gadgets, loot drops, reforge-ready
-          return;
+      // Check if user is inside a menu/modal (inventory, skills, character, pause, district map)
+      const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal'].some(
+        id => {
+          const el = document.getElementById(id);
+          return el && !el.classList.contains('hidden');
         }
+      );
+
+      // In the gameplay arena, get rid of ALL cluttering notifications so battle visibility is never blocked!
+      if (!anyModalOpen && !force) {
+        return;
       }
 
       const container = document.getElementById('toastContainer');
@@ -6895,9 +6961,25 @@
       try {
         tg.ready();
         tg.expand();
-        tg.enableClosingConfirmation();
+        if (typeof tg.enableClosingConfirmation === 'function') {
+          try { tg.enableClosingConfirmation(); } catch (e) {}
+        }
         if (typeof tg.disableVerticalSwipes === 'function') {
           try { tg.disableVerticalSwipes(); } catch (e) {}
+        }
+        if (typeof tg.lockOrientation === 'function') {
+          try { tg.lockOrientation('landscape'); } catch (e) {}
+        }
+        if (typeof tg.requestFullscreen === 'function') {
+          try { tg.requestFullscreen(); } catch (e) {}
+        }
+        if (typeof tg.onEvent === 'function') {
+          try {
+            tg.onEvent('viewportChanged', () => {
+              resizeCanvas();
+              checkOrientation();
+            });
+          } catch (e) {}
         }
 
         // Sync player name from Telegram User profile
@@ -6938,17 +7020,18 @@
     }
 
     window.onload = function() {
-      initTelegramApp();
-      initNotificationSettings();
-      resizeCanvas();
-      initRain();
-      recalcPlayerStats();
-      renderDistricts();
-      renderInventoryBag();
-      updateEquippedUI();
-      updateSkillsUI();
-      updateHUD();
-      startNextWave();
+      try { initTelegramApp(); } catch (e) { console.warn(e); }
+      try { initNotificationSettings(); } catch (e) { console.warn(e); }
+      try { resizeCanvas(); } catch (e) { console.warn(e); }
+      try { initRain(); } catch (e) { console.warn(e); }
+      try { recalcPlayerStats(); } catch (e) { console.warn(e); }
+      try { renderDistricts(); } catch (e) { console.warn(e); }
+      try { renderInventoryBag(); } catch (e) { console.warn(e); }
+      try { updateEquippedUI(); } catch (e) { console.warn(e); }
+      try { updateSkillsUI(); } catch (e) { console.warn(e); }
+      try { updateHUD(); } catch (e) { console.warn(e); }
+      try { startNextWave(); } catch (e) { console.warn(e); }
+      try { checkOrientation(); } catch (e) { console.warn(e); }
 
       requestAnimationFrame(gameLoop);
 
@@ -6961,15 +7044,29 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         if (!gameState.isPaused && !gameState.bossActive && !gameState.intermissionActive) {
+          gameState.autoPausedByVisibility = true;
           gameState.isPaused = true;
         }
         if (audioInitialized && typeof Tone !== 'undefined' && Tone.Transport.state === 'started') {
-          Tone.Transport.pause();
+          try { Tone.Transport.pause(); } catch (e) {}
         }
       } else {
         gameState.lastTimestamp = performance.now();
+        if (gameState.autoPausedByVisibility) {
+          gameState.autoPausedByVisibility = false;
+          // Auto-resume gameplay if no modal is actively blocking the screen
+          const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal'].some(
+            id => {
+              const el = document.getElementById(id);
+              return el && !el.classList.contains('hidden');
+            }
+          );
+          if (!anyModalOpen) {
+            gameState.isPaused = false;
+          }
+        }
         if (gameState.audioEnabled && audioInitialized && typeof Tone !== 'undefined') {
-          Tone.Transport.start();
+          try { Tone.Transport.start(); } catch (e) {}
         }
       }
     });
