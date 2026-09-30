@@ -435,11 +435,13 @@
                ondragleave="handleDragLeavePaperdoll(event)"
                ondrop="handleDropOnPaperdoll(event)"
                class="relative w-full max-w-[350px] h-[390px] flex items-center justify-center rounded-2xl bg-gradient-to-b from-slate-900/50 via-slate-950 to-slate-900/30 border border-slate-800/60 p-2 transition-all">
-            <!-- Center Hero 8-Bit Silhouette -->
-            <div class="absolute inset-0 flex flex-col items-center justify-center opacity-70 pointer-events-none">
-              <div class="text-7xl select-none filter drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">🥷</div>
-              <div class="text-[10px] font-mono text-cyan-400 font-bold mt-1 tracking-widest" id="d4HeroNameDisplay">RAIN-WALKER</div>
-              <div class="text-[9px] font-mono text-slate-500">OPERATIVE LVL <span id="d4HeroLvlDisplay">1</span></div>
+            <!-- Center Hero Dynamic Paperdoll Attire Avatar -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0">
+              <div id="d4HeroAvatarContainer" class="relative w-36 h-48 flex items-center justify-center">
+                <canvas id="d4PaperdollCanvas" width="144" height="192" class="image-rendering-pixelated drop-shadow-[0_0_25px_rgba(0,245,255,0.4)]"></canvas>
+              </div>
+              <div class="text-[11px] font-mono text-cyan-400 font-bold mt-1 tracking-widest drop-shadow" id="d4HeroNameDisplay">RAIN-WALKER</div>
+              <div class="text-[9px] font-mono text-slate-400">OPERATIVE LVL <span id="d4HeroLvlDisplay" class="text-amber-300 font-bold">1</span> • <span id="d4HeroSetCountDisplay" class="text-emerald-400 font-bold">NO SET</span></div>
             </div>
 
             <!-- 1. Top Center: Head / Cyber-Visor -->
@@ -1084,7 +1086,7 @@
 
   <script>
     
-    // === DIABLO-STYLE SET DEFINITIONS (EMERALD GREEN TIER) ===
+    // === DIABLO-STYLE SET DEFINITIONS (6 COMPLETE 6-PIECE THEMED SETS) ===
     const GEAR_SETS = {
       stumptown_roaster: {
         id: 'stumptown_roaster',
@@ -1117,8 +1119,8 @@
           "Rose City Thorn Signet"
         ],
         bonuses: [
-          { count: 2, text: "(2) Set: +100 Max HP & +25 Armor Rating" },
-          { count: 4, text: "(4) Set: Thorn Aegis (Reflects 40% Melee Damage to Attackers)" },
+          { count: 2, text: "(2) Set: +120 Max HP & +25 Armor Rating" },
+          { count: 4, text: "(4) Set: Thorn Aegis (Reflects 50% Melee Damage to Attackers)" },
           { count: 6, text: "(6) Set: Avatar of the Rose God (Summons rotating briar cyclones)" }
         ]
       },
@@ -1135,9 +1137,63 @@
           "Willamette River Obsidian Ring"
         ],
         bonuses: [
-          { count: 2, text: "(2) Set: +15% Crit Chance & +20% Dash Distance" },
+          { count: 2, text: "(2) Set: +18% Crit Chance & +25% Dash Distance" },
           { count: 4, text: "(4) Set: Dual-Wield +50% Damage & Guaranteed Blade Ricochet" },
-          { count: 6, text: "(6) Set: Anarchy Overdrive (Enemy kills reset Dash, 5+ combo gives Invulnerability)" }
+          { count: 6, text: "(6) Set: Anarchy Overdrive (Enemy kills reset Dash, 5+ combo grants Invulnerability)" }
+        ]
+      },
+      cascade_cryomancer: {
+        id: 'cascade_cryomancer',
+        name: 'Cascade Cryomancer',
+        color: '#38bdf8',
+        pieces: [
+          "Glacial Hood of Mt. Hood",
+          "Cryo-Leyline Frost Katana",
+          "Permafrost Tactical Trench",
+          "Sub-Zero Alpine Treads",
+          "Cryo-Crystal Shard Signet",
+          "Frozen Leyline Heart"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +80 Max HP & Chilling Frost Slashes (Slows foes 40%)" },
+          { count: 4, text: "(4) Set: Piercing Frost Shards (+35 Cryo Dmg on attack)" },
+          { count: 6, text: "(6) Set: Absolute Zero (Defensive Frost Nova on hit; 3 orbiting icicles)" }
+        ]
+      },
+      chinatown_dragon: {
+        id: 'chinatown_dragon',
+        name: 'Chinatown Dragon Syndicate',
+        color: '#f59e0b',
+        pieces: [
+          "Dragon Kabuto Helm",
+          "Crimson Dragon Fang Katana",
+          "Imperial Silk Combat Gi",
+          "Dragonscale Shin Guards",
+          "Jade Dragon Talisman Ring",
+          "Chinatown Leyline Pearl"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +25 Attack Power & +12% Lifesteal on Slash" },
+          { count: 4, text: "(4) Set: Dragon Fire Cleave (Ignites enemies for 3s burn DoT, +40% Area)" },
+          { count: 6, text: "(6) Set: Dragon Awakening (Celestial fiery dragon spirit circles hero)" }
+        ]
+      },
+      bridge_city_sentinel: {
+        id: 'bridge_city_sentinel',
+        name: 'Bridge City Sentinel',
+        color: '#60a5fa',
+        pieces: [
+          "Sentinel Cathedral Visor",
+          "Tesla Coil Edge",
+          "St. Johns Cathedral Shield",
+          "Heavy Titanite Plate",
+          "Mag-Lev Kinetic Greaves",
+          "Suspension Cable Core"
+        ],
+        bonuses: [
+          { count: 2, text: "(2) Set: +35 Armor Rating & Kinetic Shield Barrier absorbing 15% damage" },
+          { count: 4, text: "(4) Set: Tesla Arc Discharge (Slashes chain lightning to 3 nearby foes)" },
+          { count: 6, text: "(6) Set: Cathedral Thunderstorm (Ambient lightning strikes nearby foes every 1.5s)" }
         ]
       }
     };
@@ -2062,8 +2118,20 @@
 
       const aimAngle = p.angle;
       const weaponDamage = p.baseAttack + (gameState.equipped.weapon ? gameState.equipped.weapon.damage : 0);
-      const arcSpread = p.attackComboStep === 2 ? Math.PI * 0.95 : Math.PI * 0.65;
-      const range = p.attackComboStep === 2 ? 90 : 74;
+      let arcSpread = p.attackComboStep === 2 ? Math.PI * 0.95 : Math.PI * 0.65;
+      if (p.activeSetBonuses && p.activeSetBonuses['dragon_4']) arcSpread *= 1.4; // Dragon Fire Cleave +40% Area
+      const range = p.attackComboStep === 2 ? 92 : 76;
+
+      // Themed Slash Colors based on equipped weapon and active set
+      let slashColor = p.attackComboStep === 2 ? '#38bdf8' : '#10b981';
+      const eqW = gameState.equipped.weapon;
+      if (eqW) {
+        if (eqW.setId === 'chinatown_dragon' || eqW.name.includes('Dragon') || eqW.name.includes('Flame')) slashColor = '#ef4444';
+        else if (eqW.setId === 'cascade_cryomancer' || eqW.name.includes('Cryo') || eqW.name.includes('Frost')) slashColor = '#38bdf8';
+        else if (eqW.setId === 'bridge_city_sentinel' || eqW.name.includes('Tesla')) slashColor = '#60a5fa';
+        else if (eqW.setId === 'burnside_anarchist' || eqW.name.includes('Machete')) slashColor = '#34d399';
+        else if (eqW.setId === 'rose_thornstalker' || eqW.name.includes('Rosewood')) slashColor = '#10b981';
+      }
 
       gameState.slashes.push({
         x: p.x,
@@ -2073,9 +2141,23 @@
         spread: arcSpread,
         timer: 0.20,
         maxTimer: 0.20,
-        color: p.attackComboStep === 2 ? '#38bdf8' : '#10b981',
+        color: slashColor,
         type: 'cleave'
       });
+
+      // (4) Stumptown Roaster Set Bonus: Slashes emit Espresso Shockwave
+      if (p.activeSetBonuses && p.activeSetBonuses['stumptown_4']) {
+        spawnProjectile(p.x, p.y, p.x + Math.cos(aimAngle) * 320, p.y + Math.sin(aimAngle) * 320, 6.5, 30, '#f59e0b', 8);
+        createImpactParticles(p.x, p.y, '#f59e0b', 4);
+      }
+
+      // (4) Cascade Cryomancer Set Bonus: Slashes release Piercing Ice Shards
+      if (p.activeSetBonuses && p.activeSetBonuses['cryo_4']) {
+        const s1 = aimAngle - 0.22;
+        const s2 = aimAngle + 0.22;
+        spawnProjectile(p.x, p.y, p.x + Math.cos(s1) * 300, p.y + Math.sin(s1) * 300, 7.0, 35, '#38bdf8', 6);
+        spawnProjectile(p.x, p.y, p.x + Math.cos(s2) * 300, p.y + Math.sin(s2) * 300, 7.0, 35, '#38bdf8', 6);
+      }
 
       let hitCount = 0;
       gameState.enemies.forEach(enemy => {
@@ -2089,17 +2171,53 @@
 
           if (diffAngle <= arcSpread / 2) {
             hitCount++;
-            const isCrit = Math.random() < 0.22;
-            const finalDmg = Math.round(weaponDamage * (isCrit ? 1.8 : 1.0) * (p.attackComboStep === 2 ? 1.35 : 1.0));
+            const isCrit = Math.random() < (p.critChance || 0.22);
+            const finalDmg = Math.round(weaponDamage * (isCrit ? 1.85 : 1.0) * (p.attackComboStep === 2 ? 1.35 : 1.0));
             enemy.hp -= finalDmg;
 
             const knock = p.attackComboStep === 2 ? 18 : 9;
             enemy.x += Math.cos(enemyAngle) * knock;
             enemy.y += Math.sin(enemyAngle) * knock;
-            enemy.hitFlash = 0.12;
+            enemy.hitFlash = 0.14;
 
-            createImpactParticles(enemy.x, enemy.y, enemy.accentColor || '#10b981');
+            createImpactParticles(enemy.x, enemy.y, enemy.accentColor || slashColor);
             addFloatingText(`-${finalDmg}`, enemy.x, enemy.y - 12, isCrit ? '#f43f5e' : '#ffffff', isCrit ? 18 : 14);
+
+            // (2) Cascade Cryomancer: Chilling Frost Slashes (Slows enemies 40%)
+            if (p.activeSetBonuses && p.activeSetBonuses['cryo_2']) {
+              enemy.isChilled = 2.5;
+              createImpactParticles(enemy.x, enemy.y, '#38bdf8', 3);
+            }
+
+            // (2) Chinatown Dragon: +12% Lifesteal
+            if (p.activeSetBonuses && p.activeSetBonuses['dragon_2']) {
+              const healAmt = Math.max(1, Math.round(finalDmg * 0.12));
+              p.hp = Math.min(p.maxHp, p.hp + healAmt);
+              addFloatingText(`+${healAmt} HP`, p.x, p.y - 18, '#10b981', 12);
+            }
+
+            // (4) Chinatown Dragon: Dragon Fire Cleave (3s burn DoT)
+            if (p.activeSetBonuses && p.activeSetBonuses['dragon_4']) {
+              enemy.burnTimer = 3.0;
+              enemy.burnDmg = 14;
+            }
+
+            // (4) Bridge City Sentinel: Tesla Arc Discharge (Chain lightning to 3 nearby foes)
+            if (p.activeSetBonuses && p.activeSetBonuses['sentinel_4']) {
+              let arcCount = 0;
+              gameState.enemies.forEach(other => {
+                if (other !== enemy && other.hp > 0 && arcCount < 3) {
+                  const od = Math.hypot(other.x - enemy.x, other.y - enemy.y);
+                  if (od < 180) {
+                    arcCount++;
+                    other.hp -= 30;
+                    other.hitFlash = 0.15;
+                    addFloatingText('TESLA -30', other.x, other.y - 14, '#60a5fa', 13);
+                    createImpactParticles(other.x, other.y, '#60a5fa', 6);
+                  }
+                }
+              });
+            }
           }
         }
       });
@@ -2325,105 +2443,112 @@
     const MONSTER_ROSTER = [
       {
         typeId: 'crow_swarmer',
-        name: 'Brimstone Alley Crow',
+        name: 'Brimstone Alley Cyber-Drone',
         role: 'swarmer',
-        baseHp: 42,
-        baseSpeed: 4.2,
-        baseDmg: 8,
+        spriteKey: 'drone',
+        baseHp: 44,
+        baseSpeed: 4.3,
+        baseDmg: 9,
         radius: 14,
-        color: '#334155',
-        accentColor: '#94a3b8',
+        color: '#38bdf8',
+        accentColor: '#00f5ff',
         minTier: 1,
-        xpReward: 25,
-        beanReward: 12
+        xpReward: 26,
+        beanReward: 14
       },
       {
         typeId: 'barista_grunt',
-        name: 'Over-Caffeinated Barista',
+        name: 'Over-Caffeinated Mohawk Brawler',
         role: 'melee',
-        baseHp: 78,
-        baseSpeed: 2.9,
-        baseDmg: 15,
+        spriteKey: 'punk',
+        baseHp: 85,
+        baseSpeed: 3.0,
+        baseDmg: 16,
         radius: 17,
         color: '#b45309',
         accentColor: '#f59e0b',
         minTier: 1,
-        xpReward: 40,
-        beanReward: 20
+        xpReward: 42,
+        beanReward: 22
       },
       {
         typeId: 'sludge_spitter',
-        name: 'Willamette Sludge Spitter',
+        name: 'Willamette Acid Slime Spitter',
         role: 'ranged',
-        baseHp: 65,
-        baseSpeed: 2.2,
-        baseDmg: 16,
+        spriteKey: 'sludge',
+        baseHp: 72,
+        baseSpeed: 2.3,
+        baseDmg: 18,
         radius: 16,
         color: '#0284c7',
         accentColor: '#38bdf8',
         minTier: 2,
-        shootCooldown: 2.3,
+        shootCooldown: 2.2,
         preferredDist: 210,
-        xpReward: 55,
-        beanReward: 26
+        xpReward: 58,
+        beanReward: 28
       },
       {
         typeId: 'moss_brute',
         name: 'Forest Park Briar Behemoth',
         role: 'brute',
-        baseHp: 210,
+        spriteKey: 'moss_titan',
+        baseHp: 225,
         baseSpeed: 1.8,
-        baseDmg: 30,
+        baseDmg: 32,
         radius: 26,
         color: '#065f46',
         accentColor: '#10b981',
         minTier: 2,
-        chargeCooldown: 4.5,
-        xpReward: 95,
-        beanReward: 45
+        chargeCooldown: 4.2,
+        xpReward: 100,
+        beanReward: 48
       },
       {
         typeId: 'tunnel_wraith',
-        name: 'Shanghai Tunnel Phantom',
+        name: 'Shanghai Tunnel Phantom Assassin',
         role: 'assassin',
-        baseHp: 95,
-        baseSpeed: 4.5,
-        baseDmg: 24,
+        spriteKey: 'wraith',
+        baseHp: 105,
+        baseSpeed: 4.6,
+        baseDmg: 26,
         radius: 16,
         color: '#881337',
         accentColor: '#f43f5e',
         minTier: 3,
-        xpReward: 80,
-        beanReward: 38
+        xpReward: 85,
+        beanReward: 40
       },
       {
         typeId: 'toxic_shroom',
-        name: 'Mycelium Spore Creeper',
+        name: 'Mycelium Bioluminescent Creeper',
         role: 'exploder',
-        baseHp: 55,
-        baseSpeed: 3.5,
-        baseDmg: 42,
+        spriteKey: 'creeper',
+        baseHp: 60,
+        baseSpeed: 3.6,
+        baseDmg: 45,
         radius: 15,
         color: '#701a75',
         accentColor: '#e879f9',
         minTier: 3,
-        xpReward: 70,
-        beanReward: 32
+        xpReward: 75,
+        beanReward: 35
       },
       {
         typeId: 'gothic_gargoyle',
-        name: 'St. Johns Iron Gargoyle',
+        name: 'St. Johns Winged Iron Gargoyle',
         role: 'brute',
-        baseHp: 320,
-        baseSpeed: 2.2,
-        baseDmg: 38,
+        spriteKey: 'gargoyle',
+        baseHp: 340,
+        baseSpeed: 2.3,
+        baseDmg: 40,
         radius: 28,
         color: '#1e293b',
-        accentColor: '#38bdf8',
+        accentColor: '#60a5fa',
         minTier: 4,
-        chargeCooldown: 4.0,
-        xpReward: 140,
-        beanReward: 65
+        chargeCooldown: 3.8,
+        xpReward: 150,
+        beanReward: 70
       }
     ];
 
@@ -2607,6 +2732,7 @@
 
       gameState.enemies.push({
         isBoss: true,
+        bossType: districtId,
         name: template.name,
         title: template.title,
         x: bx,
@@ -2646,19 +2772,31 @@
         const hp = Math.round(archetype.baseHp * waveMult);
         const dmg = Math.round(archetype.baseDmg * (1 + (gameState.wave * 0.08)));
 
+        // Elite Affix System (Wave 2+ escalation)
+        const isElite = (gameState.wave >= 2 && Math.random() < Math.min(0.40, 0.12 + gameState.wave * 0.04));
+        const eliteAffixes = ['molten', 'frozen', 'electrified', 'vampiric'];
+        const affix = isElite ? eliteAffixes[Math.floor(Math.random() * eliteAffixes.length)] : null;
+        const finalHp = isElite ? Math.round(hp * 1.6) : hp;
+        const finalRadius = isElite ? Math.round(archetype.radius * 1.3) : archetype.radius;
+        const finalName = isElite ? `👑 [${affix.toUpperCase()}] ${archetype.name}` : archetype.name;
+
         gameState.enemies.push({
+          archetypeId: archetype.typeId,
+          isElite: !!isElite,
+          affix: affix,
+          affixTimer: 0,
           x: ex,
           y: ey,
           vx: 0,
           vy: 0,
-          hp: hp,
-          maxHp: hp,
+          hp: finalHp,
+          maxHp: finalHp,
           speed: archetype.baseSpeed * (0.92 + Math.random() * 0.16),
           damage: dmg,
-          radius: archetype.radius,
+          radius: finalRadius,
           color: archetype.color,
           accentColor: archetype.accentColor,
-          name: archetype.name,
+          name: finalName,
           role: archetype.role,
           shootCooldown: archetype.shootCooldown || 0,
           shootTimer: Math.random() * 2,
@@ -2669,8 +2807,8 @@
           chargeDirX: 0,
           chargeDirY: 0,
           preferredDist: archetype.preferredDist || 0,
-          xpReward: Math.round(archetype.xpReward * (1 + gameState.wave * 0.08)),
-          beanReward: Math.round(archetype.beanReward * (1 + gameState.wave * 0.08)),
+          xpReward: Math.round(archetype.xpReward * (isElite ? 2.2 : 1) * (1 + gameState.wave * 0.08)),
+          beanReward: Math.round(archetype.beanReward * (isElite ? 2.5 : 1) * (1 + gameState.wave * 0.08)),
           hitFlash: 0,
           attackCd: Math.random() * 1.5
         });
@@ -3800,42 +3938,78 @@
 ];
 
     function dropLoot(x, y) {
-      const beanAmount = 15 + Math.floor(Math.random() * 25);
+      let beanAmount = 15 + Math.floor(Math.random() * 25);
+      if (gameState.player.activeSetBonuses && gameState.player.activeSetBonuses['stumptown_6']) {
+        beanAmount = Math.round(beanAmount * 1.5); // +50% Beans from Stumptown (6) Set
+      }
       gameState.player.beans += beanAmount;
       playSound('coin');
       addFloatingText(`+${beanAmount} Beans`, x, y - 18, '#fbbf24', 13);
 
-      const dropChance = 0.50;
+      const dropChance = 0.55;
       if (Math.random() < dropChance) {
         const extraDrops = [
-          { name: 'Rain-City AR Visor', type: 'head', icon: '🥽', tier: 'Uncommon', hp: 30, critChance: 0.05, bonus: '+30 HP, +5% Crit', value: 65 },
-          { name: 'Hawthorne Cryptid Cowl', type: 'head', icon: '🥷', tier: 'Rare', hp: 55, critChance: 0.10, bonus: '+55 HP, +10% Crit', value: 110 },
-          { name: 'Stumptown Burlap Hood', type: 'head', icon: '🧢', tier: 'Epic', hp: 80, critChance: 0.14, bonus: '+80 HP, +14% Crit, Leyline Cloak', value: 160 },
-          { name: 'Burnside Riot Deflector', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Rare', armor: 16, blockChance: 0.18, bonus: '+16 Armor, +18% Block Chance', value: 95 },
-          { name: 'Tanto Cyber-Wakizashi (Dual-Wield)',
-          setId: 'burnside_anarchist', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 24, attackSpeedBonus: 0.25, bonus: '+24 Dual-Slash Dmg, +25% Speed', value: 155 },
-          { name: 'Eastside Deflector Aegis', type: 'offhand', subType: 'shield', icon: '🔰', tier: 'Legendary', armor: 28, blockChance: 0.25, bonus: '+28 Armor, +25% Block, Kinetic Pulse', value: 210 },
-          { name: "Powell's Puddle Jumpers", type: 'boots', icon: '👢', tier: 'Uncommon', speedBonus: 0.15, bonus: '+15% Move Speed', value: 70 },
-          { name: 'Overclocked Doc Martens', type: 'boots', icon: '🥾', tier: 'Rare', speedBonus: 0.22, armor: 8, bonus: '+22% Speed, +8 Armor', value: 120 },
-          { name: 'Forest Park Mud-Stompers', type: 'boots', icon: '👟', tier: 'Epic', speedBonus: 0.30, bonus: '+30% Speed, Instant Dash Reset', value: 165 },
-          { name: 'Stumptown Leyline Band', type: 'ring', icon: '💍', tier: 'Rare', damage: 12, ricochetBonus: 0.25, bonus: '+12 Dmg, +25% Ricochet Crit', value: 100 },
-          { name: 'Rose City Thorn Signet', type: 'ring', icon: '💎', tier: 'Rare', beanBonus: 0.30, bonus: '+30% Extra Beans Found', value: 105 },
-          { name: 'Willamette Obsidian Signet', type: 'ring', icon: '💍', tier: 'Legendary', damage: 20, critChance: 0.12, bonus: '+20 Dmg, +12% Crit', value: 220 },
-          // Belts
-          { name: 'Burnside Skate Tool Belt', type: 'belt', icon: '🥋', tier: 'Uncommon', hp: 35, armor: 10, bonus: '+35 HP, +10 Armor, 1 Gem Socket', value: 75, sockets: 1, gems: [] },
-          { name: 'Cargo Heavy Duty Rigging Belt', type: 'belt', icon: '🎗️', tier: 'Rare', hp: 60, armor: 16, bonus: '+60 HP, +16 Armor, Kinetic Dampening', value: 125, sockets: 2, gems: ['amber'] },
-          { name: 'Stumptown Barista Apron Belt', type: 'belt', icon: '🎽', tier: 'Epic', hp: 85, armor: 22, bonus: '+85 HP, +22 Armor, +15% Energy Regen', value: 185, sockets: 2, gems: ['quartz'] },
-          // Trinkets & Active Urban Gadgets
+          // ── SET 1: STUMPTOWN ROASTER ──
+          { name: "Roaster's Cyber-Visor", setId: 'stumptown_roaster', type: 'head', icon: '🥽', tier: 'Epic', hp: 60, critChance: 0.10, bonus: '+60 HP, +10% Crit [Roaster Set]', value: 160 },
+          { name: "Steam-Spike Leyline Katana", setId: 'stumptown_roaster', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 32, bonus: '+32 Attack, Steam Spike [Roaster Set]', value: 175 },
+          { name: "Barista Reinforced Apron", setId: 'stumptown_roaster', type: 'armor', icon: '🧥', tier: 'Epic', hp: 110, armor: 22, bonus: '+110 HP, +22 Armor [Roaster Set]', value: 180 },
+          { name: "Espresso Puddle Jumpers", setId: 'stumptown_roaster', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Roaster Set]', value: 155 },
+          { name: "Stumptown Leyline Signet", setId: 'stumptown_roaster', type: 'ring', icon: '💍', tier: 'Epic', damage: 16, ricochetBonus: 0.35, bonus: '+16 Dmg, +35% Ricochet [Roaster Set]', value: 165 },
+          { name: "Espresso Quantum Core", setId: 'stumptown_roaster', type: 'relic', icon: '☕', tier: 'Epic', hp: 80, speedBonus: 0.20, bonus: '+80 HP, +20% Speed [Roaster Set]', value: 190 },
+
+          // ── SET 2: ROSE CITY THORNSTALKER ──
+          { name: "Briar Cryptid Mask", setId: 'rose_thornstalker', type: 'head', icon: '🦌', tier: 'Epic', hp: 90, armor: 15, bonus: '+90 HP, +15 Armor [Thornstalker Set]', value: 165 },
+          { name: "Rosewood Leyline Cleaver", setId: 'rose_thornstalker', type: 'weapon', icon: '🪓', tier: 'Epic', damage: 34, bonus: '+34 Attack, Thorn Cleave [Thornstalker Set]', value: 180 },
+          { name: "Portlandia Spiked Aegis", setId: 'rose_thornstalker', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Epic', armor: 30, blockChance: 0.28, bonus: '+30 Armor, +28% Block [Thornstalker Set]', value: 195 },
+          { name: "Thorn-Woven Trench", setId: 'rose_thornstalker', type: 'armor', icon: '🧥', tier: 'Epic', hp: 140, armor: 26, bonus: '+140 HP, +26 Armor [Thornstalker Set]', value: 190 },
+          { name: "Forest Park Briar Runners", setId: 'rose_thornstalker', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.24, armor: 12, bonus: '+24% Speed, +12 Armor [Thornstalker Set]', value: 160 },
+          { name: "Rose City Thorn Signet", setId: 'rose_thornstalker', type: 'ring', icon: '💎', tier: 'Epic', beanBonus: 0.40, hp: 60, bonus: '+60 HP, +40% Extra Beans [Thornstalker Set]', value: 170 },
+
+          // ── SET 3: BURNSIDE ANARCHIST ──
+          { name: "Anarchist Gas Respirator", setId: 'burnside_anarchist', type: 'head', icon: '👺', tier: 'Epic', hp: 70, critChance: 0.14, bonus: '+70 HP, +14% Crit [Anarchist Set]', value: 160 },
+          { name: "Burnside Anarchy Machete", setId: 'burnside_anarchist', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 35, bonus: '+35 Attack, Urban Serration [Anarchist Set]', value: 185 },
+          { name: "Tanto Cyber-Wakizashi (Dual-Wield)", setId: 'burnside_anarchist', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 26, attackSpeedBonus: 0.30, bonus: '+26 Dual-Slash Dmg, +30% Speed [Anarchist Set]', value: 175 },
+          { name: "Kevlar Flannel Vest", setId: 'burnside_anarchist', type: 'armor', icon: '🎽', tier: 'Epic', hp: 100, armor: 20, bonus: '+100 HP, +20 Armor [Anarchist Set]', value: 180 },
+          { name: "Overclocked Doc Martens", setId: 'burnside_anarchist', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.32, armor: 10, bonus: '+32% Speed, +10 Armor [Anarchist Set]', value: 170 },
+          { name: "Willamette River Obsidian Ring", setId: 'burnside_anarchist', type: 'ring', icon: '💍', tier: 'Epic', damage: 22, critChance: 0.15, bonus: '+22 Dmg, +15% Crit [Anarchist Set]', value: 185 },
+
+          // ── SET 4: CASCADE CRYOMANCER ──
+          { name: "Glacial Hood of Mt. Hood", setId: 'cascade_cryomancer', type: 'head', icon: '❄️', tier: 'Epic', hp: 75, critChance: 0.12, bonus: '+75 HP, +12% Crit, Cryo-Chill [Cryo Set]', value: 170 },
+          { name: "Cryo-Leyline Frost Katana", setId: 'cascade_cryomancer', type: 'weapon', icon: '⚔️', tier: 'Epic', damage: 33, bonus: '+33 Attack, Frostbite Blade [Cryo Set]', value: 185 },
+          { name: "Permafrost Tactical Trench", setId: 'cascade_cryomancer', type: 'armor', icon: '🧥', tier: 'Epic', hp: 125, armor: 24, bonus: '+125 HP, +24 Armor [Cryo Set]', value: 190 },
+          { name: "Sub-Zero Alpine Treads", setId: 'cascade_cryomancer', type: 'boots', icon: '⛸️', tier: 'Epic', speedBonus: 0.26, armor: 12, bonus: '+26% Speed, Frost Trail [Cryo Set]', value: 165 },
+          { name: "Cryo-Crystal Shard Signet", setId: 'cascade_cryomancer', type: 'ring', icon: '💍', tier: 'Epic', damage: 18, critChance: 0.10, bonus: '+18 Dmg, +10% Crit [Cryo Set]', value: 175 },
+          { name: "Frozen Leyline Heart", setId: 'cascade_cryomancer', type: 'relic', icon: '🧊', tier: 'Epic', hp: 95, armor: 18, bonus: '+95 HP, +18 Armor [Cryo Set]', value: 200 },
+
+          // ── SET 5: CHINATOWN DRAGON SYNDICATE ──
+          { name: "Dragon Kabuto Helm", setId: 'chinatown_dragon', type: 'head', icon: '🪖', tier: 'Epic', hp: 85, critChance: 0.12, bonus: '+85 HP, +12% Crit [Dragon Set]', value: 175 },
+          { name: "Crimson Dragon Fang Katana", setId: 'chinatown_dragon', type: 'weapon', icon: '🗡️', tier: 'Legendary', damage: 38, bonus: '+38 Attack, Dragon Flame [Dragon Set]', value: 240 },
+          { name: "Imperial Silk Combat Gi", setId: 'chinatown_dragon', type: 'armor', icon: '🥋', tier: 'Epic', hp: 115, armor: 22, bonus: '+115 HP, +22 Armor [Dragon Set]', value: 185 },
+          { name: "Dragonscale Shin Guards", setId: 'chinatown_dragon', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Dragon Set]', value: 165 },
+          { name: "Jade Dragon Talisman Ring", setId: 'chinatown_dragon', type: 'ring', icon: '💍', tier: 'Epic', damage: 20, hp: 50, bonus: '+20 Dmg, +50 HP [Dragon Set]', value: 180 },
+          { name: "Chinatown Leyline Pearl", setId: 'chinatown_dragon', type: 'offhand', subType: 'dualwield', icon: '🔮', tier: 'Epic', damage: 24, attackSpeedBonus: 0.20, bonus: '+24 Mystic Burn Dmg [Dragon Set]', value: 190 },
+
+          // ── SET 6: BRIDGE CITY SENTINEL ──
+          { name: "Sentinel Cathedral Visor", setId: 'bridge_city_sentinel', type: 'head', icon: '👑', tier: 'Epic', hp: 80, armor: 16, bonus: '+80 HP, +16 Armor [Sentinel Set]', value: 170 },
+          { name: "Tesla Coil Edge", setId: 'bridge_city_sentinel', type: 'weapon', icon: '⚡', tier: 'Epic', damage: 35, bonus: '+35 Attack, Tesla Shock [Sentinel Set]', value: 190 },
+          { name: "St. Johns Cathedral Shield", setId: 'bridge_city_sentinel', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Legendary', armor: 35, blockChance: 0.32, bonus: '+35 Armor, +32% Block [Sentinel Set]', value: 235 },
+          { name: "Heavy Titanite Plate", setId: 'bridge_city_sentinel', type: 'armor', icon: '🦺', tier: 'Epic', hp: 150, armor: 32, bonus: '+150 HP, +32 Armor [Sentinel Set]', value: 200 },
+          { name: "Mag-Lev Kinetic Greaves", setId: 'bridge_city_sentinel', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.25, armor: 16, bonus: '+25% Speed, +16 Armor [Sentinel Set]', value: 170 },
+          { name: "Suspension Cable Core", setId: 'bridge_city_sentinel', type: 'belt', icon: '🎗️', tier: 'Epic', hp: 75, armor: 20, bonus: '+75 HP, +20 Armor [Sentinel Set]', value: 180 },
+
+          // Utility Trinkets
           { name: 'MAX Transit Pass of Phasing', type: 'trinket', icon: '🎫', tier: 'Rare', bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)', value: 130, activeAbility: 'phasing', sockets: 1, gems: [] },
           { name: 'Nitro Cold Foam Injector', type: 'trinket', icon: '🧪', tier: 'Rare', bonus: 'Active [T]: 100% Caffeination & 4s Overdrive (18s CD)', value: 140, activeAbility: 'nitro', sockets: 1, gems: ['amber'] },
           { name: 'Burnside EMP Disrupter', type: 'trinket', icon: '📡', tier: 'Epic', bonus: 'Active [T]: 360° Shockwave Deflect & Stun (15s CD)', value: 195, activeAbility: 'emp', sockets: 2, gems: ['pearl'] },
           { name: 'Voodoo Glaze Emergency Vial', type: 'trinket', icon: '🍩', tier: 'Epic', bonus: 'Active [T]: Instant +75 HP & +30 Energy (22s CD)', value: 180, activeAbility: 'sugar', sockets: 2, gems: ['quartz'] }
         ];
+
         const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
         const randomItem = combinedPool[Math.floor(Math.random() * combinedPool.length)];
         const newItem = {
           id: 'drop_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
           name: randomItem.name,
+          setId: randomItem.setId || null,
           type: randomItem.type,
           subType: randomItem.subType || null,
           bonus: randomItem.bonus,
@@ -4210,9 +4384,134 @@
         }
       }
 
+      // Set 6-Piece Ambient Passives & Mechanics
+      if (p.activeSetBonuses) {
+        // (6) Rose City Thornstalker: Continuous rotating briar cyclones
+        if (p.activeSetBonuses['rose_6']) {
+          p.roseSpinArc = (p.roseSpinArc || 0) + dt * 6;
+          gameState.enemies.forEach(e => {
+            if (Math.hypot(e.x - p.x, e.y - p.y) < 85) {
+              e.hp -= 16 * dt * 4;
+              e.hitFlash = 0.08;
+            }
+          });
+        }
+        // (6) Bridge City Sentinel: Cathedral Thunderstorm strikes random enemy
+        if (p.activeSetBonuses['sentinel_6']) {
+          p.sentinelTimer = (p.sentinelTimer || 0) + dt;
+          if (p.sentinelTimer >= 1.5) {
+            p.sentinelTimer = 0;
+            let target = null, minD = 340;
+            gameState.enemies.forEach(e => {
+              const ed = Math.hypot(e.x - p.x, e.y - p.y);
+              if (ed < minD) { minD = ed; target = e; }
+            });
+            if (target) {
+              target.hp -= 65;
+              target.hitFlash = 0.22;
+              createImpactParticles(target.x, target.y, '#60a5fa', 10);
+              addFloatingText('THUNDER -65', target.x, target.y - 20, '#93c5fd', 16);
+              playSound('hit');
+            }
+          }
+        }
+        // (6) Chinatown Dragon: Dragon Awakening Spirit breathes flames
+        if (p.activeSetBonuses['dragon_6']) {
+          p.dragonTimer = (p.dragonTimer || 0) + dt;
+          if (p.dragonTimer >= 2.0) {
+            p.dragonTimer = 0;
+            let target = null, minD = 300;
+            gameState.enemies.forEach(e => {
+              const ed = Math.hypot(e.x - p.x, e.y - p.y);
+              if (ed < minD) { minD = ed; target = e; }
+            });
+            if (target) {
+              spawnProjectile(p.x, p.y, target.x, target.y, 5.5, 55, '#f59e0b', 10);
+              addFloatingText('DRAGON BREATH', p.x, p.y - 25, '#f97316', 14);
+            }
+          }
+        }
+      }
+
+      // Ground Hazards update (Magma pools from Molten elites)
+      if (gameState.groundHazards) {
+        for (let ghIdx = gameState.groundHazards.length - 1; ghIdx >= 0; ghIdx--) {
+          const gh = gameState.groundHazards[ghIdx];
+          gh.life -= dt;
+          if (gh.type === 'magma') {
+            const distToP = Math.hypot(p.x - gh.x, p.y - gh.y);
+            if (distToP < p.radius + gh.radius) {
+              gh.tick = (gh.tick || 0) + dt;
+              if (gh.tick >= 0.5) {
+                gh.tick = 0;
+                if (!p.isDodging && !(p.invulnerableTimer > 0)) {
+                  const taken = Math.max(2, Math.round(gh.damage - (p.armor * 0.3)));
+                  p.hp -= taken;
+                  addFloatingText(`BURNING -${taken}`, p.x, p.y - 12, '#f97316', 13);
+                  playSound('hit');
+                }
+              }
+            }
+          }
+          if (gh.life <= 0) gameState.groundHazards.splice(ghIdx, 1);
+        }
+      }
+
       for (let idx = gameState.enemies.length - 1; idx >= 0; idx--) {
         const enemy = gameState.enemies[idx];
         if (enemy.hitFlash > 0) enemy.hitFlash -= dt;
+
+        // Burn DoT from Dragon Set
+        if (enemy.burnTimer > 0) {
+          enemy.burnTimer -= dt;
+          enemy.burnTick = (enemy.burnTick || 0) + dt;
+          if (enemy.burnTick >= 0.5) {
+            enemy.burnTick = 0;
+            enemy.hp -= (enemy.burnDmg || 12);
+            createImpactParticles(enemy.x, enemy.y, '#f97316', 3);
+            addFloatingText(`-${enemy.burnDmg || 12}`, enemy.x, enemy.y - 14, '#f97316', 12);
+          }
+        }
+
+        // Chill & Freeze status effects
+        let speedFactor = 1.0;
+        if (enemy.isChilled > 0) {
+          enemy.isChilled -= dt;
+          speedFactor *= 0.60;
+        }
+        if (enemy.freezeTimer > 0) {
+          enemy.freezeTimer -= dt;
+          speedFactor = 0;
+        }
+
+        // Elite Affixes periodic behaviors
+        if (enemy.isElite) {
+          enemy.affixTimer = (enemy.affixTimer || 0) + dt;
+          if (enemy.affix === 'molten' && enemy.affixTimer >= 1.8) {
+            enemy.affixTimer = 0;
+            gameState.groundHazards = gameState.groundHazards || [];
+            gameState.groundHazards.push({
+              x: enemy.x,
+              y: enemy.y,
+              radius: 24,
+              life: 4.5,
+              maxLife: 4.5,
+              damage: 10,
+              type: 'magma'
+            });
+          } else if (enemy.affix === 'electrified' && enemy.affixTimer >= 3.0) {
+            enemy.affixTimer = 0;
+            if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 240) {
+              spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.8, 18, '#eab308', 6);
+              createImpactParticles(enemy.x, enemy.y, '#eab308', 6);
+            }
+          } else if (enemy.affix === 'frozen') {
+            // Emits chill field to hero
+            if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 110) {
+              p.isChilled = 0.5;
+            }
+          }
+        }
 
         const dx = p.x - enemy.x;
         const dy = p.y - enemy.y;
@@ -4304,13 +4603,39 @@
               playSound('dodge');
               enemy.attackCd = 0.8;
             } else {
-              const taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
+              let taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
+              // (2) Sentinel Kinetic Shield Barrier absorbs 15% damage
+              if (p.activeSetBonuses && p.activeSetBonuses['sentinel_2']) {
+                taken = Math.max(1, Math.round(taken * 0.85));
+              }
               p.hp -= taken;
               addFloatingText(`-${taken}`, p.x, p.y - 15, '#f43f5e', 14);
               playSound('hit');
               enemy.attackCd = 1.0;
 
-              // Retaliatory Thorns from Hood Obsidian & Armor
+              // Elite Vampiric affix heals enemy on hit
+              if (enemy.isElite && enemy.affix === 'vampiric') {
+                enemy.hp = Math.min(enemy.maxHp, enemy.hp + taken);
+                addFloatingText(`+${taken} HP`, enemy.x, enemy.y - 16, '#dc2626', 13);
+              }
+
+              // (6) Cascade Cryomancer: Defensive Frost Nova on taking hit
+              if (p.activeSetBonuses && p.activeSetBonuses['cryo_6'] && (!p.cryoNovaCd || p.cryoNovaCd <= 0)) {
+                p.cryoNovaCd = 7.0;
+                addFloatingText('FROST NOVA!', p.x, p.y - 25, '#38bdf8', 16);
+                playSound('parry');
+                gameState.enemies.forEach(e => {
+                  if (Math.hypot(e.x - p.x, e.y - p.y) < 190) {
+                    e.freezeTimer = 2.0;
+                    e.hp -= 42;
+                    e.hitFlash = 0.22;
+                    createImpactParticles(e.x, e.y, '#38bdf8', 8);
+                    addFloatingText('FROZEN -42', e.x, e.y - 14, '#38bdf8', 14);
+                  }
+                });
+              }
+
+              // Retaliatory Thorns from Hood Obsidian, Armor & Rose Set
               if (p.thornsDamage > 0) {
                 enemy.hp -= p.thornsDamage;
                 addFloatingText(`THORNS -${p.thornsDamage}`, enemy.x, enemy.y - 12, '#c084fc', 13);
@@ -4332,6 +4657,31 @@
           grantGearXp(enemy.xpReward);
           dropLoot(enemy.x, enemy.y);
           createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
+
+          // (6) Burnside Anarchist: Anarchy Overdrive (Enemy kills reset Dash)
+          if (p.activeSetBonuses && p.activeSetBonuses['anarchist_6']) {
+            p.dodgeCooldown = 0;
+            if (p.comboHits >= 5) {
+              p.invulnerableTimer = Math.max(p.invulnerableTimer, 2.0);
+              addFloatingText('ANARCHY OVERDRIVE!', p.x, p.y - 25, '#34d399', 15);
+            }
+          }
+
+          // Elite Death Explosions
+          if (enemy.isElite) {
+            if (enemy.affix === 'molten') {
+              createImpactParticles(enemy.x, enemy.y, '#f97316', 14);
+              if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 65 && !p.isDodging && !(p.invulnerableTimer > 0)) {
+                p.hp -= 20;
+                addFloatingText('MOLTEN BURST -20', p.x, p.y - 12, '#f97316', 14);
+              }
+            } else if (enemy.affix === 'frozen') {
+              for (let k = 0; k < 6; k++) {
+                const kAng = (Math.PI * 2 / 6) * k;
+                spawnProjectile(enemy.x, enemy.y, enemy.x + Math.cos(kAng) * 180, enemy.y + Math.sin(kAng) * 180, 5.0, 16, '#38bdf8', 6);
+              }
+            }
+          }
           
           if (enemy.isBoss) {
             gameState.bossActive = false;
@@ -4517,7 +4867,16 @@
       '1': '#0f172a', // Dark slate armor
       '2': '#334155', // Slate midtone
       '3': '#64748b', // Slate highlight
-      'R': '#ef4444'  // Crimson Eye / Threat
+      'R': '#ef4444', // Crimson Eye / Threat
+      'M': '#a855f7', // Spore Purple
+      'm': '#6b21a8', // Dark Spore
+      'O': '#f97316', // Molten Orange
+      'o': '#c2410c', // Dark Orange
+      'B': '#38bdf8', // Ice Blue / Cryo
+      'b': '#0284c7', // Deep Cryo
+      'E': '#eab308', // Electric Yellow
+      'T': '#059669', // Slime Teal
+      't': '#047857'  // Dark Slime
     };
 
     const SPRITE_HERO_8BIT = [
@@ -4558,42 +4917,224 @@
       "................"
     ];
 
-    const SPRITE_DRONE_8BIT = [
+    // 1. Swarmer Drone (Hovering quad-rotor cyber drone)
+    const SPRITE_SWARMER_DRONE_8BIT = [
+      "0WW0........0WW0",
+      ".00...0000...00.",
+      ".....0CCCC0.....",
+      "..000CWWWWCC00..",
+      ".0CC0CWWWWCC0CC0",
+      ".0CC00RRRR000CC0",
+      "..00.0RRRR0..00.",
+      "....01111110....",
+      "...0111001110...",
+      "..0100....0010..",
+      ".00..........00.",
       "................",
-      "....00000000....",
-      "...0CCCCCCCC0...",
-      "..0CCWWCCWWCC0..",
-      "..0CCWWCCWWCC0..",
-      "..0CCCCCCCCCC0..",
-      "..00000RR00000..",
-      "...000RRRR000...",
-      "....00RRRR00....",
-      "...0111111110...",
-      "..011110011110..",
-      ".010..0000..010.",
-      "000..........000",
+      "................",
       "................",
       "................",
       "................"
     ];
 
-    const SPRITE_BEHEMOTH_8BIT = [
-      "....00gggg00....",
-      "...0gggggggg0...",
-      "..0ggWWggWWgg0..",
-      "..0ggWWggWWgg0..",
-      "..0gggggggggg0..",
-      ".00gg000000gg00.",
-      "0ggggGGGGGGgggg0",
-      "0gg0gGGGGGGg0gg0",
-      "0gg0gGGGGGGg0gg0",
-      ".00ggGGGGGGgg00.",
+    // 2. Barista / Mohawk Punk Brawler
+    const SPRITE_BRAWLER_PUNK_8BIT = [
+      ".....0PPPP0.....", // Spiky Pink Mohawk
+      "....0PPPPPP0....",
+      "...0P00SS00P0...",
+      "...0SSSSSSSS0...",
+      "...0S00SS00S0...",
+      "...0SSSSSSSS0...",
+      "..00yyyyyyyy00..", // Leather Barista Apron
+      ".0.0yyYYyyYY0.0.",
+      "0..0yyyyyyyy0..0", // Spiked tamper in hand
+      "0YY0yyyyyyyy0YY0",
+      "...0011111100...",
+      "...0220..0220...",
+      "...0220..0220...",
+      "..0000....0000..",
+      "................",
+      "................"
+    ];
+
+    // 3. Willamette Acid Sludge Spitter
+    const SPRITE_SLUDGE_SPITTER_8BIT = [
+      ".....00000......",
+      "...00TTTTT00....",
+      "..0TTTTTTTTT0...",
+      ".0TTWWTTTWWTT0..", // Gelatinous eye stalks
+      ".0TT00TTT00TT0..",
+      "0TTTTTTTTTTTT0..",
+      "0TTT000000TTT0..", // Bubbling acid maw
+      "0TT0CCCCCC0TT0..",
+      ".0T0CCCCCC0T0...",
+      ".0TT000000TT0...",
+      "0TTTTTTTTTTTT00.",
+      "00TTTTTTTTTTTT00",
+      ".000TTTTTTTT000.",
+      "...0000000000...",
+      "................",
+      "................"
+    ];
+
+    // 4. Shanghai Tunnel Wraith / Assassin
+    const SPRITE_TUNNEL_WRAITH_8BIT = [
+      "....00000000....",
+      "...0111111110...",
+      "..011111111110..",
+      "..010RR00RR010..", // Glowing Crimson Eyes
+      "..010RR00RR010..",
+      "..011111111110..",
+      ".00111000011100.", // Shadow Cloak & Dual Daggers
+      "0CC0111111110CC0",
+      "0CC0111111110CC0",
+      ".00.01111110.00.",
+      ".....011110.....",
+      "....01100110....",
+      "...0110..0110...",
+      "..000......000..",
+      "................",
+      "................"
+    ];
+
+    // 5. Mycelium Spore Creeper (Bioluminescent Mushroom)
+    const SPRITE_SPORE_CREEPER_8BIT = [
+      "....00MMMM00....",
+      "..00MMWWMMWW00..", // Speckled Glowing Cap
+      ".0MMMMMMMMMMMM0.",
+      "0MMWWMMMMMMWWMM0",
+      "0MMMMMMMMMMMMMM0",
+      "0000000000000000",
+      "..00EEEEEEEE00..", // Spore Vents
+      "...00SSSSSS00...",
+      "....0SSSSSS0....",
+      "...0S00SS00S0...",
+      "..00SSSSSSSS00..",
+      ".00.00000000.00.",
+      "00............00",
+      "................",
+      "................",
+      "................"
+    ];
+
+    // 6. Briar Behemoth & Iron Gargoyle (Titan with Horns & Runic Chest)
+    const SPRITE_TITAN_GARGOYLE_8BIT = [
+      ".0WW0......0WW0.", // Wing tips / Horns
+      "0gggg000000gggg0",
+      "0gggggggggggggg0",
+      ".0ggWWggggWWgg0.",
+      ".0gg00gggg00gg0.",
+      ".00gggggggggg00.",
+      "0gg00CCCC00gg0", // Glowing Runic Leyline Core
+      "0gg0CCCCCC0gg0",
+      "0gg0CCCCCC0gg0",
+      ".00gggggggggg00.",
       "..0gggggggggg0..",
       "..00gggggggg00..",
       "...00gggggg00...",
       "....00gggg00....",
       ".....00gg00.....",
       "......0000......"
+    ];
+
+    // Boss 1: Burnside Brimstone Hydra (Multi-headed Drake)
+    const SPRITE_BOSS_HYDRA_8BIT = [
+      "0OO0..0OO0..0OO0",
+      "0WW0..0WW0..0WW0",
+      "0OO0000OO0000OO0",
+      ".0OOOOOOOOOOOO0.",
+      ".0O0R0OOOO0R0O0.",
+      "0OOOOOOOOOOOOOO0",
+      "0OOOO000000OOOO0", // Flame breath maw
+      "0OOO0EEEEEE0OOO0",
+      ".0OO0EEEEEE0OO0.",
+      "..00OOOOOOOO00..",
+      ".00111111111100.",
+      "0111001111001110",
+      "0100..0000..0010",
+      "00............00",
+      "................",
+      "................"
+    ];
+
+    // Boss 2: Hawthorne Voodoo Baron (Top Hat & Painted Skull)
+    const SPRITE_BOSS_BARON_8BIT = [
+      ".....000000.....",
+      ".....011110.....", // Voodoo Top Hat
+      ".....011110.....",
+      "...0000YY0000...",
+      "..000000000000..",
+      "...0WWWWWWWW0...", // Painted Skull Mask
+      "...0W00WW00W0...",
+      "...0WWWWWWWW0...",
+      "...0WW0000WW0...",
+      "..00yyyyyyyy00..",
+      ".00.0yyyyyy0.00.",
+      "0YY0.0yyyy0.0YY0", // Orbiting skulls
+      "0YY0..0000..0YY0",
+      ".00..........00.",
+      "................",
+      "................"
+    ];
+
+    // Boss 3: Elder Sasquatch Primeval
+    const SPRITE_BOSS_SASQUATCH_8BIT = [
+      "0YY0........0YY0", // Massive Antlers
+      ".0YY00000000YY0.",
+      "..0gggggggggg0..",
+      ".0gg00gggg00gg0.",
+      ".0gggggggggggg0.",
+      "0gggggggggggggg0",
+      "0gggg000000gggg0",
+      "0gggg0SSSS0gggg0",
+      ".0gggg0000gggg0.",
+      "..00gggggggg00..",
+      ".00GGGGGGGGGG00.",
+      "0GGGG000000GGGG0",
+      "0GG00......00GG0",
+      "000..........000",
+      "................",
+      "................"
+    ];
+
+    // Boss 4: Shanghai Tunnel Leviathan (Neon Segmented Dragon)
+    const SPRITE_BOSS_LEVIATHAN_8BIT = [
+      "0CC0........0CC0",
+      ".0CC00000000CC0.",
+      "..0RRRRRRRRRR0..",
+      ".0RRWW0000WW0R0.",
+      ".0RR00RRRR00RR0.",
+      "0RRRRRRRRRRRRRR0",
+      "0RRRR000000RRRR0",
+      "0RRR0FFFFFF0RRR0",
+      ".0RR0FFFFFF0RR0.",
+      "..00RRRRRRRR00..",
+      ".0CC0RRRRRR0CC0.",
+      "0CC00RRRRRR00CC0",
+      "00..00000000..00",
+      "................",
+      "................",
+      "................"
+    ];
+
+    // Boss 5: St. Johns Arch-Reaper (Dual Scythes & Cathedral Wings)
+    const SPRITE_BOSS_REAPER_8BIT = [
+      "0CC0...00...0CC0", // Dual Energy Scythes
+      "0CC0..0110..0CC0",
+      ".00.00111100.00.",
+      "...0111111110...",
+      "..0110BB00BB10..", // Icy Blue Void Eyes
+      "..0110BB00BB10..",
+      "..011111111110..",
+      ".00111111111100.",
+      "0CC0111111110CC0",
+      "0CC0111111110CC0",
+      ".00.01111110.00.",
+      "....01100110....",
+      "...0110..0110...",
+      "..000......000..",
+      "................",
+      "................"
     ];
 
     const SPRITE_CANVAS_CACHE = new Map();
@@ -4661,37 +5202,126 @@
       context.restore();
     }
 
+    function drawGroundHazards() {
+      if (!gameState.groundHazards) return;
+      gameState.groundHazards.forEach(gh => {
+        ctx.save();
+        ctx.translate(gh.x, gh.y);
+        const alpha = Math.min(1, gh.life / (gh.maxLife * 0.3));
+        if (gh.type === 'magma') {
+          ctx.beginPath();
+          ctx.arc(0, 0, gh.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(249, 115, 22, ${0.4 * alpha})`;
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(0, 0, gh.radius * 0.65, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(239, 68, 68, ${0.6 * alpha})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(251, 191, 36, ${0.8 * alpha})`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+    }
+
     function drawPlayer() {
       const p = gameState.player;
+      const eq = gameState.equipped;
 
       ctx.save();
       ctx.translate(p.x, p.y);
 
-      // 8-Bit Ground Shadow
+      // 1. 8-Bit Ground Shadow
       ctx.beginPath();
       ctx.ellipse(0, p.radius * 0.8, p.radius * 0.9, p.radius * 0.35, 0, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
       ctx.fill();
 
-      // Caffeine Leyline Haste Aura
+      // 2. Active Diablo Set Auras (2-Piece, 4-Piece, 6-Piece)
+      if (p.dominantSet && p.dominantSet.count >= 2) {
+        const auraColor = p.dominantSet.color || '#22c55e';
+        const auraRot = Date.now() * 0.002;
+
+        // (2-Piece) Radiant Ground Rune Ring
+        ctx.save();
+        ctx.rotate(auraRot);
+        ctx.beginPath();
+        ctx.arc(0, 0, p.radius + 12, 0, Math.PI * 2);
+        ctx.strokeStyle = auraColor;
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([6, 6]);
+        ctx.stroke();
+        ctx.restore();
+
+        // (4-Piece) Orbiting Elemental Motes
+        if (p.dominantSet.count >= 4) {
+          ctx.save();
+          ctx.rotate(-auraRot * 1.5);
+          for (let m = 0; m < 4; m++) {
+            const mAng = (Math.PI / 2) * m;
+            const mx = Math.cos(mAng) * 36;
+            const my = Math.sin(mAng) * 36;
+            ctx.fillStyle = auraColor;
+            ctx.fillRect(mx - 3, my - 3, 6, 6);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(mx - 1, my - 1, 2, 2);
+          }
+          ctx.restore();
+        }
+
+        // (6-Piece) Masterwork Avatar Wings & Dragon Spirit
+        if (p.dominantSet.count >= 6) {
+          ctx.save();
+          ctx.strokeStyle = auraColor;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = auraColor;
+          ctx.shadowBlur = 14;
+
+          if (p.dominantSet.id === 'chinatown_dragon') {
+            // Celestial Fiery Dragon Serpent looping around hero
+            const dAng = Date.now() * 0.003;
+            for (let seg = 0; seg < 6; seg++) {
+              const segAng = dAng - (seg * 0.35);
+              const sx = Math.cos(segAng) * 44;
+              const sy = Math.sin(segAng) * 44;
+              ctx.fillStyle = seg === 0 ? '#f59e0b' : '#ef4444';
+              ctx.beginPath();
+              ctx.arc(sx, sy, Math.max(3, 7 - seg), 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else {
+            // Radiant Energy Wings
+            ctx.beginPath();
+            ctx.moveTo(-8, -10);
+            ctx.bezierCurveTo(-38, -35, -45, -5, -12, 8);
+            ctx.moveTo(8, -10);
+            ctx.bezierCurveTo(38, -35, 45, -5, 12, 8);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
+      // 3. Caffeine Leyline Haste Aura
       if (gameState.skills[2].activeTimer > 0) {
         ctx.beginPath();
-        ctx.arc(0, 0, p.radius + 10, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+        ctx.arc(0, 0, p.radius + 14, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.85)';
         ctx.lineWidth = 3;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // Rose Briar Cyclone Orbiting Thorns
-      if (gameState.skills[3].activeTimer > 0) {
+      // 4. Rose Briar Cyclone Orbiting Thorns
+      if (gameState.skills[3].activeTimer > 0 || (p.activeSetBonuses && p.activeSetBonuses['rose_6'])) {
         ctx.save();
-        ctx.rotate(p.slashArc);
+        ctx.rotate(p.slashArc || Date.now() * 0.01);
         for (let b = 0; b < 4; b++) {
           const bAngle = (Math.PI / 2) * b;
-          const bx = Math.cos(bAngle) * 55;
-          const by = Math.sin(bAngle) * 55;
+          const bx = Math.cos(bAngle) * 52;
+          const by = Math.sin(bAngle) * 52;
           ctx.fillStyle = '#f43f5e';
           ctx.fillRect(bx - 3, by - 3, 7, 7);
           ctx.fillStyle = '#ffffff';
@@ -4700,20 +5330,119 @@
         ctx.restore();
       }
 
-      // 8-Bit Hero Sprite with Walk Bob & Attack Thrust
+      // 5. 8-Bit Hero Sprite with Walk Bob & Dynamic Attire
       const isMoving = Math.abs(p.vx) > 0.1 || Math.abs(p.vy) > 0.1;
       const walkBob = isMoving ? Math.sin(Date.now() * 0.015) * 2.5 : 0;
       const flipX = Math.cos(p.angle) < 0;
       const sprite = p.isAttacking ? SPRITE_HERO_SLASH_8BIT : SPRITE_HERO_8BIT;
 
+      // Flowing Trenchcoat tails fluttering behind movement direction
+      if (isMoving) {
+        const moveAng = Math.atan2(p.vy, p.vx) + Math.PI;
+        ctx.save();
+        ctx.rotate(moveAng);
+        ctx.fillStyle = eq.armor && eq.armor.setId === 'chinatown_dragon' ? '#7f1d1d' :
+                        eq.armor && eq.armor.setId === 'cascade_cryomancer' ? '#0c4a6e' :
+                        eq.armor && eq.armor.setId === 'rose_thornstalker' ? '#064e3b' :
+                        eq.armor && eq.armor.setId === 'burnside_anarchist' ? '#18181b' : '#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(-10, walkBob);
+        ctx.lineTo(-24, walkBob - 6);
+        ctx.lineTo(-24, walkBob + 6);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Base Hero 8-Bit Sprite
       drawPixelMatrix(ctx, sprite, 0, walkBob - 2, 2.5, flipX);
 
-      // Laser Katana Blade Gleam
+      // Dynamic Headgear / Visor Glow Overlay
+      const headSet = eq.head ? eq.head.setId : null;
+      ctx.save();
+      if (headSet === 'chinatown_dragon') {
+        ctx.fillStyle = '#fbbf24'; // Golden Dragon Kabuto Horns
+        ctx.fillRect(-10, walkBob - 26, 4, 8);
+        ctx.fillRect(6, walkBob - 26, 4, 8);
+        ctx.fillStyle = '#ef4444'; // Red visor slit
+        ctx.fillRect(-6, walkBob - 18, 12, 3);
+      } else if (headSet === 'cascade_cryomancer') {
+        ctx.fillStyle = '#38bdf8'; // Frost cowl glow
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(-7, walkBob - 19, 14, 3);
+      } else if (headSet === 'burnside_anarchist') {
+        ctx.fillStyle = '#71717a'; // Dual Respirator filters
+        ctx.fillRect(-9, walkBob - 14, 5, 5);
+        ctx.fillRect(4, walkBob - 14, 5, 5);
+        ctx.fillStyle = '#22c55e'; // Green visor line
+        ctx.fillRect(-6, walkBob - 19, 12, 3);
+      } else if (headSet === 'rose_thornstalker') {
+        ctx.fillStyle = '#10b981'; // Briar Antlers
+        ctx.fillRect(-11, walkBob - 26, 3, 9);
+        ctx.fillRect(8, walkBob - 26, 3, 9);
+        ctx.fillStyle = '#f43f5e';
+        ctx.fillRect(-5, walkBob - 19, 10, 3);
+      } else if (headSet === 'bridge_city_sentinel') {
+        ctx.fillStyle = '#93c5fd'; // Sentinel Visor
+        ctx.shadowColor = '#60a5fa';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-8, walkBob - 19, 16, 4);
+      } else {
+        // Default Stumptown Visor
+        ctx.fillStyle = '#00f5ff';
+        ctx.fillRect(-7, walkBob - 19, 14, 3);
+      }
+      ctx.restore();
+
+      // Dynamic Main-Hand Weapon Blade Shape & Glow
+      ctx.save();
       ctx.rotate(p.angle);
-      ctx.fillStyle = p.isAttacking ? '#ffffff' : '#38bdf8';
-      ctx.fillRect(p.radius - 2, -2, p.isAttacking ? 22 : 16, 4);
-      ctx.fillStyle = '#00f5ff';
-      ctx.fillRect(p.radius + 2, -1, p.isAttacking ? 18 : 12, 2);
+      const wepSet = eq.weapon ? eq.weapon.setId : null;
+      const wepName = eq.weapon ? eq.weapon.name : '';
+
+      let bColor = '#38bdf8', bGlow = '#00f5ff';
+      if (wepSet === 'chinatown_dragon' || wepName.includes('Dragon')) { bColor = '#ef4444'; bGlow = '#f59e0b'; }
+      else if (wepSet === 'cascade_cryomancer' || wepName.includes('Cryo')) { bColor = '#e0f2fe'; bGlow = '#38bdf8'; }
+      else if (wepSet === 'rose_thornstalker' || wepName.includes('Rosewood')) { bColor = '#10b981'; bGlow = '#f43f5e'; }
+      else if (wepSet === 'burnside_anarchist' || wepName.includes('Machete')) { bColor = '#94a3b8'; bGlow = '#34d399'; }
+      else if (wepSet === 'bridge_city_sentinel' || wepName.includes('Tesla')) { bColor = '#60a5fa'; bGlow = '#ffffff'; }
+
+      ctx.shadowColor = bGlow;
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = p.isAttacking ? '#ffffff' : bColor;
+      ctx.fillRect(p.radius - 2, -2, p.isAttacking ? 24 : 18, 5);
+      ctx.fillStyle = bGlow;
+      ctx.fillRect(p.radius + 2, -1, p.isAttacking ? 20 : 14, 3);
+      ctx.restore();
+
+      // Dynamic Off-Hand Equipment
+      const offSub = eq.offhand ? eq.offhand.subType : null;
+      const offName = eq.offhand ? eq.offhand.name : '';
+      if (offSub === 'shield' || offName.includes('Shield') || offName.includes('Deflector') || offName.includes('Aegis')) {
+        // Holographic Riot Shield Barrier
+        ctx.save();
+        ctx.rotate(p.angle - 0.7);
+        ctx.strokeStyle = '#06b6d4';
+        ctx.fillStyle = 'rgba(6, 182, 212, 0.35)';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00f5ff';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(p.radius + 2, 0, 16, -Math.PI / 2, Math.PI / 2);
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+      } else if (offSub === 'dualwield' || offName.includes('Wakizashi') || offName.includes('Dagger')) {
+        // Reverse-Grip Dual Wakizashi
+        ctx.save();
+        ctx.rotate(p.angle - 1.2);
+        ctx.fillStyle = '#34d399';
+        ctx.shadowColor = '#34d399';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(p.radius - 2, -1, 14, 3);
+        ctx.restore();
+      }
 
       ctx.restore();
     }
@@ -4729,6 +5458,20 @@
         ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
         ctx.fill();
 
+        // Elite Affix Glowing Ground Aura
+        if (e.isElite) {
+          const affixColor = e.affix === 'molten' ? '#f97316' :
+                             e.affix === 'frozen' ? '#38bdf8' :
+                             e.affix === 'electrified' ? '#eab308' : '#dc2626';
+          ctx.beginPath();
+          ctx.arc(0, 0, e.radius + 12, 0, Math.PI * 2);
+          ctx.strokeStyle = affixColor;
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
         if (e.isCharging) {
           ctx.beginPath();
           ctx.arc(0, 0, e.radius + 8, 0, Math.PI * 2);
@@ -4737,13 +5480,31 @@
           ctx.stroke();
         }
 
-        // 8-Bit Enemy Sprites
+        // Distinct Archetype Matrix Selection
+        let matrix = SPRITE_SWARMER_DRONE_8BIT;
+        let spriteScale = e.radius / 7;
+
+        if (e.isBoss) {
+          spriteScale = 4.2;
+          if (e.bossType === 'burnside') matrix = SPRITE_BOSS_HYDRA_8BIT;
+          else if (e.bossType === 'hawthorne') matrix = SPRITE_BOSS_BARON_8BIT;
+          else if (e.bossType === 'forest_park') matrix = SPRITE_BOSS_SASQUATCH_8BIT;
+          else if (e.bossType === 'chinatown') matrix = SPRITE_BOSS_LEVIATHAN_8BIT;
+          else if (e.bossType === 'st_johns') matrix = SPRITE_BOSS_REAPER_8BIT;
+          else matrix = SPRITE_BOSS_HYDRA_8BIT;
+        } else {
+          if (e.archetypeId === 'crow_swarmer' || e.role === 'swarmer') matrix = SPRITE_SWARMER_DRONE_8BIT;
+          else if (e.archetypeId === 'barista_grunt' || e.role === 'melee') matrix = SPRITE_BRAWLER_PUNK_8BIT;
+          else if (e.archetypeId === 'sludge_spitter' || e.role === 'ranged') matrix = SPRITE_SLUDGE_SPITTER_8BIT;
+          else if (e.archetypeId === 'tunnel_wraith' || e.role === 'assassin') matrix = SPRITE_TUNNEL_WRAITH_8BIT;
+          else if (e.archetypeId === 'toxic_shroom' || e.role === 'exploder') matrix = SPRITE_SPORE_CREEPER_8BIT;
+          else if (e.archetypeId === 'moss_brute' || e.archetypeId === 'gothic_gargoyle' || e.role === 'brute') matrix = SPRITE_TITAN_GARGOYLE_8BIT;
+        }
+
         const enemyBob = Math.sin((Date.now() + e.x) * 0.008) * 2;
         const flipEnemy = (gameState.player.x < e.x);
-        const matrix = e.role === 'brute' || e.isBoss ? SPRITE_BEHEMOTH_8BIT : SPRITE_DRONE_8BIT;
-        const spriteScale = e.isBoss ? 3.8 : (e.role === 'brute' ? 3.0 : 2.2);
 
-        // Optimized hit flash without CPU/GPU filter lag
+        // Hit flash
         if (e.hitFlash > 0) {
           ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
           ctx.beginPath();
@@ -4753,23 +5514,33 @@
 
         drawPixelMatrix(ctx, matrix, 0, enemyBob, spriteScale, flipEnemy);
 
+        // Boss Aura & Crown
         if (e.isBoss) {
           ctx.beginPath();
           ctx.arc(0, 0, e.radius + 14, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(244, 63, 94, 0.6)';
-          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
+          ctx.lineWidth = 3;
           ctx.stroke();
         }
 
-        // Retro 8-Bit Segmented HP Bar
+        // Retro 8-Bit Segmented HP Bar & Elite Badge
         const barW = Math.max(34, e.radius * 2);
         const hpPct = Math.max(0, e.hp / e.maxHp);
         ctx.fillStyle = '#050508';
         ctx.fillRect(-barW / 2 - 1, -e.radius - 15, barW + 2, 6);
         ctx.fillStyle = '#1e293b';
         ctx.fillRect(-barW / 2, -e.radius - 14, barW, 4);
-        ctx.fillStyle = e.isBoss ? '#f43f5e' : (hpPct > 0.4 ? '#10b981' : '#f59e0b');
+        ctx.fillStyle = e.isBoss ? '#f43f5e' : (e.isElite ? '#fbbf24' : (hpPct > 0.4 ? '#10b981' : '#f59e0b'));
         ctx.fillRect(-barW / 2, -e.radius - 14, barW * hpPct, 4);
+
+        if (e.isElite) {
+          ctx.font = 'bold 9px monospace';
+          ctx.fillStyle = e.affix === 'molten' ? '#f97316' :
+                          e.affix === 'frozen' ? '#38bdf8' :
+                          e.affix === 'electrified' ? '#eab308' : '#dc2626';
+          ctx.textAlign = 'center';
+          ctx.fillText(`👑 [${e.affix.toUpperCase()}]`, 0, -e.radius - 19);
+        }
 
         ctx.restore();
       });
@@ -4872,6 +5643,7 @@
       ctx.translate(-gameState.camera.x + shakeX, -gameState.camera.y + shakeY);
 
       drawUrbanEnvironment(w, h);
+      drawGroundHazards();
       drawSlashes();
       drawProjectiles();
       drawEnemies();
@@ -5971,14 +6743,264 @@
       showToast(`Scrapped bag items for +${totalGain} Beans!`, "success");
     }
 
+    function renderPaperdollAvatar() {
+      const canvas = document.getElementById('d4PaperdollCanvas');
+      if (!canvas) return;
+      const pctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const eq = gameState.equipped;
+      const p = gameState.player;
+
+      pctx.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2 + 10;
+
+      // 1. Aura Glow Backdrop
+      if (p.dominantSet && p.dominantSet.count >= 2) {
+        const auraColor = p.dominantSet.color || '#22c55e';
+        const grad = pctx.createRadialGradient(cx, cy - 20, 20, cx, cy - 20, 75);
+        grad.addColorStop(0, auraColor + '44');
+        grad.addColorStop(0.7, auraColor + '18');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        pctx.fillStyle = grad;
+        pctx.fillRect(0, 0, w, h);
+
+        pctx.beginPath();
+        pctx.arc(cx, cy - 10, 48, 0, Math.PI * 2);
+        pctx.strokeStyle = auraColor + '88';
+        pctx.lineWidth = 2;
+        pctx.setLineDash([4, 4]);
+        pctx.stroke();
+        pctx.setLineDash([]);
+
+        if (p.dominantSet.count >= 6) {
+          pctx.save();
+          pctx.strokeStyle = auraColor;
+          pctx.lineWidth = 3;
+          pctx.shadowColor = auraColor;
+          pctx.shadowBlur = 15;
+          pctx.beginPath();
+          pctx.moveTo(cx - 15, cy - 35);
+          pctx.bezierCurveTo(cx - 55, cy - 65, cx - 65, cy - 15, cx - 20, cy - 10);
+          pctx.stroke();
+          pctx.beginPath();
+          pctx.moveTo(cx + 15, cy - 35);
+          pctx.bezierCurveTo(cx + 55, cy - 65, cx + 65, cy - 15, cx + 20, cy - 10);
+          pctx.stroke();
+          pctx.restore();
+        }
+      }
+
+      // 2. Ground Shadow
+      pctx.beginPath();
+      pctx.ellipse(cx, cy + 68, 36, 12, 0, 0, Math.PI * 2);
+      pctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+      pctx.fill();
+
+      // 3. Flowing Trenchcoat / Duster Tails
+      const armorSet = eq.armor ? eq.armor.setId : null;
+      let coatColor = '#1e293b';
+      let coatAccent = '#06b6d4';
+      if (armorSet === 'stumptown_roaster') { coatColor = '#78350f'; coatAccent = '#22c55e'; }
+      else if (armorSet === 'rose_thornstalker') { coatColor = '#064e3b'; coatAccent = '#10b981'; }
+      else if (armorSet === 'burnside_anarchist') { coatColor = '#18181b'; coatAccent = '#ef4444'; }
+      else if (armorSet === 'cascade_cryomancer') { coatColor = '#0c4a6e'; coatAccent = '#38bdf8'; }
+      else if (armorSet === 'chinatown_dragon') { coatColor = '#7f1d1d'; coatAccent = '#f59e0b'; }
+      else if (armorSet === 'bridge_city_sentinel') { coatColor = '#1e3a8a'; coatAccent = '#93c5fd'; }
+
+      pctx.fillStyle = coatColor;
+      pctx.beginPath();
+      pctx.moveTo(cx - 18, cy + 10);
+      pctx.lineTo(cx - 28, cy + 55);
+      pctx.lineTo(cx + 28, cy + 55);
+      pctx.lineTo(cx + 18, cy + 10);
+      pctx.closePath();
+      pctx.fill();
+
+      // 4. Legs
+      pctx.fillStyle = '#0f172a';
+      pctx.fillRect(cx - 15, cy + 20, 11, 38);
+      pctx.fillRect(cx + 4, cy + 20, 11, 38);
+
+      // 5. Boots
+      const bootsSet = eq.boots ? eq.boots.setId : null;
+      let bootColor = '#334155';
+      let bootTrim = '#64748b';
+      if (bootsSet === 'stumptown_roaster') { bootColor = '#92400e'; bootTrim = '#22c55e'; }
+      else if (bootsSet === 'rose_thornstalker') { bootColor = '#065f46'; bootTrim = '#34d399'; }
+      else if (bootsSet === 'burnside_anarchist') { bootColor = '#27272a'; bootTrim = '#ef4444'; }
+      else if (bootsSet === 'cascade_cryomancer') { bootColor = '#0369a1'; bootTrim = '#7dd3fc'; }
+      else if (bootsSet === 'chinatown_dragon') { bootColor = '#991b1b'; bootTrim = '#fbbf24'; }
+      else if (bootsSet === 'bridge_city_sentinel') { bootColor = '#1d4ed8'; bootTrim = '#bfdbfe'; }
+
+      pctx.fillStyle = bootColor;
+      pctx.fillRect(cx - 17, cy + 50, 14, 16);
+      pctx.fillRect(cx + 3, cy + 50, 14, 16);
+      pctx.fillStyle = bootTrim;
+      pctx.fillRect(cx - 17, cy + 62, 14, 4);
+      pctx.fillRect(cx + 3, cy + 62, 14, 4);
+
+      // 6. Torso & Chest Armor Plate
+      pctx.fillStyle = coatColor;
+      pctx.fillRect(cx - 16, cy - 25, 32, 45);
+
+      pctx.fillStyle = coatAccent;
+      pctx.fillRect(cx - 10, cy - 20, 20, 25);
+      pctx.fillStyle = '#050508';
+      pctx.fillRect(cx - 8, cy - 18, 16, 21);
+
+      // Belt
+      pctx.fillStyle = '#475569';
+      pctx.fillRect(cx - 17, cy + 16, 34, 6);
+      pctx.fillStyle = '#fbbf24';
+      pctx.fillRect(cx - 4, cy + 15, 8, 8);
+
+      // 7. Head & Headgear
+      pctx.fillStyle = '#ffc0a0';
+      pctx.fillRect(cx - 11, cy - 50, 22, 22);
+
+      const headSet = eq.head ? eq.head.setId : null;
+      const headName = eq.head ? eq.head.name : '';
+      if (headSet === 'chinatown_dragon' || headName.includes('Kabuto')) {
+        pctx.fillStyle = '#b91c1c';
+        pctx.fillRect(cx - 14, cy - 58, 28, 16);
+        pctx.fillStyle = '#fbbf24';
+        pctx.beginPath();
+        pctx.moveTo(cx - 14, cy - 55); pctx.lineTo(cx - 24, cy - 70); pctx.lineTo(cx - 10, cy - 58); pctx.fill();
+        pctx.beginPath();
+        pctx.moveTo(cx + 14, cy - 55); pctx.lineTo(cx + 24, cy - 70); pctx.lineTo(cx + 10, cy - 58); pctx.fill();
+        pctx.fillStyle = '#ef4444';
+        pctx.fillRect(cx - 8, cy - 44, 16, 4);
+      } else if (headSet === 'burnside_anarchist' || headName.includes('Respirator')) {
+        pctx.fillStyle = '#18181b';
+        pctx.fillRect(cx - 13, cy - 54, 26, 18);
+        pctx.fillStyle = '#22c55e';
+        pctx.fillRect(cx - 8, cy - 46, 16, 4);
+        pctx.fillStyle = '#71717a';
+        pctx.fillRect(cx - 14, cy - 38, 7, 7);
+        pctx.fillRect(cx + 7, cy - 38, 7, 7);
+      } else if (headSet === 'rose_thornstalker' || headName.includes('Cryptid') || headName.includes('Briar')) {
+        pctx.fillStyle = '#064e3b';
+        pctx.fillRect(cx - 12, cy - 54, 24, 22);
+        pctx.strokeStyle = '#10b981';
+        pctx.lineWidth = 3;
+        pctx.beginPath();
+        pctx.moveTo(cx - 10, cy - 54); pctx.lineTo(cx - 20, cy - 70);
+        pctx.moveTo(cx + 10, cy - 54); pctx.lineTo(cx + 20, cy - 70);
+        pctx.stroke();
+        pctx.fillStyle = '#34d399';
+        pctx.fillRect(cx - 7, cy - 44, 4, 4);
+        pctx.fillRect(cx + 3, cy - 44, 4, 4);
+      } else if (headSet === 'cascade_cryomancer' || headName.includes('Glacial') || headName.includes('Hood')) {
+        pctx.fillStyle = '#0369a1';
+        pctx.fillRect(cx - 14, cy - 56, 28, 26);
+        pctx.fillStyle = '#e0f2fe';
+        pctx.fillRect(cx - 10, cy - 58, 20, 5);
+        pctx.fillStyle = '#38bdf8';
+        pctx.fillRect(cx - 8, cy - 44, 16, 3);
+      } else if (headSet === 'bridge_city_sentinel' || headName.includes('Sentinel')) {
+        pctx.fillStyle = '#334155';
+        pctx.fillRect(cx - 13, cy - 56, 26, 26);
+        pctx.fillStyle = '#93c5fd';
+        pctx.fillRect(cx - 10, cy - 45, 20, 5);
+      } else {
+        pctx.fillStyle = '#0f172a';
+        pctx.fillRect(cx - 13, cy - 55, 26, 20);
+        pctx.fillStyle = '#06b6d4';
+        pctx.fillRect(cx - 9, cy - 45, 18, 4);
+      }
+
+      // 8. Main-Hand Weapon
+      const wSet = eq.weapon ? eq.weapon.setId : null;
+      const wName = eq.weapon ? eq.weapon.name : '';
+      pctx.save();
+      pctx.translate(cx + 26, cy);
+      pctx.rotate(-0.35);
+
+      let bladeColor = '#38bdf8';
+      let bladeGlow = '#00f5ff';
+      if (wSet === 'chinatown_dragon' || wName.includes('Dragon') || wName.includes('Flame')) {
+        bladeColor = '#ef4444'; bladeGlow = '#f59e0b';
+      } else if (wSet === 'cascade_cryomancer' || wName.includes('Cryo') || wName.includes('Frost')) {
+        bladeColor = '#e0f2fe'; bladeGlow = '#38bdf8';
+      } else if (wSet === 'rose_thornstalker' || wName.includes('Rosewood') || wName.includes('Briar')) {
+        bladeColor = '#10b981'; bladeGlow = '#f43f5e';
+      } else if (wSet === 'burnside_anarchist' || wName.includes('Machete')) {
+        bladeColor = '#94a3b8'; bladeGlow = '#34d399';
+      } else if (wSet === 'bridge_city_sentinel' || wName.includes('Tesla')) {
+        bladeColor = '#60a5fa'; bladeGlow = '#ffffff';
+      }
+
+      pctx.fillStyle = '#475569';
+      pctx.fillRect(-3, 10, 6, 14);
+      pctx.fillStyle = '#fbbf24';
+      pctx.fillRect(-6, 8, 12, 3);
+
+      pctx.shadowColor = bladeGlow;
+      pctx.shadowBlur = 12;
+      pctx.fillStyle = bladeColor;
+      pctx.fillRect(-2, -45, 4, 53);
+      pctx.fillStyle = bladeGlow;
+      pctx.fillRect(-1, -43, 2, 50);
+      pctx.restore();
+
+      // 9. Off-Hand Equipment
+      const oSub = eq.offhand ? eq.offhand.subType : null;
+      const oName = eq.offhand ? eq.offhand.name : '';
+
+      pctx.save();
+      pctx.translate(cx - 26, cy);
+      if (oSub === 'shield' || oName.includes('Shield') || oName.includes('Deflector') || oName.includes('Aegis')) {
+        pctx.strokeStyle = '#06b6d4';
+        pctx.fillStyle = 'rgba(6, 182, 212, 0.25)';
+        pctx.lineWidth = 2.5;
+        pctx.shadowColor = '#00f5ff';
+        pctx.shadowBlur = 14;
+        pctx.beginPath();
+        pctx.moveTo(0, -28);
+        pctx.lineTo(16, -14);
+        pctx.lineTo(16, 16);
+        pctx.lineTo(0, 30);
+        pctx.lineTo(-16, 16);
+        pctx.lineTo(-16, -14);
+        pctx.closePath();
+        pctx.fill();
+        pctx.stroke();
+      } else if (oSub === 'dualwield' || oName.includes('Wakizashi') || oName.includes('Dagger') || oName.includes('Pearl')) {
+        pctx.rotate(0.5);
+        pctx.fillStyle = '#475569';
+        pctx.fillRect(-2, -18, 4, 10);
+        pctx.fillStyle = '#34d399';
+        pctx.shadowColor = '#34d399';
+        pctx.shadowBlur = 8;
+        pctx.fillRect(-1.5, -8, 3, 28);
+      }
+      pctx.restore();
+    }
+
     function updateEquippedUI() {
       const eq = gameState.equipped;
       const hero = gameState.player;
 
       const heroName = document.getElementById('d4HeroNameDisplay');
       const heroLvl = document.getElementById('d4HeroLvlDisplay');
+      const heroSetEl = document.getElementById('d4HeroSetCountDisplay');
       if (heroName) heroName.textContent = hero.name || 'RAIN-WALKER';
       if (heroLvl) heroLvl.textContent = hero.level || 1;
+      if (heroSetEl) {
+        if (hero.dominantSet && hero.dominantSet.count >= 2) {
+          const isFull = hero.dominantSet.count >= 6;
+          heroSetEl.textContent = `${hero.dominantSet.count}/6 ${hero.dominantSet.name}${isFull ? ' [FULL SET]' : ''}`;
+          heroSetEl.style.color = hero.dominantSet.color;
+        } else {
+          heroSetEl.textContent = 'NO SET ACTIVE';
+          heroSetEl.style.color = '#64748b';
+        }
+      }
+
+      renderPaperdollAvatar();
 
       // Update all 10 D4 Paperdoll Sockets
       const socketDefs = [
@@ -6232,7 +7254,7 @@
         }
       });
 
-      // 3. Compute Diablo Set Bonuses
+      // 3. Compute Diablo Set Bonuses (6 Complete Sets)
       const setCounts = {};
       Object.values(eq).forEach(item => {
         if (item && item.setId) {
@@ -6241,44 +7263,91 @@
       });
 
       p.activeSetBonuses = {};
+      p.dominantSet = null;
+      let maxSetCount = 0;
+      Object.entries(setCounts).forEach(([sId, count]) => {
+        if (count > maxSetCount && GEAR_SETS[sId]) {
+          maxSetCount = count;
+          p.dominantSet = { id: sId, count, color: GEAR_SETS[sId].color, name: GEAR_SETS[sId].name };
+        }
+      });
 
-      // Stumptown Roaster Set Bonuses
+      // 1. Stumptown Roaster Set Bonuses
       if ((setCounts['stumptown_roaster'] || 0) >= 2) {
         speedMult += 0.15;
         p.activeSetBonuses['stumptown_2'] = true;
       }
       if ((setCounts['stumptown_roaster'] || 0) >= 4) {
-        totalAttack += 15;
+        totalAttack += 20;
         p.activeSetBonuses['stumptown_4'] = true;
       }
       if ((setCounts['stumptown_roaster'] || 0) >= 6) {
         p.activeSetBonuses['stumptown_6'] = true;
       }
 
-      // Rose Thornstalker Set Bonuses
+      // 2. Rose Thornstalker Set Bonuses
       if ((setCounts['rose_thornstalker'] || 0) >= 2) {
-        extraHp += 100;
+        extraHp += 120;
         totalArmor += 25;
         p.activeSetBonuses['rose_2'] = true;
       }
       if ((setCounts['rose_thornstalker'] || 0) >= 4) {
+        p.thornsDamage = (p.thornsDamage || 0) + 40;
         p.activeSetBonuses['rose_4'] = true;
       }
       if ((setCounts['rose_thornstalker'] || 0) >= 6) {
         p.activeSetBonuses['rose_6'] = true;
       }
 
-      // Burnside Anarchist Set Bonuses
+      // 3. Burnside Anarchist Set Bonuses
       if ((setCounts['burnside_anarchist'] || 0) >= 2) {
-        critBonus += 0.15;
+        critBonus += 0.18;
         p.activeSetBonuses['anarchist_2'] = true;
       }
       if ((setCounts['burnside_anarchist'] || 0) >= 4) {
-        totalAttack += 20;
+        totalAttack += 25;
         p.activeSetBonuses['anarchist_4'] = true;
       }
       if ((setCounts['burnside_anarchist'] || 0) >= 6) {
         p.activeSetBonuses['anarchist_6'] = true;
+      }
+
+      // 4. Cascade Cryomancer Set Bonuses
+      if ((setCounts['cascade_cryomancer'] || 0) >= 2) {
+        extraHp += 80;
+        p.activeSetBonuses['cryo_2'] = true;
+      }
+      if ((setCounts['cascade_cryomancer'] || 0) >= 4) {
+        totalAttack += 20;
+        p.activeSetBonuses['cryo_4'] = true;
+      }
+      if ((setCounts['cascade_cryomancer'] || 0) >= 6) {
+        p.activeSetBonuses['cryo_6'] = true;
+      }
+
+      // 5. Chinatown Dragon Set Bonuses
+      if ((setCounts['chinatown_dragon'] || 0) >= 2) {
+        totalAttack += 25;
+        p.activeSetBonuses['dragon_2'] = true;
+      }
+      if ((setCounts['chinatown_dragon'] || 0) >= 4) {
+        p.activeSetBonuses['dragon_4'] = true;
+      }
+      if ((setCounts['chinatown_dragon'] || 0) >= 6) {
+        p.activeSetBonuses['dragon_6'] = true;
+      }
+
+      // 6. Bridge City Sentinel Set Bonuses
+      if ((setCounts['bridge_city_sentinel'] || 0) >= 2) {
+        totalArmor += 35;
+        blockBonus += 0.15;
+        p.activeSetBonuses['sentinel_2'] = true;
+      }
+      if ((setCounts['bridge_city_sentinel'] || 0) >= 4) {
+        p.activeSetBonuses['sentinel_4'] = true;
+      }
+      if ((setCounts['bridge_city_sentinel'] || 0) >= 6) {
+        p.activeSetBonuses['sentinel_6'] = true;
       }
 
       p.maxHp = Math.max(80, 120 + extraHp + (p.level * 20));
