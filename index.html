@@ -211,7 +211,7 @@
 
   <main class="relative flex-1 w-full h-full overflow-hidden bg-slate-950 select-none">
     <!-- Floating On-Screen Quick Pause Button (Mobile & Desktop Fallback - Translucent) -->
-    <button onclick="togglePause()" class="absolute top-3 right-3 z-30 flex sm:hidden items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/80 hover:bg-amber-400 active:bg-amber-400 backdrop-blur-xs border border-amber-400/40 text-slate-950 font-mono font-black text-xs shadow-md active:scale-90" title="Pause">
+    <button onclick="togglePause()" class="absolute top-2.5 right-2.5 z-30 flex sm:hidden items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/40 hover:bg-amber-400/70 active:bg-amber-400 backdrop-blur-xs border border-amber-400/30 text-amber-200 font-mono font-bold text-[11px] shadow-sm active:scale-90 opacity-70 hover:opacity-100 transition-opacity" title="Pause">
       <span>⏸️</span>
       <span>PAUSE</span>
     </button>
@@ -220,17 +220,17 @@
     <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
 
     <!-- Experience Gauge (Translucent) -->
-    <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none opacity-80">
+    <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none opacity-60 hover:opacity-90 transition-opacity">
       <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1 px-1">
         <span>PACIFIC LEYLINE RESONANCE (XP)</span>
         <span id="hudXpText">0 / 180 XP</span>
       </div>
-      <div class="w-full bg-slate-900/50 backdrop-blur-xs h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-700/50 p-[1px]">
+      <div class="w-full bg-slate-900/40 backdrop-blur-xs h-1.5 sm:h-2 rounded-full overflow-hidden border border-slate-700/40 p-[1px]">
         <div id="hudXpBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 rounded-full transition-all duration-200" style="width: 0%"></div>
       </div>
     </div>
 
-    <!-- Combo Counter Overlay -->
+    <!-- Combo Counter Overlay (Translucent See-Through) -->
     <div id="comboContainer" class="absolute top-4 left-5 z-10 pointer-events-none transition-all duration-150 transform scale-90 opacity-0">
       <div class="font-display font-black text-3xl sm:text-5xl italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 drop-shadow-[0_2px_12px_rgba(244,63,94,0.6)]">
         <span id="comboCount">0</span>x COMBO
@@ -241,10 +241,10 @@
     </div>
 
     <!-- Wave Announcement Banner (Translucent / See-Through Glassmorphic) -->
-    <div id="waveAlertBanner" class="absolute top-12 sm:top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 text-center w-10/12 max-w-sm">
-      <div class="px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl border border-rose-500/40 bg-slate-950/45 backdrop-blur-xs shadow-[0_0_20px_rgba(244,63,94,0.25)]">
+    <div id="waveAlertBanner" class="absolute top-11 sm:top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 text-center w-10/12 max-w-xs sm:max-w-sm">
+      <div class="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl border border-rose-500/30 bg-slate-950/40 backdrop-blur-xs shadow-[0_0_15px_rgba(244,63,94,0.2)]">
         <div id="waveAlertTitle" class="font-display font-extrabold text-xs sm:text-sm text-rose-400 uppercase tracking-wider">NEW WAVE INCOMING</div>
-        <div id="waveAlertSub" class="font-mono text-[10px] sm:text-[11px] text-slate-300/90">Escalating Portland Leyline Density</div>
+        <div id="waveAlertSub" class="font-mono text-[9px] sm:text-[10px] text-slate-300/80">Escalating Portland Leyline Density</div>
       </div>
     </div>
 
@@ -252,35 +252,35 @@
     <div id="touchControls" class="absolute inset-0 pointer-events-none z-10 hidden flex justify-between p-6 items-end pb-12" style="touch-action: none;">
       <!-- Virtual Joystick -->
       <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/35 border border-slate-700/40 relative pointer-events-auto flex items-center justify-center backdrop-blur-xs" style="touch-action: none;">
-        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/70 shadow-glow-emerald border border-white/40" style="touch-action: none;"></div>
+        <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/50 shadow-glow-emerald border border-white/30 backdrop-blur-xs" style="touch-action: none;"></div>
       </div>
 
       <!-- Action Buttons -->
       <div class="flex flex-col gap-2.5 pointer-events-auto items-end">
         <div class="flex gap-2">
-          <button id="btnSkill1Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-cyan-500/40 text-cyan-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
+          <button id="btnSkill1Touch" class="w-11 h-11 rounded-2xl bg-slate-900/40 backdrop-blur-xs border border-cyan-500/30 text-cyan-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md opacity-75 active:opacity-100 transition-opacity">
             <span class="text-xs">Q</span>
             <span class="text-[8px] text-slate-400">Rain</span>
           </button>
-          <button id="btnSkill2Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-amber-500/40 text-amber-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
+          <button id="btnSkill2Touch" class="w-11 h-11 rounded-2xl bg-slate-900/40 backdrop-blur-xs border border-amber-500/30 text-amber-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md opacity-75 active:opacity-100 transition-opacity">
             <span class="text-xs">E</span>
             <span class="text-[8px] text-slate-400">Coffee</span>
           </button>
-          <button id="btnSkill3Touch" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-rose-500/40 text-rose-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
+          <button id="btnSkill3Touch" class="w-11 h-11 rounded-2xl bg-slate-900/40 backdrop-blur-xs border border-rose-500/30 text-rose-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md opacity-75 active:opacity-100 transition-opacity">
             <span class="text-xs">R</span>
             <span class="text-[8px] text-slate-400">Briar</span>
           </button>
-          <button id="btnTrinketTouch" onclick="triggerTrinket()" class="w-11 h-11 rounded-2xl bg-slate-900/50 backdrop-blur-xs border border-fuchsia-500/40 text-fuchsia-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md">
+          <button id="btnTrinketTouch" onclick="triggerTrinket()" class="w-11 h-11 rounded-2xl bg-slate-900/40 backdrop-blur-xs border border-fuchsia-500/30 text-fuchsia-300 font-bold flex flex-col items-center justify-center active:scale-95 shadow-md opacity-75 active:opacity-100 transition-opacity">
             <span class="text-xs">T</span>
             <span class="text-[8px] text-slate-400">Trinket</span>
           </button>
         </div>
 
         <div class="flex gap-2.5">
-          <button id="btnDodgeTouch" class="w-12 h-12 rounded-2xl bg-indigo-950/50 backdrop-blur-xs border border-indigo-500/40 text-indigo-300 font-bold flex flex-col items-center justify-center active:scale-90 shadow-md">
+          <button id="btnDodgeTouch" class="w-12 h-12 rounded-2xl bg-indigo-950/40 backdrop-blur-xs border border-indigo-500/30 text-indigo-300 font-bold flex flex-col items-center justify-center active:scale-90 shadow-md opacity-75 active:opacity-100 transition-opacity">
             <span class="text-xs">Roll</span>
           </button>
-          <button id="btnAttackTouch" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600/90 to-teal-400/90 text-slate-950 font-black opacity-90 active:opacity-100 flex flex-col items-center justify-center active:scale-90 shadow-glow-emerald border border-white/40">
+          <button id="btnAttackTouch" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600/70 to-teal-400/70 text-slate-950 font-black opacity-75 active:opacity-100 flex flex-col items-center justify-center active:scale-90 shadow-glow-emerald border border-white/30 backdrop-blur-xs transition-opacity">
             <span class="text-xs font-mono font-black">SLASH</span>
           </button>
         </div>
@@ -288,7 +288,7 @@
     </div>
 
     <!-- Desktop Skill Hotbar Dock -->
-    <div class="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 z-10 bg-slate-950/60 backdrop-blur-md px-4 py-2 rounded-2xl border border-slate-700/70 items-center gap-3 shadow-xl">
+    <div class="hidden sm:flex absolute bottom-8 left-1/2 -translate-x-1/2 z-10 bg-slate-950/45 backdrop-blur-xs px-4 py-2 rounded-2xl border border-slate-700/50 items-center gap-3 shadow-xl opacity-75 hover:opacity-100 transition-opacity">
       <!-- Slash Attack -->
       <div class="flex flex-col items-center cursor-pointer" onclick="triggerAttack()">
         <div class="w-11 h-11 rounded-xl bg-slate-800/70 border border-emerald-500/60 flex items-center justify-center text-emerald-400 shadow-sm relative">
@@ -359,7 +359,7 @@
     </div>
 
     <!-- Notification Toast Container (Translucent & Compact, Positioned Away from Combat Arena) -->
-    <div id="toastContainer" class="absolute top-12 sm:top-14 right-2 sm:right-4 z-30 flex flex-col items-end gap-1.5 pointer-events-none max-w-[280px] sm:max-w-sm w-auto"></div>
+    <div id="toastContainer" class="absolute top-11 sm:top-14 right-2 sm:right-4 z-30 flex flex-col items-end gap-1.5 pointer-events-none max-w-[260px] sm:max-w-xs w-auto opacity-75 hover:opacity-100 transition-opacity"></div>
   </main>
 
   <!-- Diablo 4 Style Paperdoll & Inventory Modal -->
@@ -872,9 +872,9 @@
     </div>
   </div>
 
-  <!-- Level Up Banner -->
+  <!-- Level Up Banner (Translucent Glassmorphic) -->
   <div id="levelUpBanner" class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center hidden">
-    <div class="glass-panel px-8 py-6 rounded-3xl border border-emerald-400/80 shadow-[0_0_50px_rgba(16,185,129,0.5)] text-center transform scale-75 animate-pulse-glow">
+    <div class="px-8 py-6 rounded-3xl border border-emerald-400/60 bg-slate-950/60 backdrop-blur-md shadow-[0_0_40px_rgba(16,185,129,0.35)] opacity-80 text-center transform scale-75 animate-pulse-glow">
       <div class="text-xs font-mono font-bold tracking-widest text-emerald-400 uppercase">LEVEL MASTERY REACHED</div>
       <div class="font-display font-black text-4xl sm:text-5xl text-white mt-1">LEVEL <span id="bannerLevelNum">2</span></div>
       <div class="text-xs font-mono text-cyan-300 mt-2">+1 Skill Point Granted | Stats Enhanced</div>
@@ -2427,12 +2427,12 @@
       subEl.textContent = subtitle;
 
       banner.classList.remove('opacity-0', '-translate-y-4');
-      banner.classList.add('opacity-100', 'translate-y-0');
+      banner.classList.add('opacity-70', 'translate-y-0');
 
       setTimeout(() => {
         banner.classList.add('opacity-0', '-translate-y-4');
-        banner.classList.remove('opacity-100', 'translate-y-0');
-      }, 1800);
+        banner.classList.remove('opacity-70', 'translate-y-0');
+      }, 1600);
     }
 
     function startNextWave() {
@@ -3887,6 +3887,14 @@
     }
 
     function addFloatingText(text, x, y, color = '#ffffff', size = 14) {
+      if (!gameState.settings?.notificationsEnabled) {
+        // When in-game details & combat spam is toggled off, suppress redundant word tags
+        // like "RICOCHET!", "SHREDDED!", "PHASED", but keep damage numbers clean & translucent
+        const str = String(text).trim();
+        if (str === 'RICOCHET!' || str === 'SHREDDED!' || str === 'PHASED') {
+          return;
+        }
+      }
       gameState.floatingTexts.push({
         text,
         x,
@@ -3894,8 +3902,8 @@
         vy: -1.2,
         color,
         size,
-        life: 0.8,
-        maxLife: 0.8
+        life: 0.75,
+        maxLife: 0.75
       });
     }
 
@@ -4755,7 +4763,8 @@
     function drawFloatingTexts() {
       gameState.floatingTexts.forEach(ft => {
         ctx.save();
-        ctx.globalAlpha = ft.life / ft.maxLife;
+        // Translucent see-through combat text so battles and enemies underneath remain visible
+        ctx.globalAlpha = Math.min(0.65, (ft.life / ft.maxLife) * 0.70);
         ctx.font = `bold ${ft.size}px JetBrains Mono`;
         ctx.fillStyle = ft.color;
         ctx.textAlign = 'center';
@@ -6426,7 +6435,7 @@
       if (gameState.player.comboHits > 0) {
         countEl.textContent = gameState.player.comboHits;
         container.classList.remove('opacity-0', 'scale-90');
-        container.classList.add('opacity-100', 'scale-100');
+        container.classList.add('opacity-70', 'scale-100');
 
         if (gameState.player.comboHits > 20) rankEl.textContent = 'CASCADE APOCALYPSE';
         else if (gameState.player.comboHits > 12) rankEl.textContent = 'WILLAMETTE DELUGE';
@@ -6434,7 +6443,7 @@
         else rankEl.textContent = 'PORTLAND SYNTHESIS';
       } else {
         container.classList.add('opacity-0', 'scale-90');
-        container.classList.remove('opacity-100', 'scale-100');
+        container.classList.remove('opacity-70', 'scale-100');
       }
     }
 
@@ -6833,21 +6842,21 @@
       }
 
       // Translucent glassmorphic see-through styling:
-      // bg-slate-950/45 backdrop-blur-xs with pointer-events-none and compact padding
-      toast.className = `pointer-events-none px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border ${borderCol} bg-slate-950/45 backdrop-blur-xs flex items-center justify-between gap-2 ${glowCol} transition-all duration-200 transform translate-x-6 opacity-0 w-auto max-w-full`;
-      toast.innerHTML = `<span class="text-[11px] sm:text-xs font-mono ${textCol} font-medium tracking-wide pointer-events-none drop-shadow-sm">${message}</span>`;
+      // bg-slate-950/40 backdrop-blur-xs with pointer-events-none and compact padding
+      toast.className = `pointer-events-none px-3 py-1 sm:px-3 sm:py-1.5 rounded-xl border ${borderCol} bg-slate-950/40 backdrop-blur-xs flex items-center justify-between gap-2 ${glowCol} transition-all duration-200 transform translate-x-4 opacity-0 w-auto max-w-full`;
+      toast.innerHTML = `<span class="text-[11px] sm:text-xs font-mono ${textCol} font-medium tracking-wide pointer-events-none drop-shadow-sm select-none">${message}</span>`;
       container.appendChild(toast);
 
       requestAnimationFrame(() => {
-        toast.classList.remove('translate-x-6', 'opacity-0');
-        toast.classList.add('opacity-90');
+        toast.classList.remove('translate-x-4', 'opacity-0');
+        toast.classList.add('opacity-70');
       });
 
       setTimeout(() => {
         toast.classList.add('opacity-0', '-translate-y-2');
-        toast.classList.remove('opacity-90');
+        toast.classList.remove('opacity-70');
         setTimeout(() => toast.remove(), 250);
-      }, 1900);
+      }, 1800);
     }
 
     // ── TELEGRAM MINI APP PRODUCTION SUITE ──
