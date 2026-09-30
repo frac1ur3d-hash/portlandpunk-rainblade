@@ -1781,12 +1781,19 @@
       Tone.Transport.start();
     }
 
+    let lastBassDropTime = 0;
     function playDubstepBassDrop(comboCount, isParry = false) {
       if (!gameState.audioEnabled || !audioInitialized) return;
+      const nowMs = performance.now();
+      if (nowMs - lastBassDropTime < 100) return;
+      lastBassDropTime = nowMs;
       try {
+        if (typeof Tone !== 'undefined' && Tone.context && Tone.context.state !== 'running') {
+          Tone.context.resume().catch(() => {});
+        }
         const now = Tone.now();
         const bassPitch = isParry ? "F1" : (comboCount > 15 ? "C1" : comboCount > 8 ? "D1" : "E1");
-        dubSubBass.triggerAttackRelease(bassPitch, "4n", now);
+        dubSubBass?.triggerAttackRelease(bassPitch, "4n", now);
 
         if (dubWobbleLfo) {
           if (comboCount > 12) dubWobbleLfo.frequency.rampTo("16n", 0.1);
@@ -1803,17 +1810,24 @@
       gameState.screenShake = Math.max(gameState.screenShake, magnitude);
     }
 
+    const lastSoundTimes = {};
     function playSound(type) {
       if (!gameState.audioEnabled || !audioInitialized) return;
+      const nowMs = performance.now();
+      if (lastSoundTimes[type] && (nowMs - lastSoundTimes[type] < 45)) return;
+      lastSoundTimes[type] = nowMs;
       try {
+        if (typeof Tone !== 'undefined' && Tone.context && Tone.context.state !== 'running') {
+          Tone.context.resume().catch(() => {});
+        }
         const now = Tone.now();
-        if (type === 'slash') sfxSlash.triggerAttackRelease("16n", now);
-        else if (type === 'hit') sfxHit.triggerAttackRelease("C2", "8n", now);
-        else if (type === 'parry') sfxParry.triggerAttackRelease(["C5", "F#5", "C6"], "16n", now);
-        else if (type === 'special') sfxSpecial.triggerAttackRelease(["D2", "A2", "D3"], "8n", now);
-        else if (type === 'dodge') sfxDodge.triggerAttackRelease("16n", now);
-        else if (type === 'level') sfxLevelUp.triggerAttackRelease(["D3", "F3", "A3", "D4"], "4n", now);
-        else if (type === 'coin') sfxCoin.triggerAttackRelease("D6", "16n", now);
+        if (type === 'slash') sfxSlash?.triggerAttackRelease("16n", now);
+        else if (type === 'hit') sfxHit?.triggerAttackRelease("C2", "8n", now);
+        else if (type === 'parry') sfxParry?.triggerAttackRelease(["C5", "F#5", "C6"], "16n", now);
+        else if (type === 'special') sfxSpecial?.triggerAttackRelease(["D2", "A2", "D3"], "8n", now);
+        else if (type === 'dodge') sfxDodge?.triggerAttackRelease("16n", now);
+        else if (type === 'level') sfxLevelUp?.triggerAttackRelease(["D3", "F3", "A3", "D4"], "4n", now);
+        else if (type === 'coin') sfxCoin?.triggerAttackRelease("D6", "16n", now);
       } catch (e) {}
     }
 
@@ -2099,9 +2113,8 @@
     bindTouchAction('btnTrinketTouch', triggerTrinket);
 
     function normalizeAngle(angle) {
-      while (angle > Math.PI) angle -= Math.PI * 2;
-      while (angle < -Math.PI) angle += Math.PI * 2;
-      return angle;
+      if (!Number.isFinite(angle)) return 0;
+      return Math.atan2(Math.sin(angle), Math.cos(angle));
     }
 
     function triggerAttack() {
@@ -2778,7 +2791,8 @@
         const affix = isElite ? eliteAffixes[Math.floor(Math.random() * eliteAffixes.length)] : null;
         const finalHp = isElite ? Math.round(hp * 1.6) : hp;
         const finalRadius = isElite ? Math.round(archetype.radius * 1.3) : archetype.radius;
-        const finalName = isElite ? `👑 [${affix.toUpperCase()}] ${archetype.name}` : archetype.name;
+        const affixLabel = isElite ? (affix || 'ELITE').toUpperCase() : '';
+        const finalName = isElite ? `👑 [${affixLabel}] ${archetype.name}` : archetype.name;
 
         gameState.enemies.push({
           archetypeId: archetype.typeId,
@@ -4704,10 +4718,7 @@
                 createImpactParticles(enemy.x, enemy.y, '#c084fc');
               }
 
-              if (p.hp <= 0) {
-                p.hp = 0;
-                openEmergencyRevive();
-              }
+              if (checkPlayerFatalDamage()) return;
             }
           }
         }
@@ -4766,6 +4777,7 @@
               p.hp -= taken;
               addFloatingText(`-${taken}`, p.x, p.y - 10, '#f43f5e', 13);
               playSound('hit');
+              if (checkPlayerFatalDamage()) return;
             } else if (p.invulnerableTimer > 0) {
               addFloatingText(`PHASED`, p.x, p.y - 10, '#d946ef', 12);
               playSound('dodge');
@@ -4780,6 +4792,8 @@
           gameState.projectiles.splice(pIdx, 1);
         }
       }
+
+      if (checkPlayerFatalDamage()) return;
 
       if (gameState.waveInProgress && gameState.enemies.length === 0) {
         gameState.waveInProgress = false;
@@ -4801,6 +4815,14 @@
       }
       if (gameState.particles.length > 120) {
         gameState.particles.splice(0, gameState.particles.length - 120);
+      }
+
+      // Hard caps on hostile/friendly entities to prevent mobile memory freeze
+      if (gameState.projectiles.length > 60) {
+        gameState.projectiles.splice(0, gameState.projectiles.length - 60);
+      }
+      if (gameState.groundHazards && gameState.groundHazards.length > 25) {
+        gameState.groundHazards.splice(0, gameState.groundHazards.length - 25);
       }
 
       for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
@@ -5673,12 +5695,13 @@
         ctx.fillRect(-barW / 2, -e.radius - 14, barW * hpPct, 4);
 
         if (e.isElite) {
+          const affixLabel = (e.affix || 'ELITE').toUpperCase();
           ctx.font = 'bold 9px monospace';
           ctx.fillStyle = e.affix === 'molten' ? '#f97316' :
                           e.affix === 'frozen' ? '#38bdf8' :
                           e.affix === 'electrified' ? '#eab308' : '#dc2626';
           ctx.textAlign = 'center';
-          ctx.fillText(`👑 [${e.affix.toUpperCase()}]`, 0, -e.radius - 19);
+          ctx.fillText(`👑 [${affixLabel}]`, 0, -e.radius - 19);
         }
 
         ctx.restore();
@@ -5806,6 +5829,7 @@
       }
     }
 
+    let consecutiveLoopErrors = 0;
     function gameLoop(timestamp) {
       try {
         const now = timestamp || performance.now();
@@ -5816,8 +5840,16 @@
           update(dt);
         }
         render();
+        consecutiveLoopErrors = 0;
       } catch (err) {
-        console.error('GameLoop frame error:', err);
+        consecutiveLoopErrors++;
+        if (consecutiveLoopErrors <= 3) {
+          console.error('GameLoop frame error:', err);
+        }
+        // Fail-safe: if player hp reaches 0 during a frame glitch, invoke revive screen
+        if (gameState.player && gameState.player.hp <= 0 && !gameState.isReviveOpen) {
+          try { openEmergencyRevive(); } catch (e) {}
+        }
       }
       requestAnimationFrame(gameLoop);
     }
@@ -8140,8 +8172,8 @@
     }
 
     function showToast(message, type = 'info', force = false) {
-      // Check if user is inside a menu/modal (inventory, skills, character, pause, district map)
-      const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal'].some(
+      // Check if user is inside a menu/modal (inventory, skills, character, pause, district map, revive)
+      const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'emergencyReviveModal'].some(
         id => {
           const el = document.getElementById(id);
           return el && !el.classList.contains('hidden');
@@ -8157,7 +8189,7 @@
       if (!container) return;
 
       // Keep only up to 2 active toasts so it never clutters mobile/telegram combat
-      while (container.children.length >= 2) {
+      while (container.firstChild && container.children.length >= 2) {
         container.removeChild(container.firstChild);
       }
 
@@ -8200,9 +8232,13 @@
 
     // ── TELEGRAM MINI APP PRODUCTION SUITE ──
     const tg = window.Telegram?.WebApp;
+    let lastTelegramHapticTime = 0;
 
     function triggerTelegramHaptic(type = 'impact', style = 'light') {
       if (!tg?.HapticFeedback) return;
+      const now = performance.now();
+      if (now - lastTelegramHapticTime < 50) return;
+      lastTelegramHapticTime = now;
       try {
         if (type === 'impact') {
           tg.HapticFeedback.impactOccurred(style); // 'light' | 'medium' | 'heavy' | 'rigid' | 'soft'
@@ -8550,6 +8586,162 @@
         }
       }
     });
+
+    // === EMERGENCY REVIVE & SPONSOR DEFIBRILLATOR SUITE ===
+    function checkPlayerFatalDamage() {
+      const p = gameState.player;
+      if (p && p.hp <= 0 && !gameState.isReviveOpen) {
+        p.hp = 0;
+        openEmergencyRevive();
+        return true;
+      }
+      return false;
+    }
+
+    function openEmergencyRevive() {
+      if (gameState.isReviveOpen) return;
+      gameState.isReviveOpen = true;
+      gameState.isPaused = true;
+
+      if (gameState.audioEnabled && audioInitialized && typeof Tone !== 'undefined' && Tone.Transport.state === 'started') {
+        try { Tone.Transport.pause(); } catch (e) {}
+      }
+      playSound('hit');
+      triggerTelegramHaptic('notification', 'error');
+
+      const modal = document.getElementById('emergencyReviveModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function triggerSponsorRevive() {
+      const modal = document.getElementById('emergencyReviveModal');
+      if (modal) modal.classList.add('hidden');
+
+      const overlay = document.getElementById('sponsorBroadcastOverlay');
+      const timerText = document.getElementById('sponsorTimerText');
+      const progressBar = document.getElementById('sponsorProgressBar');
+      const badge = document.getElementById('sponsorRewardBadge');
+
+      if (badge) badge.textContent = '⚡ NEURAL DEFIBRILLATOR OVERCHARGE ACTIVE';
+      if (overlay) overlay.classList.remove('hidden');
+
+      let duration = 2.4;
+      let elapsed = 0;
+      if (progressBar) progressBar.style.width = '0%';
+
+      const interval = setInterval(() => {
+        elapsed += 0.1;
+        const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+        const rem = Math.max(0, Math.ceil(duration - elapsed));
+        if (progressBar) progressBar.style.width = `${pct}%`;
+        if (timerText) timerText.textContent = `TRANSMITTING: ${rem}s`;
+
+        if (elapsed >= duration) {
+          clearInterval(interval);
+          if (overlay) overlay.classList.add('hidden');
+          gameState.isReviveOpen = false;
+
+          const p = gameState.player;
+          p.hp = p.maxHp;
+          p.energy = p.maxEnergy;
+          p.invulnerableTimer = 3.5;
+          p.isDodging = false;
+          p.beans += 75;
+
+          // Push back all nearby enemies to give breathing room
+          gameState.enemies.forEach(e => {
+            const ed = Math.hypot(e.x - p.x, e.y - p.y) || 1;
+            if (ed < 260) {
+              const ang = Math.atan2(e.y - p.y, e.x - p.x);
+              e.x += Math.cos(ang) * 120;
+              e.y += Math.sin(ang) * 120;
+              e.hitFlash = 0.25;
+            }
+          });
+
+          createImpactParticles(p.x, p.y, '#10b981', 25);
+          createImpactParticles(p.x, p.y, '#00f5ff', 25);
+          addFloatingText("NEURAL DEFIBRILLATOR ONLINE!", p.x, p.y - 28, '#10b981', 17);
+          playSound('special');
+          playSound('level');
+          triggerTelegramHaptic('notification', 'success');
+          showToast("REVIVED: Full HP & 3.5s Aegis Overcharge!", "success", true);
+
+          gameState.isPaused = false;
+          if (gameState.audioEnabled && audioInitialized && typeof Tone !== 'undefined') {
+            try { Tone.Transport.start(); } catch (e) {}
+          }
+          updateHUD();
+        }
+      }, 100);
+    }
+
+    function declineReviveAndRespawn() {
+      const modal = document.getElementById('emergencyReviveModal');
+      if (modal) modal.classList.add('hidden');
+      gameState.isReviveOpen = false;
+
+      const p = gameState.player;
+      p.beans = Math.max(0, p.beans - 50);
+      p.hp = p.maxHp;
+      p.energy = p.maxEnergy;
+      p.invulnerableTimer = 2.0;
+      p.x = 0;
+      p.y = 0;
+      gameState.camera.x = - (gameState.canvasWidth || 800) / 2;
+      gameState.camera.y = - (gameState.canvasHeight || 600) / 2;
+
+      gameState.enemies = [];
+      gameState.projectiles = [];
+      gameState.groundHazards = [];
+      gameState.slashes = [];
+      gameState.waveInProgress = false;
+
+      triggerWaveIntermission();
+      showToast("Retreated to Safehouse Leylines (-50 Beans).", "info", true);
+      triggerTelegramHaptic('notification', 'warning');
+      updateHUD();
+    }
+
+    function watchSponsorClip(rewardType) {
+      const overlay = document.getElementById('sponsorBroadcastOverlay');
+      const timerText = document.getElementById('sponsorTimerText');
+      const progressBar = document.getElementById('sponsorProgressBar');
+      const badge = document.getElementById('sponsorRewardBadge');
+
+      if (badge) badge.textContent = '+75 BEANS CREDITED ON COMPLETION';
+      if (overlay) overlay.classList.remove('hidden');
+
+      let duration = 2.2;
+      let elapsed = 0;
+      if (progressBar) progressBar.style.width = '0%';
+
+      const interval = setInterval(() => {
+        elapsed += 0.1;
+        const pct = Math.min(100, Math.round((elapsed / duration) * 100));
+        const rem = Math.max(0, Math.ceil(duration - elapsed));
+        if (progressBar) progressBar.style.width = `${pct}%`;
+        if (timerText) timerText.textContent = `TRANSMITTING: ${rem}s`;
+
+        if (elapsed >= duration) {
+          clearInterval(interval);
+          if (overlay) overlay.classList.add('hidden');
+
+          if (rewardType === 'beans') {
+            gameState.player.beans += 75;
+            playSound('coin');
+            addFloatingText("+75 Beans", gameState.player.x, gameState.player.y - 20, '#fbbf24', 15);
+            showToast("+75 Stumptown Beans credited!", "success", true);
+            triggerTelegramHaptic('notification', 'success');
+            updateHUD();
+            const bEl = document.getElementById('invBeansDisplay');
+            if (bEl) bEl.textContent = `${gameState.player.beans} ☕`;
+          }
+        }
+      }, 100);
+    }
 
   </script>
 
