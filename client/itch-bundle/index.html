@@ -2311,12 +2311,19 @@
       floatingTexts: [],
       slashes: [],
       rainDrops: [],
+      groundItems: [],
+      groundHazards: [],
+      dungeonStats: {
+        elitesSlain: 0,
+        bossesSlain: 0,
+        liberatedLandmarks: []
+      },
       
-      wave: 0,
-      districtWave: 0,
+      wave: 1,
+      districtWave: 1,
       waveGraceTimer: 1.0,
       bossActive: false,
-      waveInProgress: false,
+      waveInProgress: true,
       intermissionActive: false,
       
       trinketCooldown: 0,
@@ -2660,6 +2667,9 @@
 
     canvas.addEventListener('mousedown', (e) => {
       if (e.button === 0) {
+        if (typeof checkClickGroundLoot === 'function' && checkClickGroundLoot(gameState.mouse.worldX, gameState.mouse.worldY)) {
+          return;
+        }
         gameState.mouse.isDown = true;
         if (!audioInitialized) initAudio();
         triggerAttack();
@@ -2677,6 +2687,9 @@
       const touch = e.changedTouches[0];
       if (touch) {
         updateMousePos(touch.clientX, touch.clientY);
+        if (typeof checkClickGroundLoot === 'function' && checkClickGroundLoot(gameState.mouse.worldX, gameState.mouse.worldY)) {
+          return;
+        }
         gameState.player.angle = Math.atan2(gameState.mouse.worldY - gameState.player.y, gameState.mouse.worldX - gameState.player.x);
         triggerAttack();
       }
@@ -3314,24 +3327,19 @@
     }
 
     function startNextWave() {
-      gameState.wave++;
-      gameState.districtWave++;
+      gameState.wave = Math.max(1, gameState.wave);
       gameState.waveInProgress = true;
       gameState.intermissionActive = false;
-      document.getElementById('hudWaveTracker').textContent = `WAVE ${gameState.wave} (DISTRICT W${gameState.districtWave})`;
+      const tracker = document.getElementById('hudWaveTracker');
+      if (tracker) {
+        const dName = gameState.currentDistrict ? gameState.currentDistrict.name : 'PORTLAND';
+        tracker.textContent = `DUNGEON EXPLORATION • ${dName}`;
+      }
 
-      const threat = gameState.currentDistrict.threat;
-      const waveMult = 1 + (gameState.wave - 1) * 0.16 + (threat - 1) * 0.25;
-      const isBossWave = (gameState.districtWave % 5 === 0);
-
-      if (isBossWave) {
-        spawnBoss(waveMult);
-        triggerWaveAnnouncement(`⚠️ APEX DISTRICT BOSS DETECTED!`, `${gameState.currentDistrict.name} Anomaly Overload`);
-        playSound('special');
-      } else {
-        const enemyCount = 4 + Math.floor(gameState.districtWave * 1.4) + threat * 2;
-        triggerWaveAnnouncement(`WAVE ${gameState.wave} INCOMING`, `${enemyCount} District Horrors Converging`);
-        spawnEnemiesForWave(enemyCount, waveMult);
+      if (gameState.worldMap) {
+        if (!gameState.enemies || gameState.enemies.length === 0) {
+          populateDungeonMonsters(gameState.worldMap);
+        }
       }
     }
 
@@ -4656,77 +4664,155 @@
   }
 ];
 
-    function dropLoot(x, y) {
+    function getItemTierVisual(tier, setId) {
+      if (setId) {
+        return {
+          color: '#22c55e',
+          glow: 'rgba(34, 197, 94, 0.90)',
+          bg: 'rgba(5, 46, 22, 0.92)',
+          beamHeight: 340,
+          label: 'SET ITEM'
+        };
+      }
+      switch (tier) {
+        case 'Legendary':
+          return {
+            color: '#f97316',
+            glow: 'rgba(249, 115, 22, 0.92)',
+            bg: 'rgba(67, 20, 7, 0.92)',
+            beamHeight: 320,
+            label: 'LEGENDARY'
+          };
+        case 'Epic':
+          return {
+            color: '#c084fc',
+            glow: 'rgba(192, 132, 252, 0.82)',
+            bg: 'rgba(59, 7, 100, 0.90)',
+            beamHeight: 250,
+            label: 'EPIC'
+          };
+        case 'Rare':
+          return {
+            color: '#eab308',
+            glow: 'rgba(234, 179, 8, 0.82)',
+            bg: 'rgba(66, 32, 6, 0.90)',
+            beamHeight: 220,
+            label: 'RARE'
+          };
+        case 'Magic':
+        case 'Uncommon':
+          return {
+            color: '#38bdf8',
+            glow: 'rgba(56, 189, 248, 0.72)',
+            bg: 'rgba(8, 47, 73, 0.90)',
+            beamHeight: 180,
+            label: 'MAGIC'
+          };
+        default:
+          return {
+            color: '#e2e8f0',
+            glow: 'rgba(226, 232, 240, 0.55)',
+            bg: 'rgba(15, 23, 42, 0.88)',
+            beamHeight: 140,
+            label: 'NORMAL'
+          };
+      }
+    }
+
+    function dropLoot(x, y, count = 1, forceHighTier = false) {
+      if (!gameState.groundItems) gameState.groundItems = [];
+
+      // 1. Physical Bouncing Beans Drop
       let beanAmount = 15 + Math.floor(Math.random() * 25);
       if (gameState.player.activeSetBonuses && gameState.player.activeSetBonuses['stumptown_6']) {
-        beanAmount = Math.round(beanAmount * 1.5); // +50% Beans from Stumptown (6) Set
+        beanAmount = Math.round(beanAmount * 1.5);
       }
-      gameState.player.beans += beanAmount;
-      playSound('coin');
-      addFloatingText(`+${beanAmount} Beans`, x, y - 18, '#fbbf24', 13);
+      gameState.groundItems.push({
+        type: 'beans',
+        amount: beanAmount,
+        x: x + (Math.random() - 0.5) * 16,
+        y: y + (Math.random() - 0.5) * 16,
+        z: 14 + Math.random() * 8,
+        vx: (Math.random() - 0.5) * 4.0,
+        vy: (Math.random() - 0.5) * 4.0,
+        vz: 3.8 + Math.random() * 2.8,
+        bounces: 2,
+        settled: false,
+        icon: '☕',
+        name: `${beanAmount} Beans`,
+        tier: 'Beans'
+      });
 
-      const dropChance = 0.55;
-      if (Math.random() < dropChance) {
-        const extraDrops = [
-          // ── SET 1: STUMPTOWN ROASTER ──
-          { name: "Roaster's Cyber-Visor", setId: 'stumptown_roaster', type: 'head', icon: '🥽', tier: 'Epic', hp: 60, critChance: 0.10, bonus: '+60 HP, +10% Crit [Roaster Set]', value: 160 },
-          { name: "Steam-Spike Leyline Katana", setId: 'stumptown_roaster', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 32, bonus: '+32 Attack, Steam Spike [Roaster Set]', value: 175 },
-          { name: "Barista Reinforced Apron", setId: 'stumptown_roaster', type: 'armor', icon: '🧥', tier: 'Epic', hp: 110, armor: 22, bonus: '+110 HP, +22 Armor [Roaster Set]', value: 180 },
-          { name: "Espresso Puddle Jumpers", setId: 'stumptown_roaster', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Roaster Set]', value: 155 },
-          { name: "Stumptown Leyline Signet", setId: 'stumptown_roaster', type: 'ring', icon: '💍', tier: 'Epic', damage: 16, ricochetBonus: 0.35, bonus: '+16 Dmg, +35% Ricochet [Roaster Set]', value: 165 },
-          { name: "Espresso Quantum Core", setId: 'stumptown_roaster', type: 'relic', icon: '☕', tier: 'Epic', hp: 80, speedBonus: 0.20, bonus: '+80 HP, +20% Speed [Roaster Set]', value: 190 },
+      // 2. Physical Gear Drops with Diablo 3 Beacons
+      const extraDrops = [
+        // ── SET 1: STUMPTOWN ROASTER ──
+        { name: "Roaster's Cyber-Visor", setId: 'stumptown_roaster', type: 'head', icon: '🥽', tier: 'Epic', hp: 60, critChance: 0.10, bonus: '+60 HP, +10% Crit [Roaster Set]', value: 160 },
+        { name: "Steam-Spike Leyline Katana", setId: 'stumptown_roaster', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 32, bonus: '+32 Attack, Steam Spike [Roaster Set]', value: 175 },
+        { name: "Barista Reinforced Apron", setId: 'stumptown_roaster', type: 'armor', icon: '🧥', tier: 'Epic', hp: 110, armor: 22, bonus: '+110 HP, +22 Armor [Roaster Set]', value: 180 },
+        { name: "Espresso Puddle Jumpers", setId: 'stumptown_roaster', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Roaster Set]', value: 155 },
+        { name: "Stumptown Leyline Signet", setId: 'stumptown_roaster', type: 'ring', icon: '💍', tier: 'Epic', damage: 16, ricochetBonus: 0.35, bonus: '+16 Dmg, +35% Ricochet [Roaster Set]', value: 165 },
+        { name: "Espresso Quantum Core", setId: 'stumptown_roaster', type: 'relic', icon: '☕', tier: 'Epic', hp: 80, speedBonus: 0.20, bonus: '+80 HP, +20% Speed [Roaster Set]', value: 190 },
 
-          // ── SET 2: ROSE CITY THORNSTALKER ──
-          { name: "Briar Cryptid Mask", setId: 'rose_thornstalker', type: 'head', icon: '🦌', tier: 'Epic', hp: 90, armor: 15, bonus: '+90 HP, +15 Armor [Thornstalker Set]', value: 165 },
-          { name: "Rosewood Leyline Cleaver", setId: 'rose_thornstalker', type: 'weapon', icon: '🪓', tier: 'Epic', damage: 34, bonus: '+34 Attack, Thorn Cleave [Thornstalker Set]', value: 180 },
-          { name: "Portlandia Spiked Aegis", setId: 'rose_thornstalker', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Epic', armor: 30, blockChance: 0.28, bonus: '+30 Armor, +28% Block [Thornstalker Set]', value: 195 },
-          { name: "Thorn-Woven Trench", setId: 'rose_thornstalker', type: 'armor', icon: '🧥', tier: 'Epic', hp: 140, armor: 26, bonus: '+140 HP, +26 Armor [Thornstalker Set]', value: 190 },
-          { name: "Forest Park Briar Runners", setId: 'rose_thornstalker', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.24, armor: 12, bonus: '+24% Speed, +12 Armor [Thornstalker Set]', value: 160 },
-          { name: "Rose City Thorn Signet", setId: 'rose_thornstalker', type: 'ring', icon: '💎', tier: 'Epic', beanBonus: 0.40, hp: 60, bonus: '+60 HP, +40% Extra Beans [Thornstalker Set]', value: 170 },
+        // ── SET 2: ROSE CITY THORNSTALKER ──
+        { name: "Briar Cryptid Mask", setId: 'rose_thornstalker', type: 'head', icon: '🦌', tier: 'Epic', hp: 90, armor: 15, bonus: '+90 HP, +15 Armor [Thornstalker Set]', value: 165 },
+        { name: "Rosewood Leyline Cleaver", setId: 'rose_thornstalker', type: 'weapon', icon: '🪓', tier: 'Epic', damage: 34, bonus: '+34 Attack, Thorn Cleave [Thornstalker Set]', value: 180 },
+        { name: "Portlandia Spiked Aegis", setId: 'rose_thornstalker', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Epic', armor: 30, blockChance: 0.28, bonus: '+30 Armor, +28% Block [Thornstalker Set]', value: 195 },
+        { name: "Thorn-Woven Trench", setId: 'rose_thornstalker', type: 'armor', icon: '🧥', tier: 'Epic', hp: 140, armor: 26, bonus: '+140 HP, +26 Armor [Thornstalker Set]', value: 190 },
+        { name: "Forest Park Briar Runners", setId: 'rose_thornstalker', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.24, armor: 12, bonus: '+24% Speed, +12 Armor [Thornstalker Set]', value: 160 },
+        { name: "Rose City Thorn Signet", setId: 'rose_thornstalker', type: 'ring', icon: '💎', tier: 'Epic', beanBonus: 0.40, hp: 60, bonus: '+60 HP, +40% Extra Beans [Thornstalker Set]', value: 170 },
 
-          // ── SET 3: BURNSIDE ANARCHIST ──
-          { name: "Anarchist Gas Respirator", setId: 'burnside_anarchist', type: 'head', icon: '👺', tier: 'Epic', hp: 70, critChance: 0.14, bonus: '+70 HP, +14% Crit [Anarchist Set]', value: 160 },
-          { name: "Burnside Anarchy Machete", setId: 'burnside_anarchist', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 35, bonus: '+35 Attack, Urban Serration [Anarchist Set]', value: 185 },
-          { name: "Tanto Cyber-Wakizashi (Dual-Wield)", setId: 'burnside_anarchist', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 26, attackSpeedBonus: 0.30, bonus: '+26 Dual-Slash Dmg, +30% Speed [Anarchist Set]', value: 175 },
-          { name: "Kevlar Flannel Vest", setId: 'burnside_anarchist', type: 'armor', icon: '🎽', tier: 'Epic', hp: 100, armor: 20, bonus: '+100 HP, +20 Armor [Anarchist Set]', value: 180 },
-          { name: "Overclocked Doc Martens", setId: 'burnside_anarchist', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.32, armor: 10, bonus: '+32% Speed, +10 Armor [Anarchist Set]', value: 170 },
-          { name: "Willamette River Obsidian Ring", setId: 'burnside_anarchist', type: 'ring', icon: '💍', tier: 'Epic', damage: 22, critChance: 0.15, bonus: '+22 Dmg, +15% Crit [Anarchist Set]', value: 185 },
+        // ── SET 3: BURNSIDE ANARCHIST ──
+        { name: "Anarchist Gas Respirator", setId: 'burnside_anarchist', type: 'head', icon: '👺', tier: 'Epic', hp: 70, critChance: 0.14, bonus: '+70 HP, +14% Crit [Anarchist Set]', value: 160 },
+        { name: "Burnside Anarchy Machete", setId: 'burnside_anarchist', type: 'weapon', icon: '🗡️', tier: 'Epic', damage: 35, bonus: '+35 Attack, Urban Serration [Anarchist Set]', value: 185 },
+        { name: "Tanto Cyber-Wakizashi (Dual-Wield)", setId: 'burnside_anarchist', type: 'offhand', subType: 'dualwield', icon: '🗡️', tier: 'Epic', damage: 26, attackSpeedBonus: 0.30, bonus: '+26 Dual-Slash Dmg, +30% Speed [Anarchist Set]', value: 175 },
+        { name: "Kevlar Flannel Vest", setId: 'burnside_anarchist', type: 'armor', icon: '🎽', tier: 'Epic', hp: 100, armor: 20, bonus: '+100 HP, +20 Armor [Anarchist Set]', value: 180 },
+        { name: "Overclocked Doc Martens", setId: 'burnside_anarchist', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.32, armor: 10, bonus: '+32% Speed, +10 Armor [Anarchist Set]', value: 170 },
+        { name: "Willamette River Obsidian Ring", setId: 'burnside_anarchist', type: 'ring', icon: '💍', tier: 'Epic', damage: 22, critChance: 0.15, bonus: '+22 Dmg, +15% Crit [Anarchist Set]', value: 185 },
 
-          // ── SET 4: CASCADE CRYOMANCER ──
-          { name: "Glacial Hood of Mt. Hood", setId: 'cascade_cryomancer', type: 'head', icon: '❄️', tier: 'Epic', hp: 75, critChance: 0.12, bonus: '+75 HP, +12% Crit, Cryo-Chill [Cryo Set]', value: 170 },
-          { name: "Cryo-Leyline Frost Katana", setId: 'cascade_cryomancer', type: 'weapon', icon: '⚔️', tier: 'Epic', damage: 33, bonus: '+33 Attack, Frostbite Blade [Cryo Set]', value: 185 },
-          { name: "Permafrost Tactical Trench", setId: 'cascade_cryomancer', type: 'armor', icon: '🧥', tier: 'Epic', hp: 125, armor: 24, bonus: '+125 HP, +24 Armor [Cryo Set]', value: 190 },
-          { name: "Sub-Zero Alpine Treads", setId: 'cascade_cryomancer', type: 'boots', icon: '⛸️', tier: 'Epic', speedBonus: 0.26, armor: 12, bonus: '+26% Speed, Frost Trail [Cryo Set]', value: 165 },
-          { name: "Cryo-Crystal Shard Signet", setId: 'cascade_cryomancer', type: 'ring', icon: '💍', tier: 'Epic', damage: 18, critChance: 0.10, bonus: '+18 Dmg, +10% Crit [Cryo Set]', value: 175 },
-          { name: "Frozen Leyline Heart", setId: 'cascade_cryomancer', type: 'relic', icon: '🧊', tier: 'Epic', hp: 95, armor: 18, bonus: '+95 HP, +18 Armor [Cryo Set]', value: 200 },
+        // ── SET 4: CASCADE CRYOMANCER ──
+        { name: "Glacial Hood of Mt. Hood", setId: 'cascade_cryomancer', type: 'head', icon: '❄️', tier: 'Epic', hp: 75, critChance: 0.12, bonus: '+75 HP, +12% Crit, Cryo-Chill [Cryo Set]', value: 170 },
+        { name: "Cryo-Leyline Frost Katana", setId: 'cascade_cryomancer', type: 'weapon', icon: '⚔️', tier: 'Epic', damage: 33, bonus: '+33 Attack, Frostbite Blade [Cryo Set]', value: 185 },
+        { name: "Permafrost Tactical Trench", setId: 'cascade_cryomancer', type: 'armor', icon: '🧥', tier: 'Epic', hp: 125, armor: 24, bonus: '+125 HP, +24 Armor [Cryo Set]', value: 190 },
+        { name: "Sub-Zero Alpine Treads", setId: 'cascade_cryomancer', type: 'boots', icon: '⛸️', tier: 'Epic', speedBonus: 0.26, armor: 12, bonus: '+26% Speed, Frost Trail [Cryo Set]', value: 165 },
+        { name: "Cryo-Crystal Shard Signet", setId: 'cascade_cryomancer', type: 'ring', icon: '💍', tier: 'Epic', damage: 18, critChance: 0.10, bonus: '+18 Dmg, +10% Crit [Cryo Set]', value: 175 },
+        { name: "Frozen Leyline Heart", setId: 'cascade_cryomancer', type: 'relic', icon: '🧊', tier: 'Epic', hp: 95, armor: 18, bonus: '+95 HP, +18 Armor [Cryo Set]', value: 200 },
 
-          // ── SET 5: CHINATOWN DRAGON SYNDICATE ──
-          { name: "Dragon Kabuto Helm", setId: 'chinatown_dragon', type: 'head', icon: '🪖', tier: 'Epic', hp: 85, critChance: 0.12, bonus: '+85 HP, +12% Crit [Dragon Set]', value: 175 },
-          { name: "Crimson Dragon Fang Katana", setId: 'chinatown_dragon', type: 'weapon', icon: '🗡️', tier: 'Legendary', damage: 38, bonus: '+38 Attack, Dragon Flame [Dragon Set]', value: 240 },
-          { name: "Imperial Silk Combat Gi", setId: 'chinatown_dragon', type: 'armor', icon: '🥋', tier: 'Epic', hp: 115, armor: 22, bonus: '+115 HP, +22 Armor [Dragon Set]', value: 185 },
-          { name: "Dragonscale Shin Guards", setId: 'chinatown_dragon', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Dragon Set]', value: 165 },
-          { name: "Jade Dragon Talisman Ring", setId: 'chinatown_dragon', type: 'ring', icon: '💍', tier: 'Epic', damage: 20, hp: 50, bonus: '+20 Dmg, +50 HP [Dragon Set]', value: 180 },
-          { name: "Chinatown Leyline Pearl", setId: 'chinatown_dragon', type: 'offhand', subType: 'dualwield', icon: '🔮', tier: 'Epic', damage: 24, attackSpeedBonus: 0.20, bonus: '+24 Mystic Burn Dmg [Dragon Set]', value: 190 },
+        // ── SET 5: CHINATOWN DRAGON SYNDICATE ──
+        { name: "Dragon Kabuto Helm", setId: 'chinatown_dragon', type: 'head', icon: '🪖', tier: 'Epic', hp: 85, critChance: 0.12, bonus: '+85 HP, +12% Crit [Dragon Set]', value: 175 },
+        { name: "Crimson Dragon Fang Katana", setId: 'chinatown_dragon', type: 'weapon', icon: '🗡️', tier: 'Legendary', damage: 38, bonus: '+38 Attack, Dragon Flame [Dragon Set]', value: 240 },
+        { name: "Imperial Silk Combat Gi", setId: 'chinatown_dragon', type: 'armor', icon: '🥋', tier: 'Epic', hp: 115, armor: 22, bonus: '+115 HP, +22 Armor [Dragon Set]', value: 185 },
+        { name: "Dragonscale Shin Guards", setId: 'chinatown_dragon', type: 'boots', icon: '👢', tier: 'Epic', speedBonus: 0.28, bonus: '+28% Move Speed [Dragon Set]', value: 165 },
+        { name: "Jade Dragon Talisman Ring", setId: 'chinatown_dragon', type: 'ring', icon: '💍', tier: 'Epic', damage: 20, hp: 50, bonus: '+20 Dmg, +50 HP [Dragon Set]', value: 180 },
+        { name: "Chinatown Leyline Pearl", setId: 'chinatown_dragon', type: 'offhand', subType: 'dualwield', icon: '🔮', tier: 'Epic', damage: 24, attackSpeedBonus: 0.20, bonus: '+24 Mystic Burn Dmg [Dragon Set]', value: 190 },
 
-          // ── SET 6: BRIDGE CITY SENTINEL ──
-          { name: "Sentinel Cathedral Visor", setId: 'bridge_city_sentinel', type: 'head', icon: '👑', tier: 'Epic', hp: 80, armor: 16, bonus: '+80 HP, +16 Armor [Sentinel Set]', value: 170 },
-          { name: "Tesla Coil Edge", setId: 'bridge_city_sentinel', type: 'weapon', icon: '⚡', tier: 'Epic', damage: 35, bonus: '+35 Attack, Tesla Shock [Sentinel Set]', value: 190 },
-          { name: "St. Johns Cathedral Shield", setId: 'bridge_city_sentinel', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Legendary', armor: 35, blockChance: 0.32, bonus: '+35 Armor, +32% Block [Sentinel Set]', value: 235 },
-          { name: "Heavy Titanite Plate", setId: 'bridge_city_sentinel', type: 'armor', icon: '🦺', tier: 'Epic', hp: 150, armor: 32, bonus: '+150 HP, +32 Armor [Sentinel Set]', value: 200 },
-          { name: "Mag-Lev Kinetic Greaves", setId: 'bridge_city_sentinel', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.25, armor: 16, bonus: '+25% Speed, +16 Armor [Sentinel Set]', value: 170 },
-          { name: "Suspension Cable Core", setId: 'bridge_city_sentinel', type: 'belt', icon: '🎗️', tier: 'Epic', hp: 75, armor: 20, bonus: '+75 HP, +20 Armor [Sentinel Set]', value: 180 },
+        // ── SET 6: BRIDGE CITY SENTINEL ──
+        { name: "Sentinel Cathedral Visor", setId: 'bridge_city_sentinel', type: 'head', icon: '👑', tier: 'Epic', hp: 80, armor: 16, bonus: '+80 HP, +16 Armor [Sentinel Set]', value: 170 },
+        { name: "Tesla Coil Edge", setId: 'bridge_city_sentinel', type: 'weapon', icon: '⚡', tier: 'Epic', damage: 35, bonus: '+35 Attack, Tesla Shock [Sentinel Set]', value: 190 },
+        { name: "St. Johns Cathedral Shield", setId: 'bridge_city_sentinel', type: 'offhand', subType: 'shield', icon: '🛡️', tier: 'Legendary', armor: 35, blockChance: 0.32, bonus: '+35 Armor, +32% Block [Sentinel Set]', value: 235 },
+        { name: "Heavy Titanite Plate", setId: 'bridge_city_sentinel', type: 'armor', icon: '🦺', tier: 'Epic', hp: 150, armor: 32, bonus: '+150 HP, +32 Armor [Sentinel Set]', value: 200 },
+        { name: "Mag-Lev Kinetic Greaves", setId: 'bridge_city_sentinel', type: 'boots', icon: '🥾', tier: 'Epic', speedBonus: 0.25, armor: 16, bonus: '+25% Speed, +16 Armor [Sentinel Set]', value: 170 },
+        { name: "Suspension Cable Core", setId: 'bridge_city_sentinel', type: 'belt', icon: '🎗️', tier: 'Epic', hp: 75, armor: 20, bonus: '+75 HP, +20 Armor [Sentinel Set]', value: 180 },
 
-          // Utility Trinkets
-          { name: 'MAX Transit Pass of Phasing', type: 'trinket', icon: '🎫', tier: 'Rare', bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)', value: 130, activeAbility: 'phasing', sockets: 1, gems: [] },
-          { name: 'Nitro Cold Foam Injector', type: 'trinket', icon: '🧪', tier: 'Rare', bonus: 'Active [T]: 100% Caffeination & 4s Overdrive (18s CD)', value: 140, activeAbility: 'nitro', sockets: 1, gems: ['amber'] },
-          { name: 'Burnside EMP Disrupter', type: 'trinket', icon: '📡', tier: 'Epic', bonus: 'Active [T]: 360° Shockwave Deflect & Stun (15s CD)', value: 195, activeAbility: 'emp', sockets: 2, gems: ['pearl'] },
-          { name: 'Voodoo Glaze Emergency Vial', type: 'trinket', icon: '🍩', tier: 'Epic', bonus: 'Active [T]: Instant +75 HP & +30 Energy (22s CD)', value: 180, activeAbility: 'sugar', sockets: 2, gems: ['quartz'] }
-        ];
+        // Utility Trinkets
+        { name: 'MAX Transit Pass of Phasing', type: 'trinket', icon: '🎫', tier: 'Rare', bonus: 'Active [T]: 2.5s Phasing Invulnerability (20s CD)', value: 130, activeAbility: 'phasing', sockets: 1, gems: [] },
+        { name: 'Nitro Cold Foam Injector', type: 'trinket', icon: '🧪', tier: 'Rare', bonus: 'Active [T]: 100% Caffeination & 4s Overdrive (18s CD)', value: 140, activeAbility: 'nitro', sockets: 1, gems: ['amber'] },
+        { name: 'Burnside EMP Disrupter', type: 'trinket', icon: '📡', tier: 'Epic', bonus: 'Active [T]: 360° Shockwave Deflect & Stun (15s CD)', value: 195, activeAbility: 'emp', sockets: 2, gems: ['pearl'] },
+        { name: 'Voodoo Glaze Emergency Vial', type: 'trinket', icon: '🍩', tier: 'Epic', bonus: 'Active [T]: Instant +75 HP & +30 Energy (22s CD)', value: 180, activeAbility: 'sugar', sockets: 2, gems: ['quartz'] }
+      ];
 
-        const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
-        const randomItem = combinedPool[Math.floor(Math.random() * combinedPool.length)];
+      const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
+      const dropCount = forceHighTier ? Math.max(1, count) : (Math.random() < 0.62 ? count : 0);
+
+      for (let i = 0; i < dropCount; i++) {
+        let pool = combinedPool;
+        if (forceHighTier) {
+          pool = combinedPool.filter(it => it.tier === 'Legendary' || it.tier === 'Epic' || it.setId);
+          if (pool.length === 0) pool = combinedPool;
+        }
+
+        const randomItem = pool[Math.floor(Math.random() * pool.length)];
         const newItem = {
-          id: 'drop_' + Date.now() + '_' + Math.floor(Math.random() * 99999),
+          id: 'drop_' + Date.now() + '_' + Math.floor(Math.random() * 999999),
           name: randomItem.name,
           setId: randomItem.setId || null,
           type: randomItem.type,
@@ -4750,72 +4836,254 @@
           activeAbility: randomItem.activeAbility || null
         };
 
-        if (gameState.inventory.length < getInventoryCapacity()) {
-          gameState.inventory.push(newItem);
-          showToast(`Found Loot: ${newItem.name} [${newItem.tier}]!`, 'success');
-          document.getElementById('hudInventoryBadge').classList.remove('hidden');
-          renderInventoryBag();
+        const tierVis = getItemTierVisual(newItem.tier, newItem.setId);
+
+        // Diablo 3 Legendary / Set Drop Fanfare
+        if (newItem.tier === 'Legendary' || newItem.setId) {
+          playSound('level');
+          createImpactParticles(x, y, tierVis.color, 24);
+          gameState.screenShake = 5;
         }
+
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 3.5;
+        gameState.groundItems.push({
+          type: 'item',
+          item: newItem,
+          x: x + Math.cos(angle) * (10 + Math.random() * 20),
+          y: y + Math.sin(angle) * (10 + Math.random() * 20),
+          z: 16 + Math.random() * 12,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          vz: 4.2 + Math.random() * 3.0,
+          bounces: 2,
+          settled: false,
+          tierVis: tierVis,
+          beamHeight: tierVis.beamHeight,
+          pulsePhase: Math.random() * Math.PI * 2
+        });
       }
-      return;
     }
 
-    function _oldDropLoot(x, y) {
-      const beanAmount = 15 + Math.floor(Math.random() * 25);
-      gameState.player.beans += beanAmount;
-      playSound('coin');
-      addFloatingText(`+${beanAmount} Beans`, x, y - 18, '#fbbf24', 13);
+    function pickupGroundItem(gItem, idx) {
+      if (!gItem) return false;
+      const p = gameState.player;
 
-      // Higher chance on elite/boss waves
-      const dropChance = 0.45;
-      if (Math.random() < dropChance) {
-        const gearPool = [
-          // Weapons
-          { name: 'Burnside Skate-Edge Blade', type: 'weapon', bonus: '+24 Attack, Razor Sweep', tier: 'Rare', icon: '🗡️', statVal: 24, value: 80 },
-          { name: 'St. Johns Spire Rapier', type: 'weapon', bonus: '+38 Attack, High Piercing', tier: 'Epic', icon: '⚔️', statVal: 38, value: 140 },
-          { name: 'Willamette River Harpoon', type: 'weapon', bonus: '+32 Attack, Water Surge', tier: 'Rare', icon: '🔱', statVal: 32, value: 95 },
-          { name: 'Powell’s Tome Blade', type: 'weapon', bonus: '+48 Attack, Arcane Criticals', tier: 'Legendary', icon: '📖', statVal: 48, value: 240 },
-          { name: 'Steel Bridge Heavy Chainsaw', type: 'weapon', bonus: '+56 Attack, Boss Shredder', tier: 'Legendary', icon: '🪚', statVal: 56, value: 300 },
-          { name: 'Hawthorne Neon Katana', type: 'weapon', bonus: '+28 Attack, Flash Cleave', tier: 'Rare', icon: '⚡', statVal: 28, value: 110 },
-          { name: 'Forest Park Briar Scythe', type: 'weapon', bonus: '+42 Attack, Thorn Bleed', tier: 'Epic', icon: '🌾', statVal: 42, value: 170 },
+      if (gItem.type === 'beans') {
+        p.beans += gItem.amount;
+        playSound('coin');
+        addFloatingText(`+${gItem.amount} Beans`, gItem.x, gItem.y - 18, '#fbbf24', 13);
+        createImpactParticles(gItem.x, gItem.y, '#fbbf24', 6);
+        gameState.groundItems.splice(idx, 1);
+        return true;
+      }
 
-          // Armor
-          { name: 'Hawthorne Corduroy Trench', type: 'armor', bonus: '+65 HP, +12 Armor Rating', tier: 'Rare', icon: '🧥', statVal: 65, armorVal: 12, value: 85 },
-          { name: 'Forest Park Camo Rain Poncho', type: 'armor', bonus: '+95 HP, +18 Moss Plating', tier: 'Epic', icon: '🛡️', statVal: 95, armorVal: 18, value: 150 },
-          { name: 'Pearl District Nanoweave Suit', type: 'armor', bonus: '+135 HP, +26 Deflection', tier: 'Legendary', icon: '🦺', statVal: 135, armorVal: 26, value: 260 },
-          { name: 'Old Town Barista Apron', type: 'armor', bonus: '+45 HP, +8 Coffee Armor', tier: 'Common', icon: '🥋', statVal: 45, armorVal: 8, value: 50 },
-          { name: 'Division Transit Enforcer Vest', type: 'armor', bonus: '+80 HP, +15 Blast Shield', tier: 'Rare', icon: '🦹', statVal: 80, armorVal: 15, value: 115 },
-          { name: 'Chinatown Silk Dragon Robe', type: 'armor', bonus: '+110 HP, +22 Evasion Plating', tier: 'Epic', icon: '👘', statVal: 110, armorVal: 22, value: 190 },
+      if (gItem.type === 'item') {
+        if (gameState.inventory.length >= getInventoryCapacity()) {
+          addFloatingText("INVENTORY FULL!", gItem.x, gItem.y - 24, '#ef4444', 15);
+          showToast("Inventory Full! Level up, equip or salvage gear.", "warning");
+          return false;
+        }
 
-          // Relics & Urban Trinkets
-          { name: 'Cold-Brew Leyline Pendant', type: 'relic', bonus: '+25% Energy Regen & Haste', tier: 'Epic', icon: '☕', statVal: 25, value: 130 },
-          { name: 'Voodoo Bacon Maple Donut Ring', type: 'relic', bonus: '+15% Speed, +10% Crit Rate', tier: 'Rare', icon: '🍩', statVal: 15, value: 90 },
-          { name: 'MAX Transit Pass of Phasing', type: 'relic', bonus: '+35% Extended Dash Invulnerability', tier: 'Epic', icon: '🎫', statVal: 35, value: 160 },
-          { name: 'Timbers Championship Axe Head', type: 'relic', bonus: '+20% Damage on High Combos', tier: 'Legendary', icon: '🪓', statVal: 20, value: 250 },
-          { name: 'Rose Festival Emerald Rosette', type: 'relic', bonus: '+4.0 HP/sec Passive Regen', tier: 'Legendary', icon: '🌹', statVal: 4, value: 280 }
-        ];
+        const item = gItem.item;
+        const vis = gItem.tierVis || getItemTierVisual(item.tier, item.setId);
+        gameState.inventory.push(item);
+        
+        playSound(item.tier === 'Legendary' || item.setId ? 'level' : 'coin');
+        addFloatingText(`+ [${item.name}]`, p.x, p.y - 28, vis.color, 14);
+        showToast(`Looted: ${item.name} [${vis.label}]`, 'success');
+        createImpactParticles(gItem.x, gItem.y, vis.color, 14);
 
-        const randomItem = gearPool[Math.floor(Math.random() * gearPool.length)];
-        const newItem = {
-          id: 'drop_' + Date.now() + Math.random(),
-          name: randomItem.name,
-          type: randomItem.type,
-          bonus: randomItem.bonus,
-          tier: randomItem.tier,
-          icon: randomItem.icon,
-          damage: randomItem.type === 'weapon' ? randomItem.statVal : 0,
-          hp: randomItem.type === 'armor' ? randomItem.statVal : 0,
-          armor: randomItem.armorVal || 0,
-          value: randomItem.value || 75
-        };
+        const badge = document.getElementById('hudInventoryBadge');
+        if (badge) badge.classList.remove('hidden');
+        renderInventoryBag();
 
-        if (gameState.inventory.length < getInventoryCapacity()) {
-          gameState.inventory.push(newItem);
-          showToast(`Found Loot: ${newItem.name} [${newItem.tier}]!`, "success");
-          document.getElementById('hudInventoryBadge').classList.remove('hidden');
-          renderInventoryBag();
+        gameState.groundItems.splice(idx, 1);
+        return true;
+      }
+      return false;
+    }
+
+    function checkClickGroundLoot(wx, wy) {
+      if (!gameState.groundItems || gameState.groundItems.length === 0) return false;
+
+      // Click nameplate detection from top to bottom
+      for (let i = gameState.groundItems.length - 1; i >= 0; i--) {
+        const item = gameState.groundItems[i];
+        if (!item) continue;
+        const itemZ = item.z || 0;
+        const drawY = item.y - itemZ - 26;
+
+        // Nameplate click box: ~130px width, 26px height
+        const nameplateW = item.type === 'beans' ? 70 : 120;
+        const nameplateH = 24;
+
+        if (Math.abs(wx - item.x) <= nameplateW / 2 && wy >= drawY - nameplateH / 2 && wy <= drawY + nameplateH / 2) {
+          return pickupGroundItem(item, i);
         }
       }
+      return false;
+    }
+
+    function updateGroundLoot(dt) {
+      if (!gameState.groundItems) return;
+      const p = gameState.player;
+
+      for (let i = gameState.groundItems.length - 1; i >= 0; i--) {
+        const item = gameState.groundItems[i];
+
+        // 1. Physics Arc Simulation
+        if (!item.settled) {
+          item.vz -= 22.0 * dt;
+          item.vx *= (1 - 2.8 * dt);
+          item.vy *= (1 - 2.8 * dt);
+
+          item.x += item.vx * (dt * 60);
+          item.y += item.vy * (dt * 60);
+          item.z += item.vz * (dt * 60);
+
+          if (item.z <= 0) {
+            item.z = 0;
+            if (item.bounces > 0) {
+              item.vz = Math.abs(item.vz) * 0.45;
+              item.bounces--;
+              playSound('coin');
+            } else {
+              item.vz = 0;
+              item.vx = 0;
+              item.vy = 0;
+              item.settled = true;
+            }
+          }
+        }
+
+        // 2. Proximity Vacuum (Diablo 3 style pickup)
+        const dx = p.x - item.x;
+        const dy = p.y - item.y;
+        const dist = Math.hypot(dx, dy);
+        const vacuumRadius = item.type === 'beans' ? 64 : 44;
+
+        if (dist < vacuumRadius) {
+          // Smooth magnetic suction toward hero
+          const pullSpeed = (item.type === 'beans' ? 440 : 380) * dt;
+          item.x += (dx / dist) * pullSpeed;
+          item.y += (dy / dist) * pullSpeed;
+
+          // Auto-pickup when close enough
+          if (dist < 22) {
+            pickupGroundItem(item, i);
+          }
+        }
+      }
+    }
+
+    function drawGroundLoot() {
+      if (!gameState.groundItems || gameState.groundItems.length === 0) return;
+      const now = Date.now();
+
+      gameState.groundItems.forEach(item => {
+        const itemZ = item.z || 0;
+        const vis = item.tierVis || getItemTierVisual(item.item ? item.item.tier : 'Common', item.item ? item.item.setId : null);
+        const color = item.type === 'beans' ? '#fbbf24' : vis.color;
+        const glow = item.type === 'beans' ? 'rgba(251, 191, 36, 0.85)' : vis.glow;
+
+        ctx.save();
+
+        // 1. Ground Contact Shadow & Radiant Runic Ring
+        const shadowScale = Math.max(0.2, 1 - (itemZ / 60));
+        ctx.beginPath();
+        ctx.ellipse(item.x, item.y, 14 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ctx.fill();
+
+        // Ground Glowing Rune Flare
+        ctx.beginPath();
+        ctx.arc(item.x, item.y, (item.type === 'beans' ? 12 : 20) * shadowScale, 0, Math.PI * 2);
+        const groundGrad = ctx.createRadialGradient(item.x, item.y, 0, item.x, item.y, 22 * shadowScale);
+        groundGrad.addColorStop(0, glow);
+        groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = groundGrad;
+        ctx.fill();
+
+        // 2. Diablo 3 Skyward Pillar of Light (Beacon)
+        if (item.type === 'item' && item.beamHeight > 0) {
+          const pulse = Math.sin(now * 0.005 + (item.pulsePhase || 0)) * 2;
+          const beamW = 4 + pulse;
+          const beamTop = item.y - item.beamHeight;
+
+          // Outer Soft Glow Beam
+          const beamGrad = ctx.createLinearGradient(item.x, item.y, item.x, beamTop);
+          beamGrad.addColorStop(0, glow);
+          beamGrad.addColorStop(0.3, glow.replace('0.9', '0.4').replace('0.8', '0.3'));
+          beamGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+          ctx.fillStyle = beamGrad;
+          ctx.fillRect(item.x - beamW * 2, beamTop, beamW * 4, item.beamHeight);
+
+          // Intense Core Laser
+          ctx.beginPath();
+          ctx.moveTo(item.x, item.y);
+          ctx.lineTo(item.x, beamTop);
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.8;
+          ctx.globalAlpha = 0.85;
+          ctx.stroke();
+          ctx.globalAlpha = 1.0;
+
+          // Rising energy spark motes
+          const sparkOffset = (now * 0.08) % item.beamHeight;
+          ctx.beginPath();
+          ctx.arc(item.x, item.y - sparkOffset, 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+        }
+
+        // 3. Floating Physical Item Icon
+        const hoverBob = item.settled ? Math.sin(now * 0.004 + (item.x * 0.05)) * 3 : 0;
+        const iconY = item.y - itemZ + hoverBob;
+
+        ctx.font = item.type === 'beans' ? '15px sans-serif' : '20px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(item.icon || (item.item ? item.item.icon : '🗡️'), item.x, iconY - 8);
+
+        // 4. Clickable Floating Nameplate (Diablo 3 Nameplate Banner)
+        const nameplateY = item.y - itemZ - 26 + hoverBob;
+        const itemName = item.type === 'beans' ? item.name : (item.item ? item.item.name : 'Unknown Item');
+        ctx.font = 'bold 10px monospace';
+        const textMetrics = ctx.measureText(itemName);
+        const boxW = Math.max(70, textMetrics.width + 24);
+        const boxH = 18;
+        const boxX = item.x - boxW / 2;
+        const boxY = nameplateY - boxH / 2;
+
+        // Nameplate Background Pill
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+        ctx.fillStyle = item.type === 'beans' ? 'rgba(30, 20, 5, 0.92)' : vis.bg;
+        ctx.fill();
+
+        // Nameplate Colored Border & Drop Glow
+        ctx.strokeStyle = color;
+        ctx.lineWidth = item.item && (item.item.tier === 'Legendary' || item.item.setId) ? 2.0 : 1.2;
+        ctx.stroke();
+
+        // Nameplate Pointer Notch
+        ctx.beginPath();
+        ctx.moveTo(item.x - 4, boxY + boxH);
+        ctx.lineTo(item.x, boxY + boxH + 4);
+        ctx.lineTo(item.x + 4, boxY + boxH);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Nameplate Label Text
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(itemName, item.x, nameplateY);
+
+        ctx.restore();
+      });
     }
 
     function triggerLevelUpCelebration(lvl) {
@@ -4899,11 +5167,15 @@
         }
       }
 
-      // Elite Death Explosions
       if (enemy.isElite) {
+        if (!gameState.dungeonStats) gameState.dungeonStats = { elitesSlain: 0, bossesSlain: 0, liberatedLandmarks: [] };
+        gameState.dungeonStats.elitesSlain++;
+        dropLoot(enemy.x, enemy.y, 2, true);
+        addFloatingText("ELITE DEFEATED!", enemy.x, enemy.y - 28, '#fbbf24', 15);
+
         if (enemy.affix === 'molten') {
-          createImpactParticles(enemy.x, enemy.y, '#f97316', 14);
-          if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 65 && !p.isDodging && !(p.invulnerableTimer > 0)) {
+          createImpactParticles(enemy.x, enemy.y, '#f97316', 16);
+          if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 70 && !p.isDodging && !(p.invulnerableTimer > 0)) {
             p.hp -= 20;
             addFloatingText('MOLTEN BURST -20', p.x, p.y - 12, '#f97316', 14);
           }
@@ -4917,9 +5189,24 @@
 
       if (enemy.isBoss) {
         gameState.bossActive = false;
-        showToast(`APEX BOSS SLAIN: ${enemy.name}!`, "success");
-        dropLoot(enemy.x + 10, enemy.y);
-        dropLoot(enemy.x - 10, enemy.y);
+        if (!gameState.dungeonStats) gameState.dungeonStats = { elitesSlain: 0, bossesSlain: 0, liberatedLandmarks: [] };
+        gameState.dungeonStats.bossesSlain++;
+        p.skillPoints = (p.skillPoints || 0) + 2;
+        p.perkPoints = (p.perkPoints || 0) + 1;
+
+        if (enemy.landmarkId && !gameState.dungeonStats.liberatedLandmarks.includes(enemy.landmarkId)) {
+          gameState.dungeonStats.liberatedLandmarks.push(enemy.landmarkId);
+        }
+
+        showToast(`👑 APEX BOSS SLAIN: ${enemy.name}! +2 LP Awarded!`, "success", true);
+        addFloatingText("+2 LICENSE POINTS!", p.x, p.y - 45, '#38bdf8', 18);
+        playSound('special');
+        playSound('level');
+
+        // Massive Diablo 3 Loot Explosion
+        dropLoot(enemy.x, enemy.y, 2, true);
+        dropLoot(enemy.x + 28, enemy.y - 18, 2, true);
+        dropLoot(enemy.x - 28, enemy.y + 18, 1, true);
       }
       if (typeof idx === 'number' && idx >= 0 && idx < gameState.enemies.length) {
         gameState.enemies.splice(idx, 1);
@@ -4931,6 +5218,10 @@
 
     function update(dt) {
       if (gameState.isPaused) return;
+
+      if (typeof updateGroundLoot === 'function') {
+        updateGroundLoot(dt);
+      }
 
       const p = gameState.player;
 
@@ -5339,6 +5630,44 @@
         const dy = p.y - enemy.y;
         const dist = Math.hypot(dx, dy);
 
+        // Diablo 3 Monster Aggro, Pack Alert & Leashing System
+        const aggroRadius = enemy.isBoss ? 420 : (enemy.isElite ? 340 : 280);
+        if (!enemy.isAggro) {
+          if (dist < aggroRadius || enemy.hitFlash > 0 || (enemy.burnTimer && enemy.burnTimer > 0)) {
+            enemy.isAggro = true;
+            // Pack Alert: alert nearby packmates
+            gameState.enemies.forEach(other => {
+              if (!other.isAggro && Math.hypot(other.x - enemy.x, other.y - enemy.y) < 220) {
+                other.isAggro = true;
+              }
+            });
+            if (enemy.isBoss && !gameState.bossActive) {
+              gameState.bossActive = true;
+              triggerWaveAnnouncement(`⚠️ ${enemy.name.toUpperCase()} ENGAGED!`, enemy.title || 'Apex Landmark Guardian');
+              playSound('special');
+            }
+          }
+        }
+
+        // Leashing back to spawn point if player runs too far (unless boss)
+        if (enemy.isAggro && dist > 700 && !enemy.isBoss) {
+          enemy.isAggro = false;
+        }
+
+        // If not aggro'd, idle / slight wander around spawn point
+        if (!enemy.isAggro) {
+          if (enemy.spawnX !== undefined && enemy.spawnY !== undefined) {
+            const spawnDx = enemy.spawnX - enemy.x;
+            const spawnDy = enemy.spawnY - enemy.y;
+            const spawnDist = Math.hypot(spawnDx, spawnDy);
+            if (spawnDist > 25) {
+              enemy.x += (spawnDx / spawnDist) * (effectiveSpeed * 0.4);
+              enemy.y += (spawnDy / spawnDist) * (effectiveSpeed * 0.4);
+            }
+          }
+          continue;
+        }
+
         const effectiveSpeed = enemy.speed * speedFactor;
 
         if (enemy.role === 'ranged') {
@@ -5547,12 +5876,13 @@
         }
       }
 
-      if (checkPlayerFatalDamage()) return;
-
-      if (gameState.waveInProgress && gameState.enemies.length === 0) {
-        gameState.waveInProgress = false;
-        triggerWaveIntermission();
-        return;
+      // Seamless Diablo 3 Dungeon Exploration: No wave interruption popups or freezes
+      if (gameState.enemies.length < 12 && gameState.worldMap && typeof respawnDungeonPatrol === 'function') {
+        gameState.dungeonSpawnTimer = (gameState.dungeonSpawnTimer || 0) + dt;
+        if (gameState.dungeonSpawnTimer >= 3.5) {
+          gameState.dungeonSpawnTimer = 0;
+          respawnDungeonPatrol(gameState.worldMap);
+        }
       }
 
       for (let i = gameState.slashes.length - 1; i >= 0; i--) {
@@ -5867,11 +6197,332 @@
       }
     }
 
+    function findWalkableSpotInQuad(map, quad) {
+      for (let tries = 0; tries < 20; tries++) {
+        const c = quad.minC + Math.floor(Math.random() * (quad.maxC - quad.minC));
+        const r = quad.minR + Math.floor(Math.random() * (quad.maxR - quad.minR));
+        if (map.isWalkable(c, r)) {
+          return {
+            c, r,
+            wx: (c * map.tileSize) - map.originX + (map.tileSize / 2),
+            wy: (r * map.tileSize) - map.originY + (map.tileSize / 2)
+          };
+        }
+      }
+      return null;
+    }
+
+    function populateDungeonMonsters(map) {
+      if (!map) return;
+      gameState.enemies = [];
+      const rng = map.rng || Math.random;
+
+      // 1. Station Apex Landmark Bosses at the 5 Macro-Landmarks
+      const bossTemplates = {
+        burnside_bridge: APEX_BOSS_TEMPLATES.burnside,
+        chinatown_gate: APEX_BOSS_TEMPLATES.chinatown,
+        burnside_skatepark: {
+          name: 'Rail-Grinder Cyber-Behemoth',
+          title: 'Eastside Industrial Overlord',
+          hp: 1100,
+          speed: 2.2,
+          dmg: 42,
+          radius: 42,
+          color: '#0369a1',
+          accentColor: '#38bdf8'
+        },
+        forest_park_shrine: APEX_BOSS_TEMPLATES.forest_park,
+        hawthorne_undercroft: APEX_BOSS_TEMPLATES.hawthorne
+      };
+
+      map.landmarks.forEach(lm => {
+        const template = bossTemplates[lm.id] || APEX_BOSS_TEMPLATES.burnside;
+        // Spawn Apex Boss
+        gameState.enemies.push({
+          archetypeId: 'apex_boss',
+          role: 'boss',
+          isBoss: true,
+          isElite: true,
+          landmarkId: lm.id,
+          landmarkName: lm.name,
+          name: template.name,
+          title: template.title,
+          x: lm.worldX,
+          y: lm.worldY,
+          spawnX: lm.worldX,
+          spawnY: lm.worldY,
+          vx: 0,
+          vy: 0,
+          hp: template.hp,
+          maxHp: template.hp,
+          radius: template.radius,
+          speed: template.speed,
+          damage: template.dmg,
+          color: template.color,
+          accentColor: template.accentColor,
+          isAggro: false,
+          attackCd: 1.0,
+          specialAttackTimer: 3.5,
+          xpReward: 400,
+          beanReward: 180,
+          hitFlash: 0
+        });
+
+        // Spawn 2 Guardian Minions flanking the Boss altar
+        for (let g = 0; g < 2; g++) {
+          const gx = lm.worldX + (g === 0 ? -48 : 48);
+          const gy = lm.worldY + 28;
+          gameState.enemies.push({
+            archetypeId: 'apex_guardian',
+            role: 'brute',
+            isElite: true,
+            affix: g === 0 ? 'molten' : 'electrified',
+            name: `👑 [${g === 0 ? 'MOLTEN' : 'ELECTRIFIED'}] Landmark Honor Guard`,
+            x: gx,
+            y: gy,
+            spawnX: gx,
+            spawnY: gy,
+            vx: 0,
+            vy: 0,
+            hp: 220,
+            maxHp: 220,
+            radius: 22,
+            speed: 2.6,
+            damage: 24,
+            color: '#475569',
+            accentColor: '#fbbf24',
+            isAggro: false,
+            chargeCooldown: 3.5,
+            chargeTimer: Math.random() * 2,
+            isCharging: false,
+            chargeDuration: 0,
+            chargeDirX: 0,
+            chargeDirY: 0,
+            xpReward: 90,
+            beanReward: 45,
+            hitFlash: 0
+          });
+        }
+      });
+
+      // 2. Station Thematic Monster Camps, Blue Champions & Yellow Rare Packs Across Districts
+      const quadrants = [
+        { name: 'NW (Chinatown)', minC: 6, maxC: 26, minR: 6, maxR: 26, district: 'Chinatown Anomaly' },
+        { name: 'NE (Eastside)', minC: 38, maxC: 58, minR: 6, maxR: 26, district: 'Eastside Industrial' },
+        { name: 'SW (Forest Park)', minC: 6, maxC: 26, minR: 36, maxR: 58, district: 'Forest Park Wilds' },
+        { name: 'SE (Hawthorne)', minC: 38, maxC: 58, minR: 36, maxR: 58, district: 'Hawthorne Bazaar' }
+      ];
+
+      quadrants.forEach((quad, qIdx) => {
+        // 1 Champion Pack (3 Blue Champions)
+        let campTile = findWalkableSpotInQuad(map, quad);
+        if (campTile) {
+          const affixList = ['electrified', 'frozen', 'molten', 'vampiric'];
+          const packAffix = affixList[qIdx % affixList.length];
+          for (let c = 0; c < 3; c++) {
+            const cx = campTile.wx + (c - 1) * 32;
+            const cy = campTile.wy + (Math.random() - 0.5) * 24;
+            gameState.enemies.push({
+              archetypeId: 'blue_champion',
+              role: 'melee',
+              isElite: true,
+              affix: packAffix,
+              name: `💠 [CHAMPION] ${packAffix.toUpperCase()} Cyber-Hunter`,
+              x: cx,
+              y: cy,
+              spawnX: cx,
+              spawnY: cy,
+              vx: 0,
+              vy: 0,
+              hp: 175,
+              maxHp: 175,
+              radius: 20,
+              speed: 3.8,
+              damage: 22,
+              color: '#1e3a8a',
+              accentColor: '#38bdf8',
+              isAggro: false,
+              xpReward: 85,
+              beanReward: 45,
+              hitFlash: 0
+            });
+          }
+        }
+
+        // 1 Rare Pack (1 Yellow Rare Elite + 2 Minions)
+        campTile = findWalkableSpotInQuad(map, quad);
+        if (campTile) {
+          const affixList = ['molten', 'frozen', 'electrified', 'vampiric'];
+          const rareAffix = affixList[(qIdx + 2) % affixList.length];
+          // Leader
+          gameState.enemies.push({
+            archetypeId: 'yellow_rare',
+            role: 'brute',
+            isElite: true,
+            affix: rareAffix,
+            name: `👑 [${rareAffix.toUpperCase()}] Dread Overlord`,
+            x: campTile.wx,
+            y: campTile.wy,
+            spawnX: campTile.wx,
+            spawnY: campTile.wy,
+            vx: 0,
+            vy: 0,
+            hp: 310,
+            maxHp: 310,
+            radius: 24,
+            speed: 2.8,
+            damage: 28,
+            color: '#713f12',
+            accentColor: '#facc15',
+            isAggro: false,
+            chargeCooldown: 3.2,
+            chargeTimer: 1.0,
+            isCharging: false,
+            chargeDuration: 0,
+            chargeDirX: 0,
+            chargeDirY: 0,
+            xpReward: 160,
+            beanReward: 80,
+            hitFlash: 0
+          });
+
+          // Minions
+          for (let m = 0; m < 2; m++) {
+            const mx = campTile.wx + (m === 0 ? -36 : 36);
+            const my = campTile.wy + 24;
+            gameState.enemies.push({
+              archetypeId: 'minion_grunt',
+              role: 'melee',
+              isElite: false,
+              name: `☠️ Overlord Minion`,
+              x: mx,
+              y: my,
+              spawnX: mx,
+              spawnY: my,
+              vx: 0,
+              vy: 0,
+              hp: 95,
+              maxHp: 95,
+              radius: 16,
+              speed: 3.2,
+              damage: 15,
+              color: '#854d0e',
+              accentColor: '#fef08a',
+              isAggro: false,
+              xpReward: 35,
+              beanReward: 20,
+              hitFlash: 0
+            });
+          }
+        }
+
+        // 2 Regular Patrol Camps (3 monsters each)
+        for (let pIdx = 0; pIdx < 2; pIdx++) {
+          campTile = findWalkableSpotInQuad(map, quad);
+          if (campTile) {
+            const squadSize = 3;
+            for (let s = 0; s < squadSize; s++) {
+              const archetype = MONSTER_ROSTER[Math.floor(rng() * MONSTER_ROSTER.length)];
+              const sx = campTile.wx + (Math.random() - 0.5) * 48;
+              const sy = campTile.wy + (Math.random() - 0.5) * 48;
+              gameState.enemies.push({
+                archetypeId: archetype.typeId,
+                role: archetype.role,
+                isElite: false,
+                name: archetype.name,
+                x: sx,
+                y: sy,
+                spawnX: sx,
+                spawnY: sy,
+                vx: 0,
+                vy: 0,
+                hp: archetype.baseHp,
+                maxHp: archetype.baseHp,
+                radius: archetype.radius,
+                speed: archetype.baseSpeed,
+                damage: archetype.baseDmg,
+                color: archetype.color,
+                accentColor: archetype.accentColor,
+                isAggro: false,
+                shootCooldown: archetype.shootCooldown || 0,
+                shootTimer: Math.random() * 2,
+                chargeCooldown: archetype.chargeCooldown || 0,
+                chargeTimer: Math.random() * 3,
+                isCharging: false,
+                chargeDuration: 0,
+                chargeDirX: 0,
+                chargeDirY: 0,
+                preferredDist: archetype.preferredDist || 0,
+                xpReward: archetype.xpReward,
+                beanReward: archetype.beanReward,
+                hitFlash: 0
+              });
+            }
+          }
+        }
+      });
+    }
+
+    function respawnDungeonPatrol(map) {
+      if (!map) return;
+      const p = gameState.player;
+      for (let tries = 0; tries < 25; tries++) {
+        const c = 5 + Math.floor(Math.random() * (map.cols - 10));
+        const r = 5 + Math.floor(Math.random() * (map.rows - 10));
+        if (map.isWalkable(c, r)) {
+          const wx = (c * map.tileSize) - map.originX;
+          const wy = (r * map.tileSize) - map.originY;
+          const dist = Math.hypot(wx - p.x, wy - p.y);
+          if (dist > 520 && dist < 1200) {
+            for (let i = 0; i < 3; i++) {
+              const archetype = MONSTER_ROSTER[Math.floor(Math.random() * MONSTER_ROSTER.length)];
+              const px = wx + (Math.random() - 0.5) * 40;
+              const py = wy + (Math.random() - 0.5) * 40;
+              gameState.enemies.push({
+                archetypeId: archetype.typeId,
+                role: archetype.role,
+                isElite: false,
+                name: archetype.name,
+                x: px,
+                y: py,
+                spawnX: px,
+                spawnY: py,
+                vx: 0,
+                vy: 0,
+                hp: archetype.baseHp,
+                maxHp: archetype.baseHp,
+                radius: archetype.radius,
+                speed: archetype.baseSpeed,
+                damage: archetype.baseDmg,
+                color: archetype.color,
+                accentColor: archetype.accentColor,
+                isAggro: false,
+                shootCooldown: archetype.shootCooldown || 0,
+                shootTimer: Math.random() * 2,
+                chargeCooldown: archetype.chargeCooldown || 0,
+                chargeTimer: Math.random() * 3,
+                isCharging: false,
+                chargeDuration: 0,
+                chargeDirX: 0,
+                chargeDirY: 0,
+                preferredDist: archetype.preferredDist || 0,
+                xpReward: archetype.xpReward,
+                beanReward: archetype.beanReward,
+                hitFlash: 0
+              });
+            }
+            break;
+          }
+        }
+      }
+    }
+
     // Initialize Global Portland Map
     function initWorldMap(seed) {
       gameState.worldSeed = seed || (Date.now() % 100000);
       gameState.worldMap = new PortlandMapGenerator(gameState.worldSeed);
       gameState.worldMap.generate();
+      populateDungeonMonsters(gameState.worldMap);
 
       const seedTag = document.getElementById('minimapSeedTag');
       if (seedTag) seedTag.textContent = `SEED: ${gameState.worldSeed}`;
@@ -7119,6 +7770,7 @@
 
       drawUrbanEnvironment(w, h);
       drawGroundHazards();
+      drawGroundLoot();
       drawSlashes();
       drawProjectiles();
       drawEnemies();
