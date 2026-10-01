@@ -189,6 +189,24 @@
         <span class="hidden sm:inline" id="hudRoomBtnText">CO-OP ROOM</span>
       </button>
 
+      <!-- Graphics & Lighting Options Button -->
+      <button onclick="toggleModal('graphicsModal')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-indigo-400 hover:text-white transition-all flex items-center gap-1 font-mono text-xs cursor-pointer" title="Graphics & Lighting Settings">
+        <span class="text-sm">🎨</span>
+        <span class="hidden xl:inline text-[10px] font-bold">GFX</span>
+      </button>
+
+      <!-- Live ETL Telemetry Button -->
+      <button onclick="toggleModal('analyticsModal')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-cyan-400 hover:text-white transition-all flex items-center gap-1 font-mono text-xs cursor-pointer" title="Live Telemetry ETL & Analytics">
+        <span class="text-sm">📊</span>
+        <span class="hidden xl:inline text-[10px] font-bold">ETL</span>
+      </button>
+
+      <!-- Live Hot-Tuning Studio Button -->
+      <button onclick="toggleModal('hotTuningModal')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-amber-400 hover:text-white transition-all flex items-center gap-1 font-mono text-xs cursor-pointer" title="Live Hot-Tuning Studio (~ or F1)">
+        <span class="text-sm">🛠️</span>
+        <span class="hidden xl:inline text-[10px] font-bold">STUDIO</span>
+      </button>
+
       <button onclick="toggleModal('locationModal')" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white transition-all" title="Map & Radar (M)">
         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
@@ -1261,6 +1279,22 @@
               <span>DISCIPLINES (K)</span>
             </button>
           </div>
+
+          <!-- Advanced Graphics, Telemetry ETL & Hot-Tuning Studio Shortcuts -->
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="toggleModal('graphicsModal')" class="py-2 rounded-xl bg-indigo-950/60 hover:bg-indigo-900 border border-indigo-500/40 text-indigo-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="Graphics & Dynamic Lighting">
+              <span>🎨</span>
+              <span>GRAPHICS</span>
+            </button>
+            <button onclick="toggleModal('analyticsModal')" class="py-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="Live Telemetry ETL & Analytics">
+              <span>📊</span>
+              <span>ETL DATA</span>
+            </button>
+            <button onclick="toggleModal('hotTuningModal')" class="py-2 rounded-xl bg-amber-950/60 hover:bg-amber-900 border border-amber-500/40 text-amber-300 font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer" title="Live Hot-Tuning Studio (~ / F1)">
+              <span>🛠️</span>
+              <span>HOT-STUDIO</span>
+            </button>
+          </div>
         </div>
 
         <!-- Notification Toggle Switch (OFF by Default) -->
@@ -1353,6 +1387,253 @@
         <div class="pt-1 border-t border-slate-800 text-[10px] text-slate-400 flex items-center justify-between">
           <span id="saveStatusText">Simulation Paused</span>
           <span id="saveTimestampText" class="text-slate-500">Shortcut: [ESC] or [P]</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GRAPHICS & LIGHTING MODAL ==================== -->
+  <div id="graphicsModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 select-none">
+    <div class="relative w-full max-w-lg bg-slate-900/95 border border-indigo-500/40 rounded-2xl sm:rounded-3xl shadow-[0_0_40px_rgba(99,102,241,0.25)] flex flex-col max-h-[92vh] overflow-hidden text-slate-100 font-sans">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-indigo-950/80 via-slate-900/80 to-purple-950/80">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🎨</span>
+          <div>
+            <h2 class="font-display font-black text-sm sm:text-base text-indigo-300 tracking-wider">GRAPHICS & LIGHTING</h2>
+            <p class="text-[10px] text-slate-400 font-mono">Dynamic 2D Lighting, Shaders & 60 FPS Performance Presets</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('graphicsModal')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto flex-1 font-mono text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-indigo-300 mb-1.5 uppercase">Quality Preset</label>
+          <div class="grid grid-cols-4 gap-2">
+            <button onclick="applyGraphicsPreset('ultra')" id="gfxPresetUltra" class="py-2 px-1 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-indigo-950/60 text-slate-300 font-bold text-[10px] text-center transition-all cursor-pointer">ULTRA</button>
+            <button onclick="applyGraphicsPreset('high')" id="gfxPresetHigh" class="py-2 px-1 rounded-xl border border-indigo-500 bg-indigo-950/80 text-indigo-200 font-bold text-[10px] text-center transition-all cursor-pointer">HIGH</button>
+            <button onclick="applyGraphicsPreset('medium')" id="gfxPresetMedium" class="py-2 px-1 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-indigo-950/60 text-slate-300 font-bold text-[10px] text-center transition-all cursor-pointer">MEDIUM</button>
+            <button onclick="applyGraphicsPreset('low')" id="gfxPresetLow" class="py-2 px-1 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-indigo-950/60 text-slate-300 font-bold text-[10px] text-center transition-all cursor-pointer">BATTERY</button>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 border border-slate-800">
+            <div>
+              <div class="font-bold text-slate-200 text-xs">Dynamic 2D Radial Lighting</div>
+              <div class="text-[9px] text-slate-400">Atmospheric darkness with player, shrine & lamp light cones</div>
+            </div>
+            <input type="checkbox" id="gfxDynamicLighting" onchange="updateGraphicsSetting('dynamicLighting', this.checked)" class="w-4 h-4 accent-indigo-500 cursor-pointer" checked>
+          </div>
+
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 border border-slate-800">
+            <div>
+              <div class="font-bold text-slate-200 text-xs">Wet Street & Puddle Reflections</div>
+              <div class="text-[9px] text-slate-400">Reflective water puddles and rain drop ripple waves</div>
+            </div>
+            <input type="checkbox" id="gfxPuddleReflections" onchange="updateGraphicsSetting('puddleReflections', this.checked)" class="w-4 h-4 accent-indigo-500 cursor-pointer" checked>
+          </div>
+
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 border border-slate-800">
+            <div>
+              <div class="font-bold text-slate-200 text-xs">Neon Bloom & Runic Halos</div>
+              <div class="text-[9px] text-slate-400">Additive glow on slashes, beacons, and obelisks</div>
+            </div>
+            <input type="checkbox" id="gfxBloomPass" onchange="updateGraphicsSetting('bloomPass', this.checked)" class="w-4 h-4 accent-indigo-500 cursor-pointer" checked>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2 border-t border-slate-800">
+          <div>
+            <div class="flex justify-between text-[10px] font-bold text-slate-300 mb-1">
+              <span>Ambient Darkness</span>
+              <span id="gfxAmbientDarkVal" class="text-indigo-400">40%</span>
+            </div>
+            <input type="range" min="0" max="85" value="40" id="gfxAmbientDarkSlider" oninput="updateGraphicsSetting('ambientDarkness', this.value / 100)" class="w-full accent-indigo-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] font-bold text-slate-300 mb-1">
+              <span>Particle Density</span>
+              <span id="gfxParticleVal" class="text-indigo-400">100%</span>
+            </div>
+            <input type="range" min="25" max="100" step="25" value="100" id="gfxParticleSlider" oninput="updateGraphicsSetting('particleDensity', this.value / 100)" class="w-full accent-indigo-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] font-bold text-slate-300 mb-1">
+              <span>Camera Zoom Scale</span>
+              <span id="gfxZoomVal" class="text-indigo-400">1.00x</span>
+            </div>
+            <input type="range" min="80" max="130" step="5" value="100" id="gfxZoomSlider" oninput="updateGraphicsSetting('cameraZoom', this.value / 100)" class="w-full accent-indigo-500 cursor-pointer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LIVE ETL ANALYTICS MODAL ==================== -->
+  <div id="analyticsModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 select-none">
+    <div class="relative w-full max-w-2xl bg-slate-900/95 border border-cyan-500/40 rounded-2xl sm:rounded-3xl shadow-[0_0_40px_rgba(6,182,212,0.25)] flex flex-col max-h-[92vh] overflow-hidden text-slate-100 font-sans">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-cyan-950/80 via-slate-900/80 to-blue-950/80">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">📊</span>
+          <div>
+            <h2 class="font-display font-black text-sm sm:text-base text-cyan-300 tracking-wider">LIVE TELEMETRY ETL & ANALYTICS</h2>
+            <p class="text-[10px] text-slate-400 font-mono">Real-Time Data Warehouse Aggregations & Performance Insights</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('analyticsModal')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto flex-1 font-mono text-xs">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div class="text-[9px] text-slate-400 uppercase">Current 30s DPS</div>
+            <div id="etlKpiDps" class="text-lg font-bold text-amber-300 mt-0.5">0</div>
+            <div class="text-[8px] text-slate-500">fact_combat_performance</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div class="text-[9px] text-slate-400 uppercase">Critical Hit Rate</div>
+            <div id="etlKpiCrit" class="text-lg font-bold text-cyan-300 mt-0.5">0.0%</div>
+            <div class="text-[8px] text-slate-500">attacks / crits</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div class="text-[9px] text-slate-400 uppercase">Ancient Gear Rate</div>
+            <div id="etlKpiAncient" class="text-lg font-bold text-emerald-300 mt-0.5">0.0%</div>
+            <div class="text-[8px] text-slate-500">fact_loot_economy</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div class="text-[9px] text-slate-400 uppercase">Median (p50) FPS</div>
+            <div id="etlKpiFps" class="text-lg font-bold text-purple-300 mt-0.5">60.0</div>
+            <div class="text-[8px] text-slate-500">fact_device_fps_telemetry</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+          <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center text-[10px] text-slate-300 font-bold">
+              <span>📈 DPS Real-Time Velocity Curve</span>
+              <span id="etlDpsAvg" class="text-amber-400">Avg: 0</span>
+            </div>
+            <canvas id="etlDpsCanvas" width="280" height="90" class="w-full h-24 bg-slate-950/80 rounded-lg border border-slate-800"></canvas>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center text-[10px] text-slate-300 font-bold">
+              <span>💎 Loot Grade Distribution</span>
+              <span id="etlLootTotal" class="text-emerald-400">Total: 0</span>
+            </div>
+            <canvas id="etlLootCanvas" width="280" height="90" class="w-full h-24 bg-slate-950/80 rounded-lg border border-slate-800"></canvas>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-800 space-y-1.5">
+          <div class="flex justify-between items-center text-[10px] text-slate-300 font-bold">
+            <span>⚡ 60 FPS Render Stability & Frame Drops</span>
+            <span id="etlFrameDrops" class="text-purple-400">0 Stutters</span>
+          </div>
+          <canvas id="etlFpsCanvas" width="560" height="70" class="w-full h-18 bg-slate-950/80 rounded-lg border border-slate-800"></canvas>
+        </div>
+
+        <div class="pt-2 flex justify-between items-center">
+          <span class="text-[10px] text-slate-400">Schema Mapping Manifesto v1 Compliant</span>
+          <button onclick="exportTelemetryJSON()" class="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+            <span>📥</span>
+            <span>EXPORT TELEMETRY ETL JSON</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LIVE HOT-TUNING STUDIO MODAL ==================== -->
+  <div id="hotTuningModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 select-none">
+    <div class="relative w-full max-w-xl bg-slate-900/95 border border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-[0_0_40px_rgba(245,158,11,0.25)] flex flex-col max-h-[92vh] overflow-hidden text-slate-100 font-sans">
+      <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between bg-gradient-to-r from-amber-950/80 via-slate-900/80 to-orange-950/80">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🛠️</span>
+          <div>
+            <h2 class="font-display font-black text-sm sm:text-base text-amber-300 tracking-wider">LIVE HOT-TUNING STUDIO</h2>
+            <p class="text-[10px] text-slate-400 font-mono">Zero-Downtime Runtime Parameter Editor (dim_hot_config_live_patch)</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('hotTuningModal')" class="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-all cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4 overflow-y-auto flex-1 font-mono text-xs">
+        <div class="space-y-3">
+          <div class="text-[11px] font-bold text-amber-400 uppercase flex items-center gap-1.5">
+            <span>⚔️</span><span>Live Combat & Movement Sliders</span>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Player Movement Speed</span>
+              <span id="hotValSpeed" class="text-amber-300">1.00x</span>
+            </div>
+            <input type="range" min="50" max="250" step="5" value="100" id="hotSliderSpeed" oninput="updateHotConfig('playerSpeedMult', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Global Damage Multiplier</span>
+              <span id="hotValDmg" class="text-amber-300">1.00x</span>
+            </div>
+            <input type="range" min="50" max="300" step="10" value="100" id="hotSliderDmg" oninput="updateHotConfig('damageMult', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Dash Cooldown Multiplier</span>
+              <span id="hotValDash" class="text-amber-300">1.00x</span>
+            </div>
+            <input type="range" min="20" max="200" step="10" value="100" id="hotSliderDash" oninput="updateHotConfig('dashCooldownMult', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+          <div class="text-[11px] font-bold text-amber-400 uppercase flex items-center gap-1.5">
+            <span>☕</span><span>Loot & Drop Economy Balance</span>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Grunt Gear Drop Rate</span>
+              <span id="hotValGruntDrop" class="text-amber-300">12%</span>
+            </div>
+            <input type="range" min="0" max="50" step="2" value="12" id="hotSliderGruntDrop" oninput="updateHotConfig('gruntDropRate', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Ancient Masterwork Multiplier</span>
+              <span id="hotValAncient" class="text-amber-300">1.00x</span>
+            </div>
+            <input type="range" min="50" max="400" step="25" value="100" id="hotSliderAncient" oninput="updateHotConfig('ancientDropMult', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] text-slate-300 mb-1">
+              <span>Coffee Bean Yield Multiplier</span>
+              <span id="hotValBeans" class="text-amber-300">1.00x</span>
+            </div>
+            <input type="range" min="50" max="400" step="25" value="100" id="hotSliderBeans" oninput="updateHotConfig('beanMultiplier', this.value / 100)" class="w-full accent-amber-500 cursor-pointer">
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex flex-wrap gap-2 justify-between items-center">
+          <button onclick="resetHotConfigToDefault()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer">
+            🔄 RESET DEFAULTS
+          </button>
+          <div class="flex gap-2">
+            <button onclick="copyHotPatchJSON()" class="px-3 py-1.5 rounded-xl bg-amber-950/80 hover:bg-amber-900 border border-amber-600/50 text-amber-200 text-xs font-bold transition-all cursor-pointer">
+              📋 COPY PATCH JSON
+            </button>
+            <button onclick="toggleModal('hotTuningModal')" class="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all cursor-pointer">
+              ⚡ CLOSE & PLAY
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1981,7 +2262,36 @@
     const gameState = {
       isPaused: false,
       settings: {
-        notificationsEnabled: false
+        notificationsEnabled: false,
+        graphics: {
+          preset: 'high',
+          dynamicLighting: true,
+          ambientDarkness: 0.40,
+          puddleReflections: true,
+          bloomPass: true,
+          particleDensity: 1.0,
+          cameraZoom: 1.0
+        }
+      },
+      hotConfig: {
+        playerSpeedMult: 1.0,
+        damageMult: 1.0,
+        dashCooldownMult: 1.0,
+        slashHitboxMult: 1.0,
+        enemyAggroDist: 340,
+        gruntDropRate: 0.12,
+        ancientDropMult: 1.0,
+        beanMultiplier: 1.0,
+        ambientDarkness: 0.40,
+        streetlampRadius: 150,
+        rainDensityMult: 1.0
+      },
+      telemetry: {
+        combatTicks: [],
+        lootDrops: [],
+        perfSamples: [],
+        sessionStart: Date.now(),
+        lastSampleTime: 0
       },
       worldSeed: 7729,
       worldMap: null,
@@ -2593,6 +2903,22 @@
       gameState.keys[e.key.toLowerCase()] = true;
       if (!audioInitialized) initAudio();
 
+      if (e.key === '`' || e.key === '~' || e.key === 'F1') {
+        e.preventDefault();
+        toggleModal('hotTuningModal');
+        return;
+      }
+      if (e.key === 'F2') {
+        e.preventDefault();
+        toggleModal('analyticsModal');
+        return;
+      }
+      if (e.key === 'F3') {
+        e.preventDefault();
+        toggleModal('graphicsModal');
+        return;
+      }
+
       if (e.key === 'Escape' || e.code === 'Escape' || e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         const pauseModal = document.getElementById('pauseModal');
@@ -2881,8 +3207,21 @@
           if (diffAngle <= arcSpread / 2) {
             hitCount++;
             const isCrit = Math.random() < (p.critChance || 0.22);
-            const finalDmg = Math.round(weaponDamage * (isCrit ? 1.85 : 1.0) * (p.attackComboStep === 2 ? 1.35 : 1.0));
+            let finalDmg = Math.round(weaponDamage * (isCrit ? 1.85 : 1.0) * (p.attackComboStep === 2 ? 1.35 : 1.0));
+            if (gameState.hotConfig?.damageMult) {
+              finalDmg = Math.round(finalDmg * gameState.hotConfig.damageMult);
+            }
             enemy.hp -= finalDmg;
+
+            // Log Combat Tick for Telemetry ETL
+            logCombatTick({
+              damage: finalDmg,
+              isCrit: isCrit,
+              skillId: 0,
+              enemyArchetype: enemy.archetypeId || enemy.role || 'grunt',
+              affixes: enemy.affix ? [enemy.affix] : [],
+              targetKilled: enemy.hp <= 0
+            });
 
             const knock = p.attackComboStep === 2 ? 18 : 9;
             enemy.x += Math.cos(enemyAngle) * knock;
@@ -4727,9 +5066,11 @@
 
     function rollItemGrade(baseItem, forceHighTier = false, isBoss = false, hasFortune = false) {
       let roll = Math.random();
-      if (hasFortune) roll += 0.35;
-      if (isBoss) roll += 0.40;
-      else if (forceHighTier) roll += 0.22;
+      const ancientMult = gameState.hotConfig?.ancientDropMult || 1.0;
+      if (hasFortune) roll += 0.35 * ancientMult;
+      if (isBoss) roll += 0.40 * ancientMult;
+      else if (forceHighTier) roll += 0.22 * ancientMult;
+      else if (ancientMult !== 1.0) roll *= ancientMult;
 
       let grade = 'Standard';
       let mult = 1.0;
@@ -4781,6 +5122,7 @@
         let beanAmount = (isBoss ? 75 : (forceHighTier ? 25 : 8)) + Math.floor(Math.random() * (isBoss ? 55 : 14));
         if (p.activeSetBonuses && p.activeSetBonuses['stumptown_6']) beanAmount = Math.round(beanAmount * 1.5);
         if (hasFortune) beanAmount = Math.round(beanAmount * 2.0); // Fortune Shrine: Double Beans!
+        if (gameState.hotConfig?.beanMultiplier) beanAmount = Math.round(beanAmount * gameState.hotConfig.beanMultiplier);
 
         gameState.groundItems.push({
           type: 'beans',
@@ -4800,8 +5142,9 @@
       }
 
       // 2. Physical Gear Drops with Item Grading
-      // Normal grunts: 12% drop rate. Champions/Elites: Guaranteed 1. Bosses: Guaranteed 2-3.
-      const gearDropChance = forceHighTier ? 1.0 : 0.12;
+      // Normal grunts: base 12% drop rate (tunable via Hot Studio). Champions/Elites: Guaranteed 1. Bosses: Guaranteed 2-3.
+      const gruntDrop = gameState.hotConfig?.gruntDropRate ?? 0.12;
+      const gearDropChance = forceHighTier ? 1.0 : gruntDrop;
       if (Math.random() > gearDropChance && !forceHighTier) {
         return; // Don't drop item clutter from regular grunts
       }
@@ -4934,6 +5277,18 @@
           beamHeight: tierVis.beamHeight,
           pulsePhase: Math.random() * Math.PI * 2
         });
+
+        // Log Loot Drop for Telemetry ETL
+        logLootDrop({
+          dropId: newItem.id,
+          monsterTier: isBoss ? 'apex_boss' : (forceHighTier ? 'champion' : 'grunt'),
+          itemName: newItem.name,
+          itemGrade: newItem.itemGrade,
+          rollQualityPct: newItem.rollQuality,
+          itemTier: newItem.tier,
+          socketsCount: newItem.sockets,
+          isBoss: isBoss
+        });
       }
     }
 
@@ -4960,6 +5315,11 @@
         const item = gItem.item;
         const vis = gItem.tierVis || getItemTierVisual(item.tier, item.setId);
         gameState.inventory.push(item);
+
+        // Log pickup latency for Telemetry ETL
+        if (item && item.id) {
+          logLootPickup(item.id);
+        }
         
         playSound(item.tier === 'Legendary' || item.setId ? 'level' : 'coin');
         addFloatingText(`+ [${item.name}]`, p.x, p.y - 28, vis.color, 14);
@@ -4975,6 +5335,7 @@
       }
       return false;
     }
+
 
     function checkClickGroundLoot(wx, wy) {
       if (!gameState.groundItems || gameState.groundItems.length === 0) return false;
@@ -6827,12 +7188,23 @@
               ctx.fillRect(wx, wy, ts, ts);
               ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
               ctx.strokeRect(wx, wy, ts, ts);
-              // Puddle reflection
+              // Puddle reflection & animated water ripple waves
               if ((c + r) % 5 === 0) {
-                ctx.fillStyle = 'rgba(56, 189, 248, 0.06)';
+                const px = wx + ts / 2;
+                const py = wy + ts / 2;
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
                 ctx.beginPath();
-                ctx.ellipse(wx + ts/2, wy + ts/2, ts * 0.35, ts * 0.2, 0.2, 0, Math.PI * 2);
+                ctx.ellipse(px, py, ts * 0.38, ts * 0.22, 0.2, 0, Math.PI * 2);
                 ctx.fill();
+
+                if (gameState.settings.graphics?.puddleReflections) {
+                  const rip = (time * 1.6 + ((c * 7 + r * 13) % 10) * 0.1) % 1.0;
+                  ctx.strokeStyle = `rgba(56, 189, 248, ${0.18 * (1 - rip)})`;
+                  ctx.lineWidth = 1;
+                  ctx.beginPath();
+                  ctx.ellipse(px, py, (ts * 0.38) * rip, (ts * 0.22) * rip, 0.2, 0, Math.PI * 2);
+                  ctx.stroke();
+                }
               }
               break;
 
@@ -8087,6 +8459,13 @@
 
       ctx.save();
 
+      const zoom = gameState.settings.graphics?.cameraZoom || 1.0;
+      if (zoom !== 1.0) {
+        ctx.translate(w / 2, h / 2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-w / 2, -h / 2);
+      }
+
       let shakeX = 0;
       let shakeY = 0;
       if (gameState.screenShake > 0) {
@@ -8108,6 +8487,11 @@
       drawFloatingTexts();
 
       ctx.restore();
+
+      // Dynamic 2D Lighting, Night Ambience & Runic Bloom Pass
+      if (gameState.settings.graphics?.dynamicLighting) {
+        drawDynamicLightingPass(w, h, shakeX, shakeY);
+      }
 
       drawRainOverlay(w, h);
 
@@ -8134,6 +8518,17 @@
           update(dt);
         }
         render();
+
+        // Sample performance metrics every second for Telemetry ETL
+        if (!gameState.lastPerfSampleTime || now - gameState.lastPerfSampleTime >= 1000) {
+          const fps = dt > 0 ? Math.min(120, 1.0 / dt) : 60;
+          const frameMs = dt * 1000;
+          const partCount = gameState.particles ? gameState.particles.length : 0;
+          const itemCount = gameState.groundItems ? gameState.groundItems.length : 0;
+          samplePerformance(fps, frameMs, partCount, itemCount, 0.45);
+          gameState.lastPerfSampleTime = now;
+        }
+
         consecutiveLoopErrors = 0;
       } catch (err) {
         consecutiveLoopErrors++;
@@ -12061,34 +12456,615 @@
       }
     }
 
+    // ==================== DYNAMIC 2D LIGHTING & SHADER PASS ====================
+    let lightingCanvas = null;
+    let lightingCtx = null;
+
+    function drawDynamicLightingPass(w, h, shakeX = 0, shakeY = 0) {
+      if (!lightingCanvas) {
+        lightingCanvas = document.createElement('canvas');
+        lightingCtx = lightingCanvas.getContext('2d');
+      }
+      if (lightingCanvas.width !== w || lightingCanvas.height !== h) {
+        lightingCanvas.width = w;
+        lightingCanvas.height = h;
+      }
+
+      const camX = gameState.camera.x - shakeX;
+      const camY = gameState.camera.y - shakeY;
+      const darkness = gameState.hotConfig?.ambientDarkness ?? gameState.settings.graphics?.ambientDarkness ?? 0.40;
+
+      lightingCtx.globalCompositeOperation = 'source-over';
+      lightingCtx.fillStyle = `rgba(3, 7, 18, ${darkness})`;
+      lightingCtx.fillRect(0, 0, w, h);
+
+      lightingCtx.globalCompositeOperation = 'destination-out';
+
+      // (a) Player radial light halo
+      const p = gameState.player;
+      const px = p.x - camX;
+      const py = p.y - camY;
+      if (px >= -250 && px <= w + 250 && py >= -250 && py <= h + 250) {
+        const pRad = 175;
+        const pGrad = lightingCtx.createRadialGradient(px, py, 12, px, py, pRad);
+        pGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+        pGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.7)');
+        pGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        lightingCtx.fillStyle = pGrad;
+        lightingCtx.beginPath();
+        lightingCtx.arc(px, py, pRad, 0, Math.PI * 2);
+        lightingCtx.fill();
+      }
+
+      // (b) Active Shrines
+      if (gameState.worldMap && gameState.worldMap.shrines) {
+        gameState.worldMap.shrines.forEach(shrine => {
+          const sx = shrine.worldX - camX;
+          const sy = shrine.worldY - camY;
+          if (sx >= -250 && sx <= w + 250 && sy >= -250 && sy <= h + 250) {
+            const sRad = shrine.active ? 220 : 130;
+            const sGrad = lightingCtx.createRadialGradient(sx, sy, 10, sx, sy, sRad);
+            sGrad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+            sGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.65)');
+            sGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            lightingCtx.fillStyle = sGrad;
+            lightingCtx.beginPath();
+            lightingCtx.arc(sx, sy, sRad, 0, Math.PI * 2);
+            lightingCtx.fill();
+          }
+        });
+      }
+
+      // (c) Streetlamps & Props
+      const lampRad = gameState.hotConfig?.streetlampRadius || 150;
+      if (gameState.worldMap && gameState.worldMap.props) {
+        gameState.worldMap.props.forEach(prop => {
+          const lx = prop.worldX - camX;
+          const ly = prop.worldY - camY;
+          if (lx >= -200 && lx <= w + 200 && ly >= -200 && ly <= h + 200) {
+            const lGrad = lightingCtx.createRadialGradient(lx, ly, 8, lx, ly, lampRad);
+            lGrad.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+            lGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.4)');
+            lGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            lightingCtx.fillStyle = lGrad;
+            lightingCtx.beginPath();
+            lightingCtx.arc(lx, ly, lampRad, 0, Math.PI * 2);
+            lightingCtx.fill();
+          }
+        });
+      }
+
+      // (d) Rare & Legendary Ground Loot Beacons
+      if (gameState.groundItems) {
+        gameState.groundItems.forEach(item => {
+          if (item.type !== 'beans') {
+            const ix = item.x - camX;
+            const iy = item.y - camY;
+            if (ix >= -150 && ix <= w + 150 && iy >= -150 && iy <= h + 150) {
+              const iGrad = lightingCtx.createRadialGradient(ix, iy, 4, ix, iy, 120);
+              iGrad.addColorStop(0, 'rgba(0, 0, 0, 0.85)');
+              iGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+              lightingCtx.fillStyle = iGrad;
+              lightingCtx.beginPath();
+              lightingCtx.arc(ix, iy, 120, 0, Math.PI * 2);
+              lightingCtx.fill();
+            }
+          }
+        });
+      }
+
+      // Draw darkness overlay in screen space
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const zoom = gameState.settings.graphics?.cameraZoom || 1.0;
+      if (zoom !== 1.0) {
+        ctx.translate(w / 2, h / 2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-w / 2, -h / 2);
+      }
+      ctx.drawImage(lightingCanvas, 0, 0);
+
+      // (e) Neon atmospheric bloom tint
+      if (gameState.settings.graphics?.bloomPass) {
+        ctx.globalCompositeOperation = 'screen';
+        const pGlow = ctx.createRadialGradient(px, py, 2, px, py, 110);
+        pGlow.addColorStop(0, 'rgba(6, 182, 212, 0.22)');
+        pGlow.addColorStop(1, 'rgba(6, 182, 212, 0)');
+        ctx.fillStyle = pGlow;
+        ctx.beginPath();
+        ctx.arc(px, py, 110, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (gameState.worldMap && gameState.worldMap.shrines) {
+          gameState.worldMap.shrines.forEach(shrine => {
+            if (shrine.active) {
+              const sx = shrine.worldX - camX;
+              const sy = shrine.worldY - camY;
+              if (sx >= -200 && sx <= w + 200 && sy >= -200 && sy <= h + 200) {
+                const sGlow = ctx.createRadialGradient(sx, sy, 2, sx, sy, 140);
+                sGlow.addColorStop(0, (shrine.color || '#38bdf8') + '44');
+                sGlow.addColorStop(1, (shrine.color || '#38bdf8') + '00');
+                ctx.fillStyle = sGlow;
+                ctx.beginPath();
+                ctx.arc(sx, sy, 140, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+          });
+        }
+      }
+
+      ctx.restore();
+    }
+
+    // ==================== GRAPHICS SETTINGS CONTROLLERS ====================
+    function applyGraphicsPreset(preset) {
+      if (!gameState.settings.graphics) gameState.settings.graphics = {};
+      const g = gameState.settings.graphics;
+      g.preset = preset;
+
+      if (preset === 'ultra') {
+        g.dynamicLighting = true;
+        g.ambientDarkness = 0.50;
+        g.puddleReflections = true;
+        g.bloomPass = true;
+        g.particleDensity = 1.0;
+      } else if (preset === 'high') {
+        g.dynamicLighting = true;
+        g.ambientDarkness = 0.40;
+        g.puddleReflections = true;
+        g.bloomPass = true;
+        g.particleDensity = 1.0;
+      } else if (preset === 'medium') {
+        g.dynamicLighting = true;
+        g.ambientDarkness = 0.30;
+        g.puddleReflections = false;
+        g.bloomPass = false;
+        g.particleDensity = 0.50;
+      } else if (preset === 'low') {
+        g.dynamicLighting = false;
+        g.ambientDarkness = 0.0;
+        g.puddleReflections = false;
+        g.bloomPass = false;
+        g.particleDensity = 0.25;
+      }
+
+      if (gameState.hotConfig) {
+        gameState.hotConfig.ambientDarkness = g.ambientDarkness;
+      }
+
+      syncGraphicsUI();
+      showToast(`Applied Graphics Preset: ${preset.toUpperCase()}`, 'info');
+    }
+
+    function updateGraphicsSetting(key, val) {
+      if (!gameState.settings.graphics) gameState.settings.graphics = {};
+      gameState.settings.graphics[key] = val;
+      if (key === 'ambientDarkness' && gameState.hotConfig) {
+        gameState.hotConfig.ambientDarkness = val;
+      }
+      syncGraphicsUI();
+    }
+
+    function syncGraphicsUI() {
+      const g = gameState.settings.graphics || {};
+      ['ultra', 'high', 'medium', 'low'].forEach(p => {
+        const btn = document.getElementById(`gfxPreset${p.charAt(0).toUpperCase() + p.slice(1)}`);
+        if (btn) {
+          if (g.preset === p) {
+            btn.className = 'py-2 px-1 rounded-xl border border-indigo-500 bg-indigo-950/80 text-indigo-200 font-bold text-[10px] text-center transition-all cursor-pointer';
+          } else {
+            btn.className = 'py-2 px-1 rounded-xl border border-slate-700 bg-slate-800/80 hover:bg-indigo-950/60 text-slate-300 font-bold text-[10px] text-center transition-all cursor-pointer';
+          }
+        }
+      });
+
+      const dl = document.getElementById('gfxDynamicLighting');
+      if (dl) dl.checked = !!g.dynamicLighting;
+
+      const pr = document.getElementById('gfxPuddleReflections');
+      if (pr) pr.checked = !!g.puddleReflections;
+
+      const bp = document.getElementById('gfxBloomPass');
+      if (bp) bp.checked = !!g.bloomPass;
+
+      const adSlider = document.getElementById('gfxAmbientDarkSlider');
+      const adVal = document.getElementById('gfxAmbientDarkVal');
+      if (adSlider && adVal) {
+        const pct = Math.round((g.ambientDarkness ?? 0.4) * 100);
+        adSlider.value = pct;
+        adVal.textContent = `${pct}%`;
+      }
+
+      const pSlider = document.getElementById('gfxParticleSlider');
+      const pVal = document.getElementById('gfxParticleVal');
+      if (pSlider && pVal) {
+        const pPct = Math.round((g.particleDensity ?? 1.0) * 100);
+        pSlider.value = pPct;
+        pVal.textContent = `${pPct}%`;
+      }
+
+      const zSlider = document.getElementById('gfxZoomSlider');
+      const zVal = document.getElementById('gfxZoomVal');
+      if (zSlider && zVal) {
+        const zoom = (g.cameraZoom ?? 1.0);
+        zSlider.value = Math.round(zoom * 100);
+        zVal.textContent = `${zoom.toFixed(2)}x`;
+      }
+    }
+
+    // ==================== LIVE HOT-TUNING STUDIO CONTROLLERS ====================
+    const DEFAULT_HOT_CONFIG = {
+      playerSpeedMult: 1.0,
+      damageMult: 1.0,
+      dashCooldownMult: 1.0,
+      slashHitboxMult: 1.0,
+      enemyAggroDist: 340,
+      gruntDropRate: 0.12,
+      ancientDropMult: 1.0,
+      beanMultiplier: 1.0,
+      ambientDarkness: 0.40,
+      streetlampRadius: 150,
+      rainDensityMult: 1.0
+    };
+
+    function updateHotConfig(key, val) {
+      if (!gameState.hotConfig) gameState.hotConfig = { ...DEFAULT_HOT_CONFIG };
+      gameState.hotConfig[key] = val;
+      if (key === 'ambientDarkness' && gameState.settings.graphics) {
+        gameState.settings.graphics.ambientDarkness = val;
+      }
+      syncHotConfigUI();
+    }
+
+    function resetHotConfigToDefault() {
+      gameState.hotConfig = { ...DEFAULT_HOT_CONFIG };
+      if (gameState.settings.graphics) {
+        gameState.settings.graphics.ambientDarkness = DEFAULT_HOT_CONFIG.ambientDarkness;
+      }
+      syncHotConfigUI();
+      syncGraphicsUI();
+      showToast("Reset balance parameters to default!", "info");
+    }
+
+    function syncHotConfigUI() {
+      const cfg = gameState.hotConfig || DEFAULT_HOT_CONFIG;
+
+      const setSlider = (sliderId, labelId, val, formatFn) => {
+        const slider = document.getElementById(sliderId);
+        const label = document.getElementById(labelId);
+        if (slider && label) {
+          label.textContent = formatFn(val);
+        }
+      };
+
+      setSlider('hotSliderSpeed', 'hotValSpeed', cfg.playerSpeedMult ?? 1.0, v => `${v.toFixed(2)}x`);
+      setSlider('hotSliderDmg', 'hotValDmg', cfg.damageMult ?? 1.0, v => `${v.toFixed(2)}x`);
+      setSlider('hotSliderDash', 'hotValDash', cfg.dashCooldownMult ?? 1.0, v => `${v.toFixed(2)}x`);
+      setSlider('hotSliderGruntDrop', 'hotValGruntDrop', cfg.gruntDropRate ?? 0.12, v => `${Math.round(v * 100)}%`);
+      setSlider('hotSliderAncient', 'hotValAncient', cfg.ancientDropMult ?? 1.0, v => `${v.toFixed(2)}x`);
+      setSlider('hotSliderBeans', 'hotValBeans', cfg.beanMultiplier ?? 1.0, v => `${v.toFixed(2)}x`);
+    }
+
+    function copyHotPatchJSON() {
+      const patch = {
+        metadata: {
+          timestamp: new Date().toISOString(),
+          version: '1.0.0',
+          engine: 'RainBlade_HotConfig'
+        },
+        dim_hot_config_live_patch: Object.keys(gameState.hotConfig || {}).map(key => ({
+          config_key: key,
+          current_value: gameState.hotConfig[key],
+          default_value: DEFAULT_HOT_CONFIG[key] ?? null
+        }))
+      };
+      const json = JSON.stringify(patch, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        showToast("Hot-Patch JSON copied to clipboard!", "success");
+      }).catch(() => {
+        showToast("Patch JSON generated (check console)", "info");
+        console.log(json);
+      });
+    }
+
+    // ==================== LIVE TELEMETRY ETL STREAMER & INSIGHTS ====================
+    function logCombatTick(data) {
+      if (!gameState.telemetry) return;
+      if (!gameState.telemetry.combatTicks) gameState.telemetry.combatTicks = [];
+      const ticks = gameState.telemetry.combatTicks;
+      ticks.push({
+        t: Date.now(),
+        d: data.damage || 0,
+        c: !!data.isCrit,
+        s: data.skillId || 0,
+        arch: data.enemyArchetype || 'grunt',
+        aff: data.affixes || [],
+        k: !!data.targetKilled
+      });
+      if (ticks.length > 200) ticks.shift();
+    }
+
+    function logLootDrop(data) {
+      if (!gameState.telemetry) return;
+      if (!gameState.telemetry.lootDrops) gameState.telemetry.lootDrops = [];
+      const drops = gameState.telemetry.lootDrops;
+      drops.push({
+        id: data.dropId || 'drop_' + Date.now(),
+        t: Date.now(),
+        m: data.monsterTier || 'grunt',
+        name: data.itemName || 'Item',
+        grade: data.itemGrade || 'Standard',
+        roll: data.rollQualityPct || 60,
+        tier: data.itemTier || 'Common',
+        sockets: data.socketsCount || 0,
+        isBoss: !!data.isBoss,
+        pickedUp: false,
+        pickupLatency: -1
+      });
+      if (drops.length > 100) drops.shift();
+    }
+
+    function logLootPickup(itemId) {
+      if (!gameState.telemetry || !gameState.telemetry.lootDrops) return;
+      const drop = gameState.telemetry.lootDrops.find(d => d.id === itemId);
+      if (drop && !drop.pickedUp) {
+        drop.pickedUp = true;
+        drop.pickupLatency = (Date.now() - drop.t) / 1000.0;
+      }
+    }
+
+    function samplePerformance(fps, frameDelta, particlesCount, itemsCount, culledRatio) {
+      if (!gameState.telemetry) return;
+      if (!gameState.telemetry.perfSamples) gameState.telemetry.perfSamples = [];
+      const samples = gameState.telemetry.perfSamples;
+      samples.push({
+        t: Date.now(),
+        fps: Math.round(fps * 10) / 10,
+        ms: Math.round(frameDelta * 10) / 10,
+        particles: particlesCount,
+        items: itemsCount,
+        culled: Math.round(culledRatio * 100)
+      });
+      if (samples.length > 60) samples.shift();
+    }
+
+    function runETLAggregation() {
+      const telem = gameState.telemetry || { combatTicks: [], lootDrops: [], perfSamples: [] };
+      const now = Date.now();
+
+      const recentTicks = (telem.combatTicks || []).filter(tk => (now - tk.t) <= 30000);
+      const totalAttacks = recentTicks.length;
+      const totalCrits = recentTicks.filter(tk => tk.c).length;
+      const critRate = totalAttacks > 0 ? (totalCrits / totalAttacks) * 100 : 0;
+      const totalDamage = recentTicks.reduce((sum, tk) => sum + tk.d, 0);
+      const dps = totalDamage / 30.0;
+      const totalKills = recentTicks.filter(tk => tk.k).length;
+
+      const drops = telem.lootDrops || [];
+      const totalDrops = drops.length;
+      const gradesCount = { 'Standard': 0, 'Refined': 0, 'Flawless': 0, 'Ancient Masterwork': 0 };
+      drops.forEach(d => {
+        if (gradesCount[d.grade] !== undefined) gradesCount[d.grade]++;
+      });
+      const ancientRate = totalDrops > 0 ? (gradesCount['Ancient Masterwork'] / totalDrops) * 100 : 0;
+
+      const samples = telem.perfSamples || [];
+      const fpsList = samples.map(s => s.fps).sort((a, b) => a - b);
+      const p50Fps = fpsList.length > 0 ? fpsList[Math.floor(fpsList.length * 0.5)] : 60.0;
+      const frameDrops = samples.filter(s => s.ms > 33.3).length;
+
+      return {
+        combat: {
+          dps: Math.round(dps),
+          attacks: totalAttacks,
+          crits: totalCrits,
+          critRate: critRate.toFixed(1),
+          kills: totalKills,
+          recentTicks
+        },
+        loot: {
+          total: totalDrops,
+          grades: gradesCount,
+          ancientRate: ancientRate.toFixed(1)
+        },
+        perf: {
+          p50Fps: p50Fps.toFixed(1),
+          samples,
+          frameDrops
+        }
+      };
+    }
+
+    function renderETLAnalyticsUI() {
+      const etl = runETLAggregation();
+
+      const kpiDps = document.getElementById('etlKpiDps');
+      const kpiCrit = document.getElementById('etlKpiCrit');
+      const kpiAncient = document.getElementById('etlKpiAncient');
+      const kpiFps = document.getElementById('etlKpiFps');
+
+      if (kpiDps) kpiDps.textContent = etl.combat.dps.toLocaleString();
+      if (kpiCrit) kpiCrit.textContent = `${etl.combat.critRate}%`;
+      if (kpiAncient) kpiAncient.textContent = `${etl.loot.ancientRate}%`;
+      if (kpiFps) kpiFps.textContent = etl.perf.p50Fps;
+
+      const dpsAvg = document.getElementById('etlDpsAvg');
+      if (dpsAvg) dpsAvg.textContent = `Avg: ${etl.combat.dps} / s`;
+
+      const lootTotal = document.getElementById('etlLootTotal');
+      if (lootTotal) lootTotal.textContent = `Total: ${etl.loot.total}`;
+
+      const fDrops = document.getElementById('etlFrameDrops');
+      if (fDrops) fDrops.textContent = `${etl.perf.frameDrops} Stutters (>33ms)`;
+
+      drawDpsTimelineChart(etl.combat.recentTicks);
+      drawLootGradeBarChart(etl.loot.grades, etl.loot.total);
+      drawFpsTimelineChart(etl.perf.samples);
+    }
+
+    function drawDpsTimelineChart(ticks) {
+      const cvs = document.getElementById('etlDpsCanvas');
+      if (!cvs) return;
+      const c = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+      c.clearRect(0, 0, w, h);
+
+      c.strokeStyle = '#1e293b';
+      c.lineWidth = 1;
+      c.beginPath();
+      c.moveTo(0, h / 2); c.lineTo(w, h / 2);
+      c.stroke();
+
+      if (!ticks || ticks.length < 2) {
+        c.fillStyle = '#64748b';
+        c.font = '10px monospace';
+        c.fillText('Attack enemies to generate DPS curves', 20, h / 2 + 3);
+        return;
+      }
+
+      const now = Date.now();
+      const points = [];
+      for (let s = 30; s >= 0; s--) {
+        const secTime = now - (s * 1000);
+        const dmgInSec = ticks.filter(tk => Math.abs(tk.t - secTime) < 500).reduce((sum, tk) => sum + tk.d, 0);
+        points.push(dmgInSec);
+      }
+
+      const maxVal = Math.max(100, ...points);
+      c.strokeStyle = '#f59e0b';
+      c.lineWidth = 2;
+      c.beginPath();
+      points.forEach((val, i) => {
+        const x = (i / (points.length - 1)) * w;
+        const y = h - 6 - (val / maxVal) * (h - 12);
+        if (i === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      });
+      c.stroke();
+    }
+
+    function drawLootGradeBarChart(grades, total) {
+      const cvs = document.getElementById('etlLootCanvas');
+      if (!cvs) return;
+      const c = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+      c.clearRect(0, 0, w, h);
+
+      const items = [
+        { label: 'Std', count: grades['Standard'] || 0, color: '#94a3b8' },
+        { label: 'Ref', count: grades['Refined'] || 0, color: '#38bdf8' },
+        { label: 'Flaw', count: grades['Flawless'] || 0, color: '#a855f7' },
+        { label: 'Anc', count: grades['Ancient Masterwork'] || 0, color: '#f59e0b' }
+      ];
+
+      const barWidth = 36;
+      const spacing = (w - (barWidth * 4)) / 5;
+      const maxCount = Math.max(1, ...items.map(it => it.count));
+
+      items.forEach((it, i) => {
+        const x = spacing + i * (barWidth + spacing);
+        const barHeight = Math.max(4, (it.count / maxCount) * (h - 28));
+        const y = h - 16 - barHeight;
+
+        c.fillStyle = it.color;
+        c.fillRect(x, y, barWidth, barHeight);
+
+        c.fillStyle = '#cbd5e1';
+        c.font = '9px monospace';
+        c.fillText(`${it.count}`, x + 10, y - 3);
+        c.fillText(it.label, x + 8, h - 4);
+      });
+    }
+
+    function drawFpsTimelineChart(samples) {
+      const cvs = document.getElementById('etlFpsCanvas');
+      if (!cvs) return;
+      const c = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+      c.clearRect(0, 0, w, h);
+
+      c.strokeStyle = 'rgba(74, 222, 128, 0.2)';
+      c.beginPath();
+      const targetY = h - (60 / 75) * (h - 8);
+      c.moveTo(0, targetY); c.lineTo(w, targetY);
+      c.stroke();
+
+      if (!samples || samples.length < 2) {
+        c.fillStyle = '#64748b';
+        c.font = '10px monospace';
+        c.fillText('Sampling live FPS and frame consistency...', 20, h / 2 + 3);
+        return;
+      }
+
+      c.strokeStyle = '#c084fc';
+      c.lineWidth = 1.5;
+      c.beginPath();
+      samples.forEach((s, i) => {
+        const x = (i / (samples.length - 1)) * w;
+        const clampedFps = Math.max(10, Math.min(75, s.fps));
+        const y = h - 4 - (clampedFps / 75) * (h - 8);
+        if (i === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      });
+      c.stroke();
+    }
+
+    function exportTelemetryJSON() {
+      const etl = runETLAggregation();
+      const payload = {
+        metadata: {
+          export_id: 'etl_' + Date.now(),
+          schema_version: 'v1.0.0',
+          manifesto: 'rainblade_analytics_manifesto',
+          session_id: 'sess_' + (gameState.telemetry?.sessionStart || Date.now()),
+          device_user_agent: navigator.userAgent,
+          exported_at: new Date().toISOString()
+        },
+        fact_combat_performance: etl.combat,
+        fact_loot_economy: etl.loot,
+        fact_device_fps_telemetry: etl.perf,
+        dim_hot_config_live_patch: gameState.hotConfig || DEFAULT_HOT_CONFIG
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `rainblade-telemetry-etl-${Date.now()}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Telemetry ETL JSON downloaded successfully!", "success");
+    }
+
     function toggleModal(modalId) {
       const modal = document.getElementById(modalId);
       if (!modal) return;
       const isOpening = modal.classList.contains('hidden');
       
-      ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal'].forEach(id => {
+      ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'multiplayerModal', 'graphicsModal', 'analyticsModal', 'hotTuningModal'].forEach(id => {
         const m = document.getElementById(id);
         if (m && id !== modalId) m.classList.add('hidden');
       });
 
       if (isOpening) {
         modal.classList.remove('hidden');
-        // Keep game paused when opening modals
         gameState.isPaused = true;
         if (gameState.audioEnabled && audioInitialized && Tone.Transport.state === 'started') {
           Tone.Transport.pause();
         }
         if (modalId === 'inventoryModal') renderInventoryBag();
-      if (modalId === 'skillsModal') {
-        updateSkillsUI();
-        renderSpecialPerksUI();
-        renderRaceClassUI();
-      }
-        if (modalId === 'skillsModal') updateSkillsUI();
+        if (modalId === 'skillsModal') {
+          updateSkillsUI();
+          renderSpecialPerksUI();
+          renderRaceClassUI();
+        }
         if (modalId === 'locationModal') renderDistricts();
+        if (modalId === 'graphicsModal') syncGraphicsUI();
+        if (modalId === 'analyticsModal') renderETLAnalyticsUI();
+        if (modalId === 'hotTuningModal') syncHotConfigUI();
       } else {
         modal.classList.add('hidden');
-        // If wave intermission is active, STAY paused; otherwise resume
         if (gameState.intermissionActive) {
           gameState.isPaused = true;
         } else {
