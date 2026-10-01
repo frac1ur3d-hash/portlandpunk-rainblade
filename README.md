@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🗡️ PORTLAND PROTOCOL // RAIN BLADE
 ### 8-Bit Cyber ARPG with Diablo 3 Skill Runes, Tactical Blade Ricochet & 120+ Portland Items
@@ -92,6 +92,27 @@ npm run electron:dev
 
 ---
 
+## 🏆 Project Credits & Attribution
+
+### 👤 Creator, Director & Lead Game Designer
+* **Kyle McLeod** ([@frac1ur3d-hash](https://github.com/frac1ur3d-hash))
+  * **Original Concept, World Lore, District Landscaping Vision & Gameplay Direction**
+  * **Design of Diablo 3 Shrine mechanics, Item Grading tiers, and Cyberpunk Themes**
+  * **Continuous Quality Assurance, Mobile/Desktop Playtesting, and Performance Guidance**
+
+### 🤖 Autonomous AI Systems Architecture & Engineering
+* **Antigravity** (Google DeepMind)
+  * Ultra-Fast 60–120 FPS Engine Architecture ($0.38\text{ms}$ render loop)
+  * Virtual Texture Megachunking, SpatialHashGrid, and Zero-GC Object Pools
+  * Downsampled Half-Resolution Dynamic 2D Lighting & Pre-Baked Radial Light Stamps
+  * Live Hot-Tuning Studio (`~` / `F1`) & Telemetry ETL Analytics Dashboard (`F2`)
+
+### 🎵 Interactive Audio Engine
+* **Tone.js** (Synthesized Dubstep Bass Drops, Blade Ricochets, and Ambient Rain Resonance)
+
+---
+
 <div align="center">
-Made with ☕ in Portland, Oregon. 100% Open Source.
+Created by Kyle McLeod in Portland, Oregon. 100% Open Source.
 </div>
+

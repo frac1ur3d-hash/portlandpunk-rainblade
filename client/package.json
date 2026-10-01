@@ -2,6 +2,7 @@
   "name": "portlandpunk-client",
   "private": true,
   "version": "0.1.0",
+  "author": "Kyle McLeod <https://github.com/frac1ur3d-hash>",
   "type": "module",
   "scripts": {
     "dev": "vite",
