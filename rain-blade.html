@@ -135,6 +135,8 @@
           </div>
           <span id="hudEnergyText" class="text-[9px] font-mono text-amber-300 font-bold">80/80</span>
         </div>
+        <!-- Mobile/Compact Shrine Buff Indicators -->
+        <div id="hudMobileShrineBuffs" class="flex md:hidden items-center gap-1 mt-1 empty:hidden"></div>
       </div>
     </div>
 
@@ -155,6 +157,8 @@
         <span class="w-1 h-1 rounded-full bg-emerald-400"></span>
         <span id="hudWeatherState">Perpetual Pacific Drizzle</span>
       </div>
+      <!-- Desktop Shrine Buff Badges -->
+      <div id="hudShrineBuffs" class="flex items-center gap-1.5 mt-1 empty:hidden"></div>
     </div>
 
     <!-- Right Controls: Currency, Gear & Audio -->
@@ -4721,31 +4725,88 @@
       }
     }
 
-    function dropLoot(x, y, count = 1, forceHighTier = false) {
-      if (!gameState.groundItems) gameState.groundItems = [];
+    function rollItemGrade(baseItem, forceHighTier = false, isBoss = false, hasFortune = false) {
+      let roll = Math.random();
+      if (hasFortune) roll += 0.35;
+      if (isBoss) roll += 0.40;
+      else if (forceHighTier) roll += 0.22;
 
-      // 1. Physical Bouncing Beans Drop
-      let beanAmount = 15 + Math.floor(Math.random() * 25);
-      if (gameState.player.activeSetBonuses && gameState.player.activeSetBonuses['stumptown_6']) {
-        beanAmount = Math.round(beanAmount * 1.5);
+      let grade = 'Standard';
+      let mult = 1.0;
+      let rollPct = 52 + Math.floor(Math.random() * 22);
+      let socketsBonus = 0;
+      let gradeColor = '#94a3b8';
+
+      if (roll >= 0.86) {
+        grade = 'Ancient Masterwork';
+        mult = 1.65 + (Math.random() * 0.35); // +65% to +100%
+        rollPct = 90 + Math.floor(Math.random() * 11);
+        socketsBonus = 1;
+        gradeColor = '#f59e0b'; // Amber Gold
+      } else if (roll >= 0.58) {
+        grade = 'Flawless';
+        mult = 1.35 + (Math.random() * 0.20); // +35% to +55%
+        rollPct = 80 + Math.floor(Math.random() * 14);
+        socketsBonus = (Math.random() < 0.5 ? 1 : 0);
+        gradeColor = '#a855f7'; // Purple
+      } else if (roll >= 0.28) {
+        grade = 'Refined';
+        mult = 1.15 + (Math.random() * 0.15); // +15% to +30%
+        rollPct = 68 + Math.floor(Math.random() * 14);
+        gradeColor = '#38bdf8'; // Cyan
       }
-      gameState.groundItems.push({
-        type: 'beans',
-        amount: beanAmount,
-        x: x + (Math.random() - 0.5) * 16,
-        y: y + (Math.random() - 0.5) * 16,
-        z: 14 + Math.random() * 8,
-        vx: (Math.random() - 0.5) * 4.0,
-        vy: (Math.random() - 0.5) * 4.0,
-        vz: 3.8 + Math.random() * 2.8,
-        bounces: 2,
-        settled: false,
-        icon: '☕',
-        name: `${beanAmount} Beans`,
-        tier: 'Beans'
-      });
 
-      // 2. Physical Gear Drops with Diablo 3 Beacons
+      return {
+        grade,
+        gradeColor,
+        rollQuality: rollPct,
+        damage: baseItem.damage ? Math.round(baseItem.damage * mult) : 0,
+        hp: baseItem.hp ? Math.round(baseItem.hp * mult) : 0,
+        armor: baseItem.armor ? Math.round(baseItem.armor * mult) : 0,
+        speedBonus: baseItem.speedBonus ? Math.round(baseItem.speedBonus * mult * 100) / 100 : 0,
+        critChance: baseItem.critChance ? Math.round(baseItem.critChance * mult * 100) / 100 : 0,
+        blockChance: baseItem.blockChance ? Math.round(baseItem.blockChance * mult * 100) / 100 : 0,
+        sockets: Math.min(3, (baseItem.sockets !== undefined ? baseItem.sockets : 1) + socketsBonus)
+      };
+    }
+
+    function dropLoot(x, y, count = 1, forceHighTier = false, isBoss = false) {
+      if (!gameState.groundItems) gameState.groundItems = [];
+      const p = gameState.player;
+      const hasFortune = (p.activeShrines && p.activeShrines.fortune > 0);
+
+      // 1. Controlled Physical Beans Drop (Avoid flooding screen)
+      const beanChance = forceHighTier ? 1.0 : (Math.random() < 0.40 ? 1.0 : 0);
+      if (beanChance > 0) {
+        let beanAmount = (isBoss ? 75 : (forceHighTier ? 25 : 8)) + Math.floor(Math.random() * (isBoss ? 55 : 14));
+        if (p.activeSetBonuses && p.activeSetBonuses['stumptown_6']) beanAmount = Math.round(beanAmount * 1.5);
+        if (hasFortune) beanAmount = Math.round(beanAmount * 2.0); // Fortune Shrine: Double Beans!
+
+        gameState.groundItems.push({
+          type: 'beans',
+          amount: beanAmount,
+          x: x + (Math.random() - 0.5) * 16,
+          y: y + (Math.random() - 0.5) * 16,
+          z: 14 + Math.random() * 8,
+          vx: (Math.random() - 0.5) * 3.5,
+          vy: (Math.random() - 0.5) * 3.5,
+          vz: 3.5 + Math.random() * 2.5,
+          bounces: 2,
+          settled: false,
+          icon: '☕',
+          name: `${beanAmount} Beans`,
+          tier: 'Beans'
+        });
+      }
+
+      // 2. Physical Gear Drops with Item Grading
+      // Normal grunts: 12% drop rate. Champions/Elites: Guaranteed 1. Bosses: Guaranteed 2-3.
+      const gearDropChance = forceHighTier ? 1.0 : 0.12;
+      if (Math.random() > gearDropChance && !forceHighTier) {
+        return; // Don't drop item clutter from regular grunts
+      }
+
+      // 3. Physical Gear Drops with Diablo 3 Beacons & Item Grading
       const extraDrops = [
         // ── SET 1: STUMPTOWN ROASTER ──
         { name: "Roaster's Cyber-Visor", setId: 'stumptown_roaster', type: 'head', icon: '🥽', tier: 'Epic', hp: 60, critChance: 0.10, bonus: '+60 HP, +10% Crit [Roaster Set]', value: 160 },
@@ -4803,37 +4864,46 @@
       ];
 
       const combinedPool = FULL_PORTLAND_LOOT_TABLE.concat(extraDrops);
-      const dropCount = forceHighTier ? Math.max(1, count) : (Math.random() < 0.62 ? count : 0);
+      const dropCount = isBoss ? Math.max(2, count) : (forceHighTier ? Math.max(1, count) : 1);
 
       for (let i = 0; i < dropCount; i++) {
         let pool = combinedPool;
-        if (forceHighTier) {
-          pool = combinedPool.filter(it => it.tier === 'Legendary' || it.tier === 'Epic' || it.setId);
+        if (isBoss) {
+          pool = combinedPool.filter(it => it.tier === 'Legendary' || it.setId);
+          if (pool.length === 0) pool = combinedPool;
+        } else if (forceHighTier) {
+          pool = combinedPool.filter(it => it.tier === 'Epic' || it.tier === 'Rare' || it.setId);
           if (pool.length === 0) pool = combinedPool;
         }
 
         const randomItem = pool[Math.floor(Math.random() * pool.length)];
+        const graded = rollItemGrade(randomItem, forceHighTier, isBoss, hasFortune);
+
         const newItem = {
           id: 'drop_' + Date.now() + '_' + Math.floor(Math.random() * 999999),
-          name: randomItem.name,
+          name: graded.grade === 'Standard' ? randomItem.name : `[${graded.grade}] ${randomItem.name}`,
+          baseName: randomItem.name,
+          itemGrade: graded.grade,
+          gradeColor: graded.gradeColor,
+          rollQuality: graded.rollQuality,
           setId: randomItem.setId || null,
           type: randomItem.type,
           subType: randomItem.subType || null,
           bonus: randomItem.bonus,
           tier: randomItem.tier,
           icon: randomItem.icon,
-          damage: randomItem.damage || (randomItem.type === 'weapon' ? (randomItem.statVal || 20) : 0),
-          hp: randomItem.hp || (randomItem.type === 'armor' ? (randomItem.hp || 50) : (randomItem.type === 'belt' ? (randomItem.hp || 30) : 0)),
-          armor: randomItem.armor || 0,
-          speedBonus: randomItem.speedBonus || 0,
-          critChance: randomItem.critChance || 0,
-          blockChance: randomItem.blockChance || 0,
-          value: randomItem.value || 75,
+          damage: graded.damage || (randomItem.type === 'weapon' ? (randomItem.statVal || 20) : 0),
+          hp: graded.hp || (randomItem.type === 'armor' ? (randomItem.hp || 50) : (randomItem.type === 'belt' ? (randomItem.hp || 30) : 0)),
+          armor: graded.armor || 0,
+          speedBonus: graded.speedBonus || 0,
+          critChance: graded.critChance || 0,
+          blockChance: graded.blockChance || 0,
+          value: Math.round((randomItem.value || 75) * (graded.rollQuality / 70)),
           level: 1,
-          stars: 1,
+          stars: graded.grade === 'Ancient Masterwork' ? 3 : (graded.grade === 'Flawless' ? 2 : 1),
           xp: 0,
           xpMax: 120,
-          sockets: randomItem.sockets !== undefined ? randomItem.sockets : 1,
+          sockets: graded.sockets,
           gems: randomItem.gems ? [...randomItem.gems] : [],
           activeAbility: randomItem.activeAbility || null
         };
@@ -4982,8 +5052,23 @@
     function drawGroundLoot() {
       if (!gameState.groundItems || gameState.groundItems.length === 0) return;
       const now = Date.now();
+      const cam = gameState.camera;
+      const cw = gameState.canvasWidth || window.innerWidth;
+      const ch = gameState.canvasHeight || window.innerHeight;
+      const minX = cam.x - 70;
+      const maxX = cam.x + cw + 70;
+      const minY = cam.y - 300;
+      const maxY = cam.y + ch + 70;
+
+      let renderedBeams = 0;
+      const maxBeams = 10;
 
       gameState.groundItems.forEach(item => {
+        // Viewport Culling: Skip items that are off-screen completely
+        if (item.x < minX || item.x > maxX || item.y < minY || item.y > maxY) {
+          return;
+        }
+
         const itemZ = item.z || 0;
         const vis = item.tierVis || getItemTierVisual(item.item ? item.item.tier : 'Common', item.item ? item.item.setId : null);
         const color = item.type === 'beans' ? '#fbbf24' : vis.color;
@@ -5000,23 +5085,24 @@
 
         // Ground Glowing Rune Flare
         ctx.beginPath();
-        ctx.arc(item.x, item.y, (item.type === 'beans' ? 12 : 20) * shadowScale, 0, Math.PI * 2);
-        const groundGrad = ctx.createRadialGradient(item.x, item.y, 0, item.x, item.y, 22 * shadowScale);
+        ctx.arc(item.x, item.y, (item.type === 'beans' ? 12 : 18) * shadowScale, 0, Math.PI * 2);
+        const groundGrad = ctx.createRadialGradient(item.x, item.y, 0, item.x, item.y, 20 * shadowScale);
         groundGrad.addColorStop(0, glow);
         groundGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = groundGrad;
         ctx.fill();
 
-        // 2. Diablo 3 Skyward Pillar of Light (Beacon)
-        if (item.type === 'item' && item.beamHeight > 0) {
-          const pulse = Math.sin(now * 0.005 + (item.pulsePhase || 0)) * 2;
-          const beamW = 4 + pulse;
+        // 2. Diablo 3 Skyward Pillar of Light (Beacon) - Capped & Culled
+        if (item.type === 'item' && item.beamHeight > 0 && renderedBeams < maxBeams) {
+          renderedBeams++;
+          const pulse = Math.sin(now * 0.005 + (item.pulsePhase || 0)) * 1.8;
+          const beamW = 3.2 + pulse;
           const beamTop = item.y - item.beamHeight;
 
           // Outer Soft Glow Beam
           const beamGrad = ctx.createLinearGradient(item.x, item.y, item.x, beamTop);
           beamGrad.addColorStop(0, glow);
-          beamGrad.addColorStop(0.3, glow.replace('0.9', '0.4').replace('0.8', '0.3'));
+          beamGrad.addColorStop(0.3, glow.replace('0.9', '0.35').replace('0.8', '0.25'));
           beamGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
           ctx.fillStyle = beamGrad;
@@ -5027,24 +5113,17 @@
           ctx.moveTo(item.x, item.y);
           ctx.lineTo(item.x, beamTop);
           ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 1.8;
+          ctx.lineWidth = 1.6;
           ctx.globalAlpha = 0.85;
           ctx.stroke();
           ctx.globalAlpha = 1.0;
-
-          // Rising energy spark motes
-          const sparkOffset = (now * 0.08) % item.beamHeight;
-          ctx.beginPath();
-          ctx.arc(item.x, item.y - sparkOffset, 2.2, 0, Math.PI * 2);
-          ctx.fillStyle = '#ffffff';
-          ctx.fill();
         }
 
         // 3. Floating Physical Item Icon
         const hoverBob = item.settled ? Math.sin(now * 0.004 + (item.x * 0.05)) * 3 : 0;
         const iconY = item.y - itemZ + hoverBob;
 
-        ctx.font = item.type === 'beans' ? '15px sans-serif' : '20px sans-serif';
+        ctx.font = item.type === 'beans' ? '15px sans-serif' : '19px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(item.icon || (item.item ? item.item.icon : '🗡️'), item.x, iconY - 8);
@@ -5052,29 +5131,29 @@
         // 4. Clickable Floating Nameplate (Diablo 3 Nameplate Banner)
         const nameplateY = item.y - itemZ - 26 + hoverBob;
         const itemName = item.type === 'beans' ? item.name : (item.item ? item.item.name : 'Unknown Item');
-        ctx.font = 'bold 10px monospace';
+        ctx.font = 'bold 9.5px monospace';
         const textMetrics = ctx.measureText(itemName);
-        const boxW = Math.max(70, textMetrics.width + 24);
-        const boxH = 18;
+        const boxW = Math.max(65, textMetrics.width + 18);
+        const boxH = 17;
         const boxX = item.x - boxW / 2;
         const boxY = nameplateY - boxH / 2;
 
         // Nameplate Background Pill
         ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+        ctx.roundRect(boxX, boxY, boxW, boxH, 5);
         ctx.fillStyle = item.type === 'beans' ? 'rgba(30, 20, 5, 0.92)' : vis.bg;
         ctx.fill();
 
         // Nameplate Colored Border & Drop Glow
         ctx.strokeStyle = color;
-        ctx.lineWidth = item.item && (item.item.tier === 'Legendary' || item.item.setId) ? 2.0 : 1.2;
+        ctx.lineWidth = item.item && (item.item.tier === 'Legendary' || item.item.setId) ? 1.8 : 1.0;
         ctx.stroke();
 
         // Nameplate Pointer Notch
         ctx.beginPath();
-        ctx.moveTo(item.x - 4, boxY + boxH);
-        ctx.lineTo(item.x, boxY + boxH + 4);
-        ctx.lineTo(item.x + 4, boxY + boxH);
+        ctx.moveTo(item.x - 3, boxY + boxH);
+        ctx.lineTo(item.x, boxY + boxH + 3.5);
+        ctx.lineTo(item.x + 3, boxY + boxH);
         ctx.fillStyle = color;
         ctx.fill();
 
@@ -5095,7 +5174,9 @@
     }
 
     function createImpactParticles(x, y, color = '#38bdf8', count = 7) {
-      for (let i = 0; i < count; i++) {
+      if (gameState.particles.length >= 50) return;
+      const spawnCount = Math.min(count, 50 - gameState.particles.length);
+      for (let i = 0; i < spawnCount; i++) {
         const speed = 1.8 + Math.random() * 3.5;
         const angle = Math.random() * Math.PI * 2;
         gameState.particles.push({
@@ -5119,6 +5200,9 @@
         if (str === 'RICOCHET!' || str === 'SHREDDED!' || str === 'PHASED') {
           return;
         }
+      }
+      if (gameState.floatingTexts.length >= 20) {
+        gameState.floatingTexts.shift();
       }
       gameState.floatingTexts.push({
         text,
@@ -5157,7 +5241,7 @@
       if (slainEl) slainEl.textContent = p.enemiesSlain;
       gainExperience(enemy.xpReward);
       grantGearXp(enemy.xpReward);
-      dropLoot(enemy.x, enemy.y);
+      dropLoot(enemy.x, enemy.y, 1, false, false);
       createImpactParticles(enemy.x, enemy.y, enemy.accentColor || '#f43f5e');
 
       // (6) Burnside Anarchist: Anarchy Overdrive (Enemy kills reset Dash)
@@ -5172,7 +5256,7 @@
       if (enemy.isElite) {
         if (!gameState.dungeonStats) gameState.dungeonStats = { elitesSlain: 0, bossesSlain: 0, liberatedLandmarks: [] };
         gameState.dungeonStats.elitesSlain++;
-        dropLoot(enemy.x, enemy.y, 2, true);
+        dropLoot(enemy.x, enemy.y, 1, true, false);
         addFloatingText("ELITE DEFEATED!", enemy.x, enemy.y - 28, '#fbbf24', 15);
 
         if (enemy.affix === 'molten') {
@@ -5205,10 +5289,9 @@
         playSound('special');
         playSound('level');
 
-        // Massive Diablo 3 Loot Explosion
-        dropLoot(enemy.x, enemy.y, 2, true);
-        dropLoot(enemy.x + 28, enemy.y - 18, 2, true);
-        dropLoot(enemy.x - 28, enemy.y + 18, 1, true);
+        // Guaranteed Diablo 3 Apex Boss Legendary / Set Loot Explosion
+        dropLoot(enemy.x, enemy.y, 2, true, true);
+        dropLoot(enemy.x + 28, enemy.y - 18, 1, true, true);
       }
       if (typeof idx === 'number' && idx >= 0 && idx < gameState.enemies.length) {
         gameState.enemies.splice(idx, 1);
@@ -5405,29 +5488,46 @@
         moveY = gameState.touchJoystick.dirY;
       }
 
+      const len = Math.hypot(moveX, moveY);
+
       if (p.isDodging) {
         p.dodgeTimer -= dt;
         p.x += p.dodgeDirX * (p.speed * 2.8);
         p.y += p.dodgeDirY * (p.speed * 2.8);
         if (p.dodgeTimer <= 0) p.isDodging = false;
       } else {
-        const len = Math.hypot(moveX, moveY);
         if (len > 0) {
           const hasteMult = gameState.skills[2].activeTimer > 0 ? 1.6 : 1.0;
           const chillMult = p.isChilled > 0 ? 0.60 : 1.0;
-          const currentSpeed = p.speed * hasteMult * chillMult;
+          const shrineSpeedMult = (p.activeShrines && p.activeShrines.fleeting > 0) ? 1.40 : 1.0;
+          const currentSpeed = p.speed * hasteMult * chillMult * shrineSpeedMult;
           p.vx = (moveX / (len > 1 ? len : 1)) * currentSpeed;
           p.vy = (moveY / (len > 1 ? len : 1)) * currentSpeed;
 
           // Smooth sliding collision with Portland World Map
           if (gameState.worldMap) {
-            const nextX = p.x + p.vx;
-            if (gameState.worldMap.isWorldWalkable(nextX, p.y, p.radius * 0.75)) {
-              p.x = nextX;
-            }
-            const nextY = p.y + p.vy;
-            if (gameState.worldMap.isWorldWalkable(p.x, nextY, p.radius * 0.75)) {
-              p.y = nextY;
+            const wm = gameState.worldMap;
+            const curTile = wm.worldToTile(p.x, p.y);
+            const curWalkable = wm.isWalkable(curTile.c, curTile.r);
+
+            // Auto-unstick fail-safe if pushed or spawned out of bounds
+            if (!curWalkable) {
+              const safe = wm.findNearestWalkable(p.x, p.y);
+              const udx = safe.wx - p.x;
+              const udy = safe.wy - p.y;
+              const udist = Math.hypot(udx, udy) || 1;
+              p.x += (udx / udist) * (currentSpeed * 1.5);
+              p.y += (udy / udist) * (currentSpeed * 1.5);
+            } else {
+              // Independent axis movement for ultra-smooth wall sliding
+              const nextX = p.x + p.vx;
+              if (wm.isWorldWalkable(nextX, p.y, 8)) {
+                p.x = nextX;
+              }
+              const nextY = p.y + p.vy;
+              if (wm.isWorldWalkable(p.x, nextY, 8)) {
+                p.y = nextY;
+              }
             }
           } else {
             p.x += p.vx;
@@ -5436,6 +5536,57 @@
         } else {
           p.vx = 0;
           p.vy = 0;
+
+          // Auto-unstick even when standing still if pushed inside a building
+          if (gameState.worldMap) {
+            const wm = gameState.worldMap;
+            const curTile = wm.worldToTile(p.x, p.y);
+            if (!wm.isWalkable(curTile.c, curTile.r)) {
+              const safe = wm.findNearestWalkable(p.x, p.y);
+              const udx = safe.wx - p.x;
+              const udy = safe.wy - p.y;
+              const udist = Math.hypot(udx, udy) || 1;
+              p.x += (udx / udist) * 2.5;
+              p.y += (udy / udist) * 2.5;
+            }
+          }
+        }
+
+        // Active Shrine Buff Timers
+        if (p.activeShrines) {
+          ['frenzied', 'blessed', 'empowered', 'fleeting', 'fortune'].forEach(st => {
+            if (p.activeShrines[st] > 0) {
+              p.activeShrines[st] = Math.max(0, p.activeShrines[st] - dt);
+            }
+          });
+        }
+
+        // Interactive Diablo 3 Shrines
+        if (gameState.worldMap && gameState.worldMap.shrines) {
+          gameState.worldMap.shrines.forEach(shrine => {
+            if (!shrine.active && shrine.cooldownTimer > 0) {
+              shrine.cooldownTimer -= dt;
+              if (shrine.cooldownTimer <= 0) {
+                shrine.active = true;
+                createImpactParticles(shrine.worldX + 16, shrine.worldY + 16, shrine.color, 14);
+              }
+            }
+
+            // Proximity activation
+            const sDist = Math.hypot(p.x - shrine.worldX, p.y - shrine.worldY);
+            if (sDist < 42 && shrine.active) {
+              shrine.active = false;
+              shrine.cooldownTimer = 180;
+              if (!p.activeShrines) p.activeShrines = {};
+              p.activeShrines[shrine.type] = shrine.duration;
+
+              playSound('level');
+              createImpactParticles(p.x, p.y, shrine.color, 28);
+              triggerWaveAnnouncement(`✨ ${shrine.name.toUpperCase()} ACTIVATED!`, `${shrine.desc} (${shrine.duration}s)`);
+              showToast(`✨ ${shrine.name}: ${shrine.desc}!`, 'success', true);
+              addFloatingText(`✨ ${shrine.name.toUpperCase()}!`, p.x, p.y - 35, shrine.color, 16);
+            }
+          });
         }
 
         // Interactive World Props (Coffee Siphon Stills, Supply Crates, Anomaly Beacons)
@@ -5871,16 +6022,16 @@
         pt.life -= dt;
         if (pt.life <= 0) gameState.particles.splice(i, 1);
       }
-      if (gameState.particles.length > 120) {
-        gameState.particles.splice(0, gameState.particles.length - 120);
+      if (gameState.particles.length > 50) {
+        gameState.particles.splice(0, gameState.particles.length - 50);
       }
 
       // Hard caps on hostile/friendly entities to prevent mobile memory freeze
-      if (gameState.projectiles.length > 60) {
-        gameState.projectiles.splice(0, gameState.projectiles.length - 60);
+      if (gameState.projectiles.length > 40) {
+        gameState.projectiles.splice(0, gameState.projectiles.length - 40);
       }
-      if (gameState.groundHazards && gameState.groundHazards.length > 25) {
-        gameState.groundHazards.splice(0, gameState.groundHazards.length - 25);
+      if (gameState.groundHazards && gameState.groundHazards.length > 20) {
+        gameState.groundHazards.splice(0, gameState.groundHazards.length - 20);
       }
 
       for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
@@ -5889,8 +6040,24 @@
         ft.life -= dt;
         if (ft.life <= 0) gameState.floatingTexts.splice(i, 1);
       }
-      if (gameState.floatingTexts.length > 40) {
-        gameState.floatingTexts.splice(0, gameState.floatingTexts.length - 40);
+      if (gameState.floatingTexts.length > 20) {
+        gameState.floatingTexts.splice(0, gameState.floatingTexts.length - 20);
+      }
+
+      // Cap ground items to max 30 to prevent loot flood & mobile canvas slowdown
+      if (gameState.groundItems && gameState.groundItems.length > 30) {
+        let excess = gameState.groundItems.length - 30;
+        for (let i = 0; i < gameState.groundItems.length && excess > 0; i++) {
+          const it = gameState.groundItems[i];
+          if (it.type === 'beans' || it.tier === 'Common' || it.tier === 'Magic' || it.tier === 'Rare') {
+            gameState.groundItems.splice(i, 1);
+            i--;
+            excess--;
+          }
+        }
+        if (excess > 0) {
+          gameState.groundItems.splice(0, excess);
+        }
       }
 
       const cw = gameState.canvasWidth || window.innerWidth;
@@ -6116,6 +6283,58 @@
             rotation: 0
           });
         });
+
+        // 6. Iconic Diablo 3 Shrines (Open-World Sanctuary Points)
+        const SHRINE_DEFS = [
+          { type: 'frenzied', name: 'Frenzied Shrine', icon: '⚡', color: '#fbbf24', lightColor: 'rgba(251, 191, 36, 0.50)', desc: '+50% Attack Speed & Rapid Slash', duration: 45 },
+          { type: 'blessed', name: 'Blessed Shrine', icon: '🛡️', color: '#38bdf8', lightColor: 'rgba(56, 189, 248, 0.50)', desc: '40% Damage Reduction Barrier', duration: 45 },
+          { type: 'empowered', name: 'Empowered Shrine', icon: '🌀', color: '#00f5ff', lightColor: 'rgba(0, 245, 255, 0.55)', desc: '+100% Resource Regen & 50% Skill CDs', duration: 45 },
+          { type: 'fleeting', name: 'Fleeting Shrine', icon: '👟', color: '#10b981', lightColor: 'rgba(16, 185, 129, 0.50)', desc: '+40% Move Speed & +80px Item Magnet', duration: 45 },
+          { type: 'fortune', name: 'Fortune Shrine', icon: '💎', color: '#c084fc', lightColor: 'rgba(192, 132, 252, 0.55)', desc: '+60% Magic Find & Double Beans', duration: 45 }
+        ];
+
+        this.shrines = [];
+        const shrineSpots = [
+          { c: 20, r: 20, typeIdx: 0 },
+          { c: 44, r: 20, typeIdx: 1 },
+          { c: 20, r: 44, typeIdx: 2 },
+          { c: 44, r: 44, typeIdx: 3 },
+          { c: 32, r: 24, typeIdx: 4 },
+          { c: 32, r: 40, typeIdx: 0 },
+          { c: 14, r: 28, typeIdx: 1 },
+          { c: 50, r: 28, typeIdx: 2 },
+          { c: 26, r: 36, typeIdx: 3 },
+          { c: 38, r: 28, typeIdx: 4 }
+        ];
+
+        shrineSpots.forEach((sp, idx) => {
+          let sc = sp.c;
+          let sr = sp.r;
+          while (!this.isWalkable(sc, sr) && sc < this.cols - 2) {
+            sc++;
+          }
+          const sDef = SHRINE_DEFS[sp.typeIdx % SHRINE_DEFS.length];
+          const wx = ((sc * this.tileSize) - this.originX);
+          const wy = ((sr * this.tileSize) - this.originY);
+          this.shrines.push({
+            id: `shrine_${idx}`,
+            type: sDef.type,
+            name: sDef.name,
+            icon: sDef.icon,
+            color: sDef.color,
+            lightColor: sDef.lightColor,
+            desc: sDef.desc,
+            duration: sDef.duration,
+            tileX: sc,
+            tileY: sr,
+            worldX: wx,
+            worldY: wy,
+            radius: 26,
+            active: true,
+            cooldownTimer: 0,
+            pulseAngle: Math.random() * Math.PI * 2
+          });
+        });
       }
 
       setTile(c, r, type) {
@@ -6142,19 +6361,39 @@
         return { c, r };
       }
 
-      isWorldWalkable(wx, wy, radius = 16) {
-        const points = [
-          { dx: 0, dy: 0 },
-          { dx: radius, dy: 0 },
-          { dx: -radius, dy: 0 },
-          { dx: 0, dy: radius },
-          { dx: 0, dy: -radius }
-        ];
-        for (let p of points) {
-          const { c, r } = this.worldToTile(wx + p.dx, wy + p.dy);
-          if (!this.isWalkable(c, r)) return false;
+      isWorldWalkable(wx, wy, radius = 8) {
+        const center = this.worldToTile(wx, wy);
+        if (!this.isWalkable(center.c, center.r)) return false;
+
+        const rad = Math.min(radius, 8);
+        const p1 = this.worldToTile(wx + rad, wy);
+        const p2 = this.worldToTile(wx - rad, wy);
+        const p3 = this.worldToTile(wx, wy + rad);
+        const p4 = this.worldToTile(wx, wy - rad);
+
+        return this.isWalkable(p1.c, p1.r) &&
+               this.isWalkable(p2.c, p2.r) &&
+               this.isWalkable(p3.c, p3.r) &&
+               this.isWalkable(p4.c, p4.r);
+      }
+
+      findNearestWalkable(wx, wy) {
+        const cur = this.worldToTile(wx, wy);
+        if (this.isWalkable(cur.c, cur.r)) return { wx, wy };
+
+        for (let dist = 1; dist <= 5; dist++) {
+          for (let dr = -dist; dr <= dist; dr++) {
+            for (let dc = -dist; dc <= dist; dc++) {
+              if (this.isWalkable(cur.c + dc, cur.r + dr)) {
+                return {
+                  wx: ((cur.c + dc) * this.tileSize) - this.originX + (this.tileSize / 2),
+                  wy: ((cur.r + dr) * this.tileSize) - this.originY + (this.tileSize / 2)
+                };
+              }
+            }
+          }
         }
-        return true;
+        return { wx: 0, wy: 0 };
       }
 
       revealArea(wx, wy, radiusTiles = 5) {
@@ -6786,6 +7025,71 @@
         ctx.fillText(`${lm.icon} ${lm.name}`, 0, -2);
         ctx.restore();
       });
+
+      // 4. Draw Diablo 3 Shrines (Runic Pillars, Radiant Auras, Hover Icons)
+      if (map.shrines) {
+        map.shrines.forEach(shrine => {
+          if (shrine.worldX < left - 120 || shrine.worldX > right + 120 || shrine.worldY < top - 120 || shrine.worldY > bottom + 120) return;
+
+          ctx.save();
+          ctx.translate(shrine.worldX, shrine.worldY);
+
+          const pulse = Math.sin(time * 3 + shrine.pulseAngle) * 0.12 + 0.88;
+
+          // Ground Runic Ring
+          ctx.beginPath();
+          ctx.arc(0, 0, shrine.radius * pulse, 0, Math.PI * 2);
+          ctx.strokeStyle = shrine.active ? shrine.color : '#475569';
+          ctx.lineWidth = shrine.active ? 2 : 1;
+          ctx.stroke();
+
+          // Radial Glow Aura when active
+          if (shrine.active) {
+            const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, shrine.radius * 1.5 * pulse);
+            grad.addColorStop(0, shrine.lightColor);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, shrine.radius * 1.5 * pulse, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Obelisk Stone Pillar
+          ctx.fillStyle = '#090d16';
+          ctx.fillRect(-10, -32, 20, 36);
+          ctx.strokeStyle = shrine.active ? shrine.color : '#334155';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(-10, -32, 20, 36);
+
+          // Runic Crystal Core
+          ctx.fillStyle = shrine.active ? shrine.color : '#475569';
+          ctx.beginPath();
+          ctx.arc(0, -14, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Floating Shrine Icon
+          const hoverY = -44 + (shrine.active ? Math.sin(time * 2.5) * 4 : 0);
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(shrine.icon, 0, hoverY);
+
+          // Nameplate Banner
+          ctx.font = 'bold 9px monospace';
+          const title = shrine.active ? shrine.name.toUpperCase() : `RECHARGING (${Math.ceil(shrine.cooldownTimer)}s)`;
+          const tw = ctx.measureText(title).width + 14;
+          ctx.fillStyle = 'rgba(2, 6, 23, 0.90)';
+          ctx.strokeStyle = shrine.active ? shrine.color : '#475569';
+          ctx.lineWidth = 1;
+          ctx.fillRect(-tw/2, -62, tw, 14);
+          ctx.strokeRect(-tw/2, -62, tw, 14);
+
+          ctx.fillStyle = shrine.active ? '#ffffff' : '#94a3b8';
+          ctx.fillText(title, 0, -55);
+
+          ctx.restore();
+        });
+      }
 
       // Reveal fog around player
       map.revealArea(gameState.player.x, gameState.player.y, 6);
@@ -7876,6 +8180,29 @@
       if (mobileBagBadge) {
         mobileBagBadge.classList.toggle('hidden', gameState.inventory.length === 0);
       }
+
+      // Render Active Diablo 3 Shrine Buff Badges
+      const shrineEl = document.getElementById('hudShrineBuffs');
+      const mobileShrineEl = document.getElementById('hudMobileShrineBuffs');
+      if (p.activeShrines && (shrineEl || mobileShrineEl)) {
+        const SHRINE_METAS = {
+          frenzied: { label: 'FRENZIED', icon: '⚡', color: '#f59e0b', bg: 'rgba(245,158,11,0.2)', border: 'rgba(245,158,11,0.6)' },
+          blessed: { label: 'BLESSED', icon: '🛡️', color: '#60a5fa', bg: 'rgba(59,130,246,0.2)', border: 'rgba(59,130,246,0.6)' },
+          empowered: { label: 'EMPOWERED', icon: '🌀', color: '#c084fc', bg: 'rgba(168,85,247,0.2)', border: 'rgba(168,85,247,0.6)' },
+          fleeting: { label: 'FLEETING', icon: '💨', color: '#34d399', bg: 'rgba(16,185,129,0.2)', border: 'rgba(16,185,129,0.6)' },
+          fortune: { label: 'FORTUNE', icon: '💎', color: '#fbbf24', bg: 'rgba(251,191,36,0.2)', border: 'rgba(251,191,36,0.6)' }
+        };
+        let buffHtml = '';
+        Object.keys(SHRINE_METAS).forEach(k => {
+          const sec = Math.ceil(p.activeShrines[k] || 0);
+          if (sec > 0) {
+            const m = SHRINE_METAS[k];
+            buffHtml += `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-tight shadow-sm animate-pulse" style="background:${m.bg}; border:1px solid ${m.border}; color:${m.color};" title="${m.label} Shrine Active (${sec}s remaining)">${m.icon} ${m.label} ${sec}s</span>`;
+          }
+        });
+        if (shrineEl) shrineEl.innerHTML = buffHtml;
+        if (mobileShrineEl) mobileShrineEl.innerHTML = buffHtml;
+      }
     }
 
     let activeInspectSlot = 'weapon';
@@ -8409,6 +8736,7 @@
               <div>
                 <div class="text-xs font-bold text-white leading-tight">${item.name}</div>
                 <div class="text-[9px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+                ${item.itemGrade ? `<div class="text-[8px] font-bold px-1.5 py-0.2 rounded border inline-block mt-0.5" style="color: ${item.gradeColor || '#fbbf24'}; border-color: ${item.gradeColor || '#fbbf24'}; background: rgba(0,0,0,0.6)">✦ ${item.itemGrade.toUpperCase()} (${item.rollQuality || 70}% ROLL)</div>` : ''}
               </div>
             </div>
             <div class="text-[10px] text-emerald-400 font-semibold bg-slate-900/80 p-2 rounded-xl border border-slate-800">${item.bonus || 'Standard gear'}</div>
@@ -8443,6 +8771,7 @@
                     <span class="truncate">${item.name}</span>
                   </div>
                   <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+                  ${item.itemGrade ? `<div class="text-[7.5px] font-bold px-1 py-0.2 rounded border inline-block mt-0.5" style="color: ${item.gradeColor || '#fbbf24'}; border-color: ${item.gradeColor || '#fbbf24'}; background: rgba(0,0,0,0.6)">✦ ${item.itemGrade.toUpperCase()} (${item.rollQuality || 70}%)</div>` : ''}
                   <div class="text-[9px] text-emerald-400 mt-1 leading-tight">${item.bonus || ''}</div>
                   ${item.setId ? formatSetTooltipHtml(item.setId, false) : ''}
                 </div>
@@ -8463,6 +8792,7 @@
                     <span class="truncate">${eq.name}</span>
                   </div>
                   <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(eq.stars || 1)} Lv.${eq.level || 1}</div>
+                  ${eq.itemGrade ? `<div class="text-[7.5px] font-bold px-1 py-0.2 rounded border inline-block mt-0.5" style="color: ${eq.gradeColor || '#fbbf24'}; border-color: ${eq.gradeColor || '#fbbf24'}; background: rgba(0,0,0,0.6)">✦ ${eq.itemGrade.toUpperCase()} (${eq.rollQuality || 70}%)</div>` : ''}
                   <div class="text-[9px] text-slate-300 mt-1 leading-tight">${eq.bonus || ''}</div>
                   ${eq.setId ? formatSetTooltipHtml(eq.setId, true) : ''}
                 </div>
@@ -8488,6 +8818,7 @@
               <div>
                 <div class="text-xs font-bold text-white leading-tight">${item.name}</div>
                 <div class="text-[8px] text-amber-300 font-bold">${'★'.repeat(item.stars || 1)} Lv.${item.level || 1}</div>
+                ${item.itemGrade ? `<div class="text-[8px] font-bold px-1.5 py-0.2 rounded border inline-block mt-0.5" style="color: ${item.gradeColor || '#fbbf24'}; border-color: ${item.gradeColor || '#fbbf24'}; background: rgba(0,0,0,0.6)">✦ ${item.itemGrade.toUpperCase()} (${item.rollQuality || 70}% ROLL)</div>` : ''}
               </div>
             </div>
             <div class="text-[10px] text-emerald-400 font-semibold bg-slate-900/80 p-2 rounded-xl border border-slate-800">${item.bonus || 'Standard gear'}</div>
