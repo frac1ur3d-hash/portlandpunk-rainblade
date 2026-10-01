@@ -2339,6 +2339,7 @@
       audioEnabled: false,
       lastTimestamp: performance.now(),
     };
+    window.gameState = gameState;
 
     function getInventoryCapacity() {
       const lvl = Math.max(1, (gameState && gameState.player && gameState.player.level) ? gameState.player.level : 1);
@@ -3330,6 +3331,7 @@
       gameState.wave = Math.max(1, gameState.wave);
       gameState.waveInProgress = true;
       gameState.intermissionActive = false;
+      gameState.isPaused = false;
       const tracker = document.getElementById('hudWaveTracker');
       if (tracker) {
         const dName = gameState.currentDistrict ? gameState.currentDistrict.name : 'PORTLAND';
@@ -5628,55 +5630,29 @@
 
         const dx = p.x - enemy.x;
         const dy = p.y - enemy.y;
-        const dist = Math.hypot(dx, dy);
+        const dist = Math.hypot(dx, dy) || 1;
 
-        // Diablo 3 Monster Aggro, Pack Alert & Leashing System
-        const aggroRadius = enemy.isBoss ? 420 : (enemy.isElite ? 340 : 280);
-        if (!enemy.isAggro) {
-          if (dist < aggroRadius || enemy.hitFlash > 0 || (enemy.burnTimer && enemy.burnTimer > 0)) {
-            enemy.isAggro = true;
-            // Pack Alert: alert nearby packmates
-            gameState.enemies.forEach(other => {
-              if (!other.isAggro && Math.hypot(other.x - enemy.x, other.y - enemy.y) < 220) {
-                other.isAggro = true;
-              }
-            });
-            if (enemy.isBoss && !gameState.bossActive) {
-              gameState.bossActive = true;
-              triggerWaveAnnouncement(`⚠️ ${enemy.name.toUpperCase()} ENGAGED!`, enemy.title || 'Apex Landmark Guardian');
-              playSound('special');
-            }
-          }
-        }
-
-        // Leashing back to spawn point if player runs too far (unless boss)
-        if (enemy.isAggro && dist > 700 && !enemy.isBoss) {
-          enemy.isAggro = false;
-        }
-
-        // If not aggro'd, idle / slight wander around spawn point
-        if (!enemy.isAggro) {
-          if (enemy.spawnX !== undefined && enemy.spawnY !== undefined) {
-            const spawnDx = enemy.spawnX - enemy.x;
-            const spawnDy = enemy.spawnY - enemy.y;
-            const spawnDist = Math.hypot(spawnDx, spawnDy);
-            if (spawnDist > 25) {
-              enemy.x += (spawnDx / spawnDist) * (effectiveSpeed * 0.4);
-              enemy.y += (spawnDy / spawnDist) * (effectiveSpeed * 0.4);
-            }
-          }
+        // If enemy is beyond active range (> 1400px), idle to save performance
+        if (dist > 1400) {
           continue;
+        }
+
+        // Apex Boss Engagement Announcement
+        if (enemy.isBoss && !gameState.bossActive && dist < 500) {
+          gameState.bossActive = true;
+          triggerWaveAnnouncement(`⚠️ ${enemy.name.toUpperCase()} ENGAGED!`, enemy.title || 'Apex Landmark Guardian');
+          playSound('special');
         }
 
         const effectiveSpeed = enemy.speed * speedFactor;
 
         if (enemy.role === 'ranged') {
           if (dist < enemy.preferredDist - 40) {
-            enemy.x -= (dx / dist) * effectiveSpeed;
-            enemy.y -= (dy / dist) * effectiveSpeed;
+            enemy.x -= (dx / (dist || 1)) * effectiveSpeed;
+            enemy.y -= (dy / (dist || 1)) * effectiveSpeed;
           } else if (dist > enemy.preferredDist + 40) {
-            enemy.x += (dx / dist) * effectiveSpeed;
-            enemy.y += (dy / dist) * effectiveSpeed;
+            enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+            enemy.y += (dy / (dist || 1)) * effectiveSpeed;
           }
 
           if (speedFactor > 0) {
@@ -5748,10 +5724,8 @@
           }
         } 
         else {
-          if (dist > 0) {
-            enemy.x += (dx / dist) * effectiveSpeed;
-            enemy.y += (dy / dist) * effectiveSpeed;
-          }
+          enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+          enemy.y += (dy / (dist || 1)) * effectiveSpeed;
         }
 
         if (dist < p.radius + enemy.radius && !p.isDodging && speedFactor > 0) {
@@ -6237,7 +6211,9 @@
 
       map.landmarks.forEach(lm => {
         const template = bossTemplates[lm.id] || APEX_BOSS_TEMPLATES.burnside;
-        // Spawn Apex Boss
+        // Spawn Apex Boss (Burnside sits at y: -450 on bridge deck so starting hub (0,0) is clear)
+        const bossX = lm.worldX;
+        const bossY = lm.id === 'burnside_bridge' ? -450 : lm.worldY;
         gameState.enemies.push({
           archetypeId: 'apex_boss',
           role: 'boss',
@@ -6247,10 +6223,10 @@
           landmarkName: lm.name,
           name: template.name,
           title: template.title,
-          x: lm.worldX,
-          y: lm.worldY,
-          spawnX: lm.worldX,
-          spawnY: lm.worldY,
+          x: bossX,
+          y: bossY,
+          spawnX: bossX,
+          spawnY: bossY,
           vx: 0,
           vy: 0,
           hp: template.hp,
@@ -6260,7 +6236,7 @@
           damage: template.dmg,
           color: template.color,
           accentColor: template.accentColor,
-          isAggro: false,
+          isAggro: true,
           attackCd: 1.0,
           specialAttackTimer: 3.5,
           xpReward: 400,
@@ -6270,8 +6246,8 @@
 
         // Spawn 2 Guardian Minions flanking the Boss altar
         for (let g = 0; g < 2; g++) {
-          const gx = lm.worldX + (g === 0 ? -48 : 48);
-          const gy = lm.worldY + 28;
+          const gx = bossX + (g === 0 ? -48 : 48);
+          const gy = bossY + 28;
           gameState.enemies.push({
             archetypeId: 'apex_guardian',
             role: 'brute',
@@ -6291,7 +6267,7 @@
             damage: 24,
             color: '#475569',
             accentColor: '#fbbf24',
-            isAggro: false,
+            isAggro: true,
             chargeCooldown: 3.5,
             chargeTimer: Math.random() * 2,
             isCharging: false,
@@ -6303,6 +6279,54 @@
             hitFlash: 0
           });
         }
+      });
+
+      // 1.5 Spawn Starting Vanguard squad around Central Hub (340-460px from player)
+      const vanguardSquad = [
+        { angle: 0.1, dist: 380, archetype: MONSTER_ROSTER[0], affix: 'molten', isElite: true },
+        { angle: 1.1, dist: 410, archetype: MONSTER_ROSTER[1], affix: null, isElite: false },
+        { angle: 2.2, dist: 360, archetype: MONSTER_ROSTER[2], affix: null, isElite: false },
+        { angle: 3.3, dist: 400, archetype: MONSTER_ROSTER[3], affix: null, isElite: false },
+        { angle: 4.4, dist: 430, archetype: MONSTER_ROSTER[4], affix: null, isElite: false },
+        { angle: 5.4, dist: 390, archetype: MONSTER_ROSTER[5 % MONSTER_ROSTER.length], affix: null, isElite: false }
+      ];
+      vanguardSquad.forEach((v) => {
+        const vx = Math.cos(v.angle) * v.dist;
+        const vy = Math.sin(v.angle) * v.dist;
+        const arch = v.archetype;
+        gameState.enemies.push({
+          archetypeId: arch.typeId,
+          role: arch.role,
+          isElite: v.isElite,
+          affix: v.affix,
+          name: v.isElite ? `🔥 [MOLTEN] Vanguard Enforcer` : `Vanguard ${arch.name}`,
+          x: vx,
+          y: vy,
+          spawnX: vx,
+          spawnY: vy,
+          vx: 0,
+          vy: 0,
+          hp: arch.baseHp,
+          maxHp: arch.baseHp,
+          radius: arch.radius,
+          speed: arch.baseSpeed,
+          damage: arch.baseDmg,
+          color: arch.color,
+          accentColor: arch.accentColor,
+          isAggro: true,
+          shootCooldown: arch.shootCooldown || 0,
+          shootTimer: Math.random() * 2,
+          chargeCooldown: arch.chargeCooldown || 0,
+          chargeTimer: Math.random() * 3,
+          isCharging: false,
+          chargeDuration: 0,
+          chargeDirX: 0,
+          chargeDirY: 0,
+          preferredDist: arch.preferredDist || 0,
+          xpReward: arch.xpReward,
+          beanReward: arch.beanReward,
+          hitFlash: 0
+        });
       });
 
       // 2. Station Thematic Monster Camps, Blue Champions & Yellow Rare Packs Across Districts
@@ -7817,7 +7841,7 @@
           try { openEmergencyRevive(); } catch (e) {}
         }
       }
-      initMultiplayer();
+      try { broadcastPlayerState(); } catch (e) {}
       requestAnimationFrame(gameLoop);
     }
 
@@ -12232,6 +12256,9 @@
       try { updateHUD(); } catch (e) { console.warn(e); }
       try { startNextWave(); } catch (e) { console.warn(e); }
       try { checkOrientation(); } catch (e) { console.warn(e); }
+      try { initMultiplayer(); } catch (e) { console.warn(e); }
+      gameState.isPaused = false;
+      gameState.intermissionActive = false;
 
       requestAnimationFrame(gameLoop);
 
