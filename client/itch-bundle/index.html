@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-slate-950 text-slate-100">
 <head>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Portland Protocol: Rain Blade | Modern Urban ARPG</title>
@@ -653,6 +656,18 @@
 
       <!-- MODE A: DIABLO IMMORTAL RADIAL ACTION CLUSTER (Bottom Right) -->
       <div id="diabloRadialCluster" class="absolute bottom-6 right-6 w-64 h-64 pointer-events-none select-none z-30">
+        
+      <!-- Prominent Mobile Dodge Roll Button -->
+      <button id="btnMobileDodgeRoll" onclick="triggerDodge()" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-700/80 to-purple-600/80 border-2 border-indigo-300 text-white font-black font-mono flex flex-col items-center justify-center shadow-lg active:scale-95 cursor-pointer pointer-events-auto select-none">
+        <span class="text-base">🏃‍♂️</span>
+        <span class="text-[9px] tracking-wider">ROLL</span>
+      </button>
+      
+      <!-- Mobile Quick Revive Button (Appears when near casualty) -->
+      <button id="btnMobileRevivePrompt" onclick="checkDownedCasualtyInteraction()" class="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 border border-emerald-300 text-slate-950 font-black font-mono text-xs flex items-center gap-1 shadow-glow-emerald active:scale-95 cursor-pointer pointer-events-auto select-none">
+        <span>🚑</span><span>REVIVE [E]</span>
+      </button>
+
         <!-- Center/Anchor: Primary Attack Button (Oversized 76px, Hold-to-Attack) -->
         <button id="btnRadialAttack" class="radial-btn absolute bottom-2 right-2 w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600/80 via-teal-500/80 to-cyan-400/80 border-2 border-white/50 text-slate-950 font-black font-mono flex flex-col items-center justify-center diablo-glow-emerald pointer-events-auto select-none shadow-2xl">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4318,6 +4333,10 @@
           interactWithSanctuaryStation();
           return;
         }
+        // Check Downed Paramedic / Injured Citizen rescue
+        if (checkDownedCasualtyInteraction()) {
+          return;
+        }
         if (gameState.mode === 'overworld' && gameState.worldMap && gameState.worldMap.landmarks) {
           const p = gameState.player;
           const nearDungeon = gameState.worldMap.landmarks.find(l => l.hasDungeon && Math.hypot(p.x - l.worldX, p.y - l.worldY) < 65);
@@ -6697,6 +6716,7 @@
 
     function dropLoot(x, y, count = 1, forceHighTier = false, isBoss = false) {
       if (!gameState.groundItems) gameState.groundItems = [];
+      gameState.casualties = spawnCasualtiesForMap(gameState.worldMap);
       const p = gameState.player;
       const hasFortune = (p.activeShrines && p.activeShrines.fortune > 0);
 
@@ -6993,6 +7013,177 @@
         }
       }
     }
+
+    
+    // =========================================================================
+    // 🚑 DOWNED PARAMEDICS & INJURED CITIZENS RESCUE SYSTEM (HOSTILE AREAS)
+    // =========================================================================
+    function spawnCasualtiesForMap(map) {
+      if (!map) return [];
+      const casualties = [];
+      const casualtyTypes = [
+        { type: 'paramedic', name: 'Downed Paramedic', icon: '🚑', color: '#10b981', cry: 'Medic down! Administer Amp Stim!' },
+        { type: 'citizen', name: 'Injured Portland Citizen', icon: '🩹', color: '#f59e0b', cry: 'Help! Sludge venom in my veins!' }
+      ];
+
+      // Spawn 8-12 casualties along sidewalks and road edges in explored or hostile sectors
+      const count = 10;
+      for (let i = 0; i < count; i++) {
+        const c = 20 + Math.floor(Math.random() * (map.cols - 40));
+        const r = 20 + Math.floor(Math.random() * (map.rows - 40));
+        const worldPos = map.tileToWorld(c, r);
+        const def = casualtyTypes[Math.floor(Math.random() * casualtyTypes.length)];
+
+        casualties.push({
+          id: 'cas_' + Date.now() + '_' + i,
+          type: def.type,
+          name: def.name,
+          icon: def.icon,
+          color: def.color,
+          cry: def.cry,
+          x: worldPos.x + (Math.random() * 20 - 10),
+          y: worldPos.y + (Math.random() * 20 - 10),
+          revived: false,
+          fleeing: false,
+          fleeTimer: 0,
+          pulsePhase: Math.random() * Math.PI * 2
+        });
+      }
+      return casualties;
+    }
+
+    function checkDownedCasualtyInteraction() {
+      if (!gameState.casualties || gameState.casualties.length === 0) return false;
+      const p = gameState.player;
+      let nearest = null;
+      let minDist = 55;
+
+      gameState.casualties.forEach(c => {
+        if (c.revived) return;
+        const d = Math.hypot(p.x - c.x, p.y - c.y);
+        if (d < minDist) {
+          minDist = d;
+          nearest = c;
+        }
+      });
+
+      if (nearest) {
+        reviveCasualty(nearest);
+        return true;
+      }
+      return false;
+    }
+
+    function reviveCasualty(cas) {
+      if (!cas || cas.revived) return;
+      const p = gameState.player;
+
+      // Use Amp Stim (slot 3) or Narcan (slot 2) or standard emergency stim
+      let usedPotionName = "Emergency Stim";
+      if (gameState.potions.amp > 0) {
+        gameState.potions.amp--;
+        usedPotionName = "Amp Stim";
+      } else if (gameState.potions.narcan > 0) {
+        gameState.potions.narcan--;
+        usedPotionName = "Tactical Narcan";
+      }
+
+      cas.revived = true;
+      cas.fleeing = true;
+      cas.fleeTimer = 3.5;
+
+      playSound('heal');
+      playSound('level');
+      createImpactParticles(cas.x, cas.y, cas.color, 24);
+      triggerTelegramHaptic('impact', 'heavy');
+
+      if (cas.type === 'paramedic') {
+        // Paramedic reward: Medical supply cache + 60s Adrenaline Nano-Regen Buff
+        gameState.potions.health = Math.min(5, gameState.potions.health + 2);
+        gameState.potions.narcan = Math.min(8, gameState.potions.narcan + 2);
+        gameState.potions.amp = Math.min(4, gameState.potions.amp + 1);
+        p.beans += 150;
+        p.xp += 100;
+
+        // Apply Adrenaline Nano-Regen Aura (60s buff)
+        p.buffs = p.buffs || {};
+        p.buffs.paramedicRegen = { duration: 60, speedBonus: 0.35, hpRegen: 8 };
+        
+        addFloatingText("🚑 PARAMEDIC REVIVED! +100 XP +150 ☕", cas.x, cas.y - 30, '#10b981', 15);
+        addFloatingText("⚡ ADRENALINE REGEN BUFF (+35% SPEED / +8 HP/s)", p.x, p.y - 45, '#38bdf8', 13);
+        showToast("🚑 Paramedic: 'Unit back online! Medical supplies restocked and Adrenaline Aura deployed!'", "success", true);
+      } else {
+        // Citizen reward: +75 XP, +125 Beans, +10 Civic Reputation
+        p.beans += 125;
+        p.xp += 75;
+        if (gameState.npcReputation) {
+          gameState.npcReputation.mayor = (gameState.npcReputation.mayor || 0) + 10;
+        }
+
+        addFloatingText("🩹 CITIZEN SAVED! +75 XP +125 ☕", cas.x, cas.y - 30, '#f59e0b', 15);
+        showToast("🩹 Citizen: 'Thank you Blade! I\'m booking it to the nearest Safehouse!' (+10 Civic Rep)", "success", true);
+      }
+
+      recalcPlayerStats();
+      updateHUD();
+      checkLevelUp();
+    }
+
+    function drawDownedCasualties() {
+      if (!gameState.casualties || gameState.casualties.length === 0) return;
+      const time = performance.now() * 0.001;
+      const p = gameState.player;
+
+      gameState.casualties.forEach(c => {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+
+        if (!c.revived) {
+          // Pulsing Distress Aura Ring
+          const pulse = Math.sin(time * 4 + c.pulsePhase) * 0.2 + 0.8;
+          ctx.beginPath();
+          ctx.arc(0, 0, 22 * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = c.type === 'paramedic' ? 'rgba(16, 185, 129, 0.22)' : 'rgba(245, 158, 11, 0.22)';
+          ctx.fill();
+          ctx.strokeStyle = c.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Downed Silhouette / Sprite
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(c.icon, 0, -2);
+
+          // Distress Text & Interaction Key
+          const dist = Math.hypot(p.x - c.x, p.y - c.y);
+          if (dist < 60) {
+            ctx.font = 'bold 9px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 4;
+            ctx.fillText(`[E] REVIVE (${c.type.toUpperCase()})`, 0, -24);
+          } else {
+            ctx.font = 'bold 8px "JetBrains Mono", monospace';
+            ctx.fillStyle = c.color;
+            ctx.fillText(c.name.toUpperCase(), 0, -20);
+          }
+        } else if (c.fleeing) {
+          // Standing up & fleeing toward safety
+          ctx.font = '22px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(c.type === 'paramedic' ? '🏃‍♂️' : '🏃‍♀️', 0, -6);
+
+          ctx.font = 'bold 8px "JetBrains Mono", monospace';
+          ctx.fillStyle = '#10b981';
+          ctx.fillText("EVACUATING!", 0, -22);
+        }
+
+        ctx.restore();
+      });
+    }
+
 
     function drawGroundLoot() {
       if (!gameState.groundItems || gameState.groundItems.length === 0) return;
@@ -11299,6 +11490,7 @@
       drawClickWaypoints();
       drawGroundHazards();
       drawGroundLoot();
+        drawDownedCasualties();
       drawSlashes();
       drawProjectiles();
       drawEnemies();
