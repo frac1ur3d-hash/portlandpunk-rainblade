@@ -395,15 +395,15 @@
   <div id="diablo2BottomHud" class="fixed bottom-0 left-0 right-0 z-40 pointer-events-none select-none flex flex-col items-center font-mono">
     
     <!-- Main Diablo 2 Dock Bar -->
-    <div class="relative w-full max-w-4xl px-2 pb-1 flex items-end justify-between pointer-events-none">
+    <div class="relative w-full max-w-4xl px-2 pb-1.5 flex items-end justify-between pointer-events-none">
       
       <!-- LEFT: DEMONIC LIFE GLOBE & STAMINA BAR -->
-      <div class="flex items-end gap-2 pointer-events-auto">
-        <!-- Diablo 2 Red Life Globe (104px) -->
-        <div class="relative w-26 h-26 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-700 shadow-[0_0_25px_rgba(220,38,38,0.55)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(1)" title="Life Globe (Click to drink Cold Brew) [1]">
+      <div class="flex items-end gap-2.5 pointer-events-auto">
+        <!-- Diablo 2 Red Life Globe (100px) -->
+        <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-600 shadow-[0_0_25px_rgba(220,38,38,0.65)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(1)" title="Life Globe (Click to drink Cold Brew) [1]">
           <!-- Gothic Stone Bezel Ring -->
-          <div class="absolute inset-0 rounded-full border-4 border-stone-900/90 pointer-events-none z-20"></div>
-          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-black text-rose-500/90 z-20 tracking-widest uppercase">LIFE</div>
+          <div class="absolute inset-0 rounded-full border-4 border-stone-900/95 pointer-events-none z-20"></div>
+          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-black text-rose-400 z-20 tracking-widest uppercase text-shadow-d2">LIFE</div>
           
           <!-- Blood Sphere Interior -->
           <div class="relative w-full h-full rounded-full bg-stone-950 overflow-hidden flex items-end justify-center">
@@ -422,12 +422,12 @@
           </div>
         </div>
 
-        <!-- Green Stamina / Dash Meter -->
-        <div class="flex flex-col items-center gap-0.5 mb-1.5" title="Stamina / Sprint Dash Gauge [SPACE]">
-          <div class="w-3.5 h-20 bg-stone-950 rounded-full border border-stone-700 p-0.5 overflow-hidden flex items-end">
+        <!-- Green Stamina / Dash Meter & Run/Walk Mode Toggle -->
+        <div class="flex flex-col items-center gap-0.5 mb-2 cursor-pointer select-none group" onclick="toggleRunWalkMode()" title="Stamina & Run/Walk Toggle [R]">
+          <div class="w-3.5 h-20 bg-stone-950 rounded-full border border-stone-700 p-0.5 overflow-hidden flex items-end shadow-inner group-hover:border-emerald-400/80 transition-colors">
             <div id="d2StaminaBarFill" class="w-full bg-gradient-to-t from-emerald-800 to-emerald-400 rounded-full transition-all duration-150" style="height: 100%;"></div>
           </div>
-          <span class="text-[8px] font-bold text-emerald-400">STAM</span>
+          <span id="d2RunWalkBadge" class="text-[8px] font-black px-1 rounded text-emerald-400 bg-emerald-950/80 border border-emerald-500/50 shadow">RUN</span>
         </div>
       </div>
 
@@ -435,7 +435,7 @@
       <div class="flex flex-col items-center gap-1.5 mb-1 pointer-events-auto">
         
         <!-- Top Row: Carved Stone Utility Buttons -->
-        <div class="flex items-center gap-1.5 bg-stone-950/85 px-3 py-1 rounded-xl border border-stone-700/80 shadow-2xl backdrop-blur-xs">
+        <div class="flex items-center gap-1.5 bg-stone-950/90 px-3 py-1 rounded-xl border border-stone-700/80 shadow-2xl backdrop-blur-xs">
           <button onclick="toggleModal('inventoryModal')" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-amber-200 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Hero Inventory & Stash [I]">
             <span>🎒 [INV]</span>
           </button>
@@ -504,12 +504,12 @@
       </div>
 
       <!-- RIGHT: ARCHANGEL MANA GLOBE -->
-      <div class="flex items-end gap-2 pointer-events-auto">
-        <!-- Diablo 2 Blue Mana Globe (104px) -->
-        <div class="relative w-26 h-26 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-700 shadow-[0_0_25px_rgba(37,99,235,0.55)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(2)" title="Mana Globe (Click to drink Energy) [2]">
+      <div class="flex items-end gap-2.5 pointer-events-auto">
+        <!-- Diablo 2 Blue Mana Globe (100px) -->
+        <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-600 shadow-[0_0_25px_rgba(37,99,235,0.65)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(2)" title="Mana Globe (Click to drink Energy) [2]">
           <!-- Gothic Stone Bezel Ring -->
-          <div class="absolute inset-0 rounded-full border-4 border-stone-900/90 pointer-events-none z-20"></div>
-          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-black text-sky-400/90 z-20 tracking-widest uppercase">MANA</div>
+          <div class="absolute inset-0 rounded-full border-4 border-stone-900/95 pointer-events-none z-20"></div>
+          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] font-black text-sky-400 z-20 tracking-widest uppercase text-shadow-d2">MANA</div>
 
           <!-- Arcane Sphere Interior -->
           <div class="relative w-full h-full rounded-full bg-stone-950 overflow-hidden flex items-end justify-center">
@@ -3088,6 +3088,11 @@
       }
     };
 
+    function renderDiablo2SkillTree() {
+      if (typeof updateSkillsUI === 'function') updateSkillsUI();
+    }
+    window.renderDiablo2SkillTree = renderDiablo2SkillTree;
+
     function allocateSkillPoint(treeId, skillId) {
       const p = gameState.player;
       if (!p.skillPoints || p.skillPoints <= 0) {
@@ -3168,6 +3173,7 @@
       },
       worldSeed: 7729,
       worldMap: null,
+      clickWaypoints: [],
       multiplayer: {
         roomCode: 'RAIN-7729',
         isHost: true,
@@ -3195,6 +3201,10 @@
         maxHp: 120,
         energy: 80,
         maxEnergy: 80,
+        stamina: 100,
+        maxStamina: 100,
+        isRunning: true,
+        moveTarget: null,
         beans: 450,
         skillPoints: 1,
         name: 'Rain-Walker',
@@ -4185,8 +4195,32 @@
       setTimeout(resizeCanvas, 150);
     });
 
+    // =========================================================================
+    // 🕹️ DIABLO 2 INPUT, CLICK-TO-MOVE, SHIFT-ATTACK & HOTKEY SYSTEM
+    // =========================================================================
+
+    function spawnClickWaypoint(x, y, color = '#f59e0b') {
+      if (!gameState.clickWaypoints) gameState.clickWaypoints = [];
+      if (gameState.clickWaypoints.length > 6) gameState.clickWaypoints.shift();
+      gameState.clickWaypoints.push({ x, y, life: 0.45, maxLife: 0.45, color });
+    }
+
+    function toggleRunWalkMode() {
+      const p = gameState.player;
+      if (!p) return;
+      p.isRunning = !p.isRunning;
+      playSound('toggle');
+      const label = p.isRunning ? "RUNNING [R]" : "WALKING [R]";
+      const color = p.isRunning ? "#10b981" : "#f59e0b";
+      addFloatingText(label, p.x, p.y - 22, color, 13);
+      showToast(`Movement Mode: ${label}`, "info");
+      updateHUD();
+    }
+
     window.addEventListener('keydown', (e) => {
-      gameState.keys[e.key.toLowerCase()] = true;
+      const key = e.key.toLowerCase();
+      gameState.keys[key] = true;
+      if (e.key === 'Shift') gameState.keys['shift'] = true;
       if (!audioInitialized) initAudio();
 
       if (e.key === '`' || e.key === '~' || e.key === 'F1') {
@@ -4216,7 +4250,7 @@
         return;
       }
 
-      // If in pause screen (or wave intermission), Space / Enter continues or starts next wave
+      // If in pause screen, Space / Enter continues
       const pauseModalEl = document.getElementById('pauseModal');
       const isPauseOpen = pauseModalEl && !pauseModalEl.classList.contains('hidden');
       if (isPauseOpen && (e.key === ' ' || e.code === 'Space' || e.key === 'Enter')) {
@@ -4225,45 +4259,92 @@
         return;
       }
 
-      
-      // Portland Overworld & Dungeon Interaction Hotkeys (Space & E)
-      if (gameState.mode === 'overworld' && gameState.worldMap && gameState.worldMap.landmarks) {
-        const p = gameState.player;
-        const nearDungeon = gameState.worldMap.landmarks.find(l => l.hasDungeon && Math.hypot(p.x - l.worldX, p.y - l.worldY) < 65);
-        if (nearDungeon && (e.key === ' ' || e.code === 'Space' || e.key === 'e' || e.key === 'E')) {
-          e.preventDefault();
-          enterNeighborhoodDungeon(nearDungeon.dungeonId);
+      if (key === 'r') {
+        e.preventDefault();
+        toggleRunWalkMode();
+        return;
+      }
+
+      if (key === 'q') {
+        e.preventDefault();
+        openQuestLogModal();
+        return;
+      }
+
+      if (key === 'tab') {
+        e.preventDefault();
+        toggleAutomap();
+        return;
+      }
+
+      if (key === 't') {
+        e.preventDefault();
+        castTownPortal();
+        return;
+      }
+
+      if (key === 'x') {
+        e.preventDefault();
+        swapGearLoadout();
+        return;
+      }
+
+      if (key === '1') { usePotion(1); return; }
+      if (key === '2') { usePotion(2); return; }
+      if (key === '3') { usePotion(3); return; }
+      if (key === '4') { usePotion(4); return; }
+
+      if (key === 'i' || key === 'b') {
+        e.preventDefault();
+        toggleModal('inventoryModal');
+        return;
+      }
+
+      if (key === 's' || key === 'k') {
+        e.preventDefault();
+        toggleModal('skillsModal');
+        return;
+      }
+
+      if (key === 'm') {
+        e.preventDefault();
+        toggleModal('locationModal');
+        return;
+      }
+
+      if (key === 'e') {
+        e.preventDefault();
+        if (gameState.mode === 'residence') {
+          interactWithSanctuaryStation();
           return;
         }
-      }
-      if (gameState.mode === 'dungeon') {
-        const p = gameState.player;
-        if (gameState.portaPotty && gameState.portaPotty.active && Math.hypot(p.x - gameState.portaPotty.x, p.y - gameState.portaPotty.y) < 65) {
-          if (e.key === ' ' || e.code === 'Space' || e.key === 'e' || e.key === 'E') {
-            e.preventDefault();
+        if (gameState.mode === 'overworld' && gameState.worldMap && gameState.worldMap.landmarks) {
+          const p = gameState.player;
+          const nearDungeon = gameState.worldMap.landmarks.find(l => l.hasDungeon && Math.hypot(p.x - l.worldX, p.y - l.worldY) < 65);
+          if (nearDungeon) {
+            enterNeighborhoodDungeon(nearDungeon.dungeonId);
+            return;
+          }
+        }
+        if (gameState.mode === 'dungeon') {
+          const p = gameState.player;
+          if (gameState.portaPotty && gameState.portaPotty.active && Math.hypot(p.x - gameState.portaPotty.x, p.y - gameState.portaPotty.y) < 65) {
             warpBackToPortlandSurface();
             return;
           }
-        }
-        if (gameState.multiversePortal && gameState.multiversePortal.active && Math.hypot(p.x - gameState.multiversePortal.x, p.y - gameState.multiversePortal.y) < 65) {
-          if (e.key === ' ' || e.code === 'Space' || e.key === 'e' || e.key === 'E') {
-            e.preventDefault();
+          if (gameState.multiversePortal && gameState.multiversePortal.active && Math.hypot(p.x - gameState.multiversePortal.x, p.y - gameState.multiversePortal.y) < 65) {
             enterMultiverseCowLevel();
             return;
           }
-        }
-        if (gameState.dungeonStairs && gameState.dungeonStairs.active && Math.hypot(p.x - gameState.dungeonStairs.x, p.y - gameState.dungeonStairs.y) < 65) {
-          if (e.key === ' ' || e.code === 'Space' || e.key === 'e' || e.key === 'E') {
-            e.preventDefault();
+          if (gameState.dungeonStairs && gameState.dungeonStairs.active && Math.hypot(p.x - gameState.dungeonStairs.x, p.y - gameState.dungeonStairs.y) < 65) {
             checkDungeonStairsInteraction();
             return;
           }
         }
+        triggerSkill(2);
+        return;
       }
 
-      if (e.key === 'q' || e.key === 'Q') triggerSkill(1);
-      if (e.key === 'e' || e.key === 'E') triggerSkill(2);
-      if (e.key === 'r' || e.key === 'R') triggerSkill(3);
       if (e.key === ' ' || e.code === 'Space') {
         const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'leaderboardModal', 'classSelectModal'].some(
           id => {
@@ -4276,35 +4357,11 @@
           triggerDodge();
         }
       }
-
-      if (e.key === 't' || e.key === 'T') {
-        const anyModalOpen = ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'leaderboardModal', 'classSelectModal'].some(
-          id => {
-            const el = document.getElementById(id);
-            return el && !el.classList.contains('hidden');
-          }
-        );
-        if (!anyModalOpen) {
-          e.preventDefault();
-          triggerTrinket();
-        }
-      }
-
-      if (e.key === 'i' || e.key === 'I' || e.key === 'b' || e.key === 'B') {
-        e.preventDefault();
-        toggleModal('inventoryModal');
-      }
-
-      if (e.key === 's' || e.key === 'S' || e.key === 'k' || e.key === 'K') {
-        e.preventDefault();
-        toggleModal('skillsModal');
-      }
-
-      if (e.key === 'm' || e.key === 'M') toggleModal('locationModal');
     });
 
     window.addEventListener('keyup', (e) => {
       gameState.keys[e.key.toLowerCase()] = false;
+      if (e.key === 'Shift') gameState.keys['shift'] = false;
     });
 
     function updateMousePos(clientX, clientY) {
@@ -4314,37 +4371,137 @@
       gameState.mouse.worldY = gameState.mouse.y + gameState.camera.y;
     }
 
+    function resolveClickTarget(worldX, worldY) {
+      const p = gameState.player;
+      // 1. Ground Loot Item
+      if (typeof checkClickGroundLoot === 'function' && checkClickGroundLoot(worldX, worldY)) {
+        return { type: 'loot' };
+      }
+
+      // 2. Sanctuary Station (residence mode)
+      if (gameState.mode === 'residence' && typeof SANCTUARY_STATIONS !== 'undefined') {
+        const station = SANCTUARY_STATIONS.find(st => Math.hypot(st.x - worldX, st.y - worldY) < 40);
+        if (station) return { type: 'station', target: station, x: station.x, y: station.y };
+      }
+
+      // 3. Overworld Dungeon Landmark (overworld mode)
+      if (gameState.mode === 'overworld' && gameState.worldMap && gameState.worldMap.landmarks) {
+        const lm = gameState.worldMap.landmarks.find(l => l.hasDungeon && Math.hypot(l.worldX - worldX, l.worldY - worldY) < 48);
+        if (lm) return { type: 'portal', target: lm, x: lm.worldX, y: lm.worldY };
+      }
+
+      // 4. Dungeon Stairs / Porta-Potty / Multiverse Portal
+      if (gameState.mode === 'dungeon') {
+        if (gameState.portaPotty && gameState.portaPotty.active && Math.hypot(gameState.portaPotty.x - worldX, gameState.portaPotty.y - worldY) < 48) {
+          return { type: 'porta_potty', x: gameState.portaPotty.x, y: gameState.portaPotty.y };
+        }
+        if (gameState.multiversePortal && gameState.multiversePortal.active && Math.hypot(gameState.multiversePortal.x - worldX, gameState.multiversePortal.y - worldY) < 48) {
+          return { type: 'multiverse_portal', x: gameState.multiversePortal.x, y: gameState.multiversePortal.y };
+        }
+        if (gameState.dungeonStairs && gameState.dungeonStairs.active && Math.hypot(gameState.dungeonStairs.x - worldX, gameState.dungeonStairs.y - worldY) < 48) {
+          return { type: 'stairs', x: gameState.dungeonStairs.x, y: gameState.dungeonStairs.y };
+        }
+      }
+
+      // 5. Living Monster
+      if (gameState.enemies && gameState.enemies.length > 0) {
+        const enemy = gameState.enemies.find(e => (e.hp > 0) && Math.hypot(e.x - worldX, e.y - worldY) < (e.radius || 18) + 20);
+        if (enemy) return { type: 'enemy', target: enemy, x: enemy.x, y: enemy.y };
+      }
+
+      // 6. Walkable Ground
+      return { type: 'ground', x: worldX, y: worldY };
+    }
+
     canvas.addEventListener('mousemove', (e) => {
       updateMousePos(e.clientX, e.clientY);
-    });
+      const p = gameState.player;
+      if (!p) return;
 
-    canvas.addEventListener('mousedown', (e) => {
-      if (e.button === 0) {
-        if (typeof checkClickGroundLoot === 'function' && checkClickGroundLoot(gameState.mouse.worldX, gameState.mouse.worldY)) {
-          return;
+      if (gameState.mouse.isDown) {
+        if (e.shiftKey || gameState.keys['shift']) {
+          // Force Stand Ground Attack
+          p.moveTarget = null;
+          p.angle = Math.atan2(gameState.mouse.worldY - p.y, gameState.mouse.worldX - p.x);
+          if (!p.isAttacking) triggerAttack();
+        } else {
+          // Continuous Hold-to-Move steering (Diablo 2 style)
+          p.moveTarget = { x: gameState.mouse.worldX, y: gameState.mouse.worldY, type: 'ground' };
         }
-        gameState.mouse.isDown = true;
-        if (!audioInitialized) initAudio();
-        triggerAttack();
       }
     });
 
-    window.addEventListener('mouseup', () => {
-      gameState.mouse.isDown = false;
+    canvas.addEventListener('mousedown', (e) => {
+      updateMousePos(e.clientX, e.clientY);
+      const p = gameState.player;
+      if (!p) return;
+      if (!audioInitialized) initAudio();
+
+      if (e.button === 0) { // Primary Left Click (LMB)
+        if (e.shiftKey || gameState.keys['shift']) {
+          // Stand Ground Force Attack
+          p.moveTarget = null;
+          p.angle = Math.atan2(gameState.mouse.worldY - p.y, gameState.mouse.worldX - p.x);
+          triggerAttack();
+        } else {
+          const targetInfo = resolveClickTarget(gameState.mouse.worldX, gameState.mouse.worldY);
+          if (targetInfo.type === 'loot') {
+            return;
+          } else if (targetInfo.type === 'enemy') {
+            p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: 'enemy', targetEntity: targetInfo.target };
+            const dist = Math.hypot(targetInfo.x - p.x, targetInfo.y - p.y);
+            if (dist <= 55) {
+              p.angle = Math.atan2(targetInfo.y - p.y, targetInfo.x - p.x);
+              triggerAttack();
+            } else {
+              spawnClickWaypoint(targetInfo.x, targetInfo.y, '#ef4444');
+            }
+          } else if (targetInfo.type === 'station') {
+            p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: 'station', targetEntity: targetInfo.target };
+            spawnClickWaypoint(targetInfo.x, targetInfo.y, '#38bdf8');
+          } else if (targetInfo.type === 'portal') {
+            p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: 'portal', targetEntity: targetInfo.target };
+            spawnClickWaypoint(targetInfo.x, targetInfo.y, '#a855f7');
+          } else if (targetInfo.type === 'stairs' || targetInfo.type === 'porta_potty' || targetInfo.type === 'multiverse_portal') {
+            p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: targetInfo.type };
+            spawnClickWaypoint(targetInfo.x, targetInfo.y, '#10b981');
+          } else {
+            // Ground Walk / Run Waypoint
+            p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: 'ground' };
+            spawnClickWaypoint(targetInfo.x, targetInfo.y, '#f59e0b');
+          }
+        }
+        gameState.mouse.isDown = true;
+      } else if (e.button === 2) { // Secondary Right Click (RMB)
+        e.preventDefault();
+        p.angle = Math.atan2(gameState.mouse.worldY - p.y, gameState.mouse.worldX - p.x);
+        triggerSkill(1);
+        gameState.mouse.isRightDown = true;
+      }
     });
 
-    // Touch support directly on canvas for mobile aiming / slashing without page scroll gestures
+    window.addEventListener('mouseup', (e) => {
+      if (e.button === 0) gameState.mouse.isDown = false;
+      if (e.button === 2) gameState.mouse.isRightDown = false;
+    });
+
+    // Touch support directly on canvas for mobile aiming / slashing / movement
     canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       if (!audioInitialized) initAudio();
       const touch = e.changedTouches[0];
       if (touch) {
         updateMousePos(touch.clientX, touch.clientY);
-        if (typeof checkClickGroundLoot === 'function' && checkClickGroundLoot(gameState.mouse.worldX, gameState.mouse.worldY)) {
-          return;
+        const p = gameState.player;
+        if (!p) return;
+        const targetInfo = resolveClickTarget(gameState.mouse.worldX, gameState.mouse.worldY);
+        if (targetInfo.type === 'loot') return;
+        p.moveTarget = { x: targetInfo.x, y: targetInfo.y, type: targetInfo.type, targetEntity: targetInfo.target };
+        spawnClickWaypoint(targetInfo.x, targetInfo.y, targetInfo.type === 'enemy' ? '#ef4444' : '#f59e0b');
+        if (targetInfo.type === 'enemy' && Math.hypot(targetInfo.x - p.x, targetInfo.y - p.y) <= 55) {
+          p.angle = Math.atan2(targetInfo.y - p.y, targetInfo.x - p.x);
+          triggerAttack();
         }
-        gameState.player.angle = Math.atan2(gameState.mouse.worldY - gameState.player.y, gameState.mouse.worldX - gameState.player.x);
-        triggerAttack();
       }
     }, { passive: false });
 
@@ -4353,8 +4510,9 @@
       const touch = e.changedTouches[0];
       if (touch) {
         updateMousePos(touch.clientX, touch.clientY);
-        if (!gameState.touchJoystick.active) {
-          gameState.player.angle = Math.atan2(gameState.mouse.worldY - gameState.player.y, gameState.mouse.worldX - gameState.player.x);
+        const p = gameState.player;
+        if (p && !gameState.touchJoystick.active) {
+          p.moveTarget = { x: gameState.mouse.worldX, y: gameState.mouse.worldY, type: 'ground' };
         }
       }
     }, { passive: false });
@@ -7335,89 +7493,206 @@
         }
       }
 
-      let moveX = 0;
-      let moveY = 0;
-
-      if (gameState.keys['w'] || gameState.keys['arrowup']) moveY -= 1;
-      if (gameState.keys['s'] || gameState.keys['arrowdown']) moveY += 1;
-      if (gameState.keys['a'] || gameState.keys['arrowleft']) moveX -= 1;
-      if (gameState.keys['d'] || gameState.keys['arrowright']) moveX += 1;
-
-      if (gameState.touchJoystick.active) {
-        moveX = gameState.touchJoystick.dirX;
-        moveY = gameState.touchJoystick.dirY;
+    // Decay Diablo 2 Click Waypoints
+    if (gameState.clickWaypoints) {
+      for (let i = gameState.clickWaypoints.length - 1; i >= 0; i--) {
+        gameState.clickWaypoints[i].life -= dt;
+        if (gameState.clickWaypoints[i].life <= 0) {
+          gameState.clickWaypoints.splice(i, 1);
+        }
       }
+    }
 
-      const len = Math.hypot(moveX, moveY);
+    let moveX = 0;
+    let moveY = 0;
 
-      if (p.isDodging) {
-        p.dodgeTimer -= dt;
-        p.x += p.dodgeDirX * (p.speed * 2.8);
-        p.y += p.dodgeDirY * (p.speed * 2.8);
-        if (p.dodgeTimer <= 0) p.isDodging = false;
-      } else {
-        if (len > 0) {
-          const hasteMult = gameState.skills[2].activeTimer > 0 ? 1.6 : 1.0;
-          const chillMult = p.isChilled > 0 ? 0.60 : 1.0;
-          const shrineSpeedMult = (p.activeShrines && p.activeShrines.fleeting > 0) ? 1.40 : 1.0;
-          const currentSpeed = p.speed * hasteMult * chillMult * shrineSpeedMult;
-          p.vx = (moveX / (len > 1 ? len : 1)) * currentSpeed;
-          p.vy = (moveY / (len > 1 ? len : 1)) * currentSpeed;
+    // 1. Direct Keyboard & Joystick Input (Overrides Mouse Waypoint Pathing)
+    if (gameState.keys['w'] || gameState.keys['arrowup']) moveY -= 1;
+    if (gameState.keys['s'] || gameState.keys['arrowdown']) moveY += 1;
+    if (gameState.keys['a'] || gameState.keys['arrowleft']) moveX -= 1;
+    if (gameState.keys['d'] || gameState.keys['arrowright']) moveX += 1;
 
-          // Mode-Aware Collision: Safehouse Sanctuary vs Urban Overworld vs Dungeon
-          if (gameState.mode === 'residence') {
-            // Sanctuary room bounds (720x580): [-340, 340] x [-270, 270]
-            p.x = Math.max(-340, Math.min(340, p.x + p.vx));
-            p.y = Math.max(-270, Math.min(270, p.y + p.vy));
+    if (gameState.touchJoystick.active) {
+      moveX = gameState.touchJoystick.dirX;
+      moveY = gameState.touchJoystick.dirY;
+    }
 
-            // Stepping on southern exit portal ring at (0, 240)
-            if (Math.hypot(p.x - 0, p.y - 240) < 42) {
-              exitSanctuaryToPortlandStreetGrid();
-            }
-          } else if (gameState.mode !== 'residence' && gameState.worldMap) {
-            const wm = gameState.worldMap;
-            const curTile = wm.worldToTile(p.x, p.y);
-            const curWalkable = wm.isWalkable(curTile.c, curTile.r);
-
-            if (!curWalkable) {
-              const safe = wm.findNearestWalkable(p.x, p.y);
-              const udx = safe.wx - p.x;
-              const udy = safe.wy - p.y;
-              const udist = Math.hypot(udx, udy) || 1;
-              p.x += (udx / udist) * (currentSpeed * 1.5);
-              p.y += (udy / udist) * (currentSpeed * 1.5);
-            } else {
-              const nextX = p.x + p.vx;
-              if (wm.isWorldWalkable(nextX, p.y, 8)) {
-                p.x = nextX;
-              }
-              const nextY = p.y + p.vy;
-              if (wm.isWorldWalkable(p.x, nextY, 8)) {
-                p.y = nextY;
-              }
-            }
-          } else {
-            p.x += p.vx;
-            p.y += p.vy;
-          }
+    if (moveX !== 0 || moveY !== 0) {
+      // Direct key/stick input clears mouse waypoint
+      p.moveTarget = null;
+    } else if (p.moveTarget) {
+      // 2. Diablo 2 Mouse Pathing / Target Resolution
+      if (p.moveTarget.type === 'enemy') {
+        const enemy = p.moveTarget.targetEntity;
+        if (!enemy || enemy.hp <= 0) {
+          p.moveTarget = null;
         } else {
-          p.vx = 0;
-          p.vy = 0;
-
-          // Auto-unstick even when standing still if pushed inside a building
-          if (gameState.worldMap) {
-            const wm = gameState.worldMap;
-            const curTile = wm.worldToTile(p.x, p.y);
-            if (!wm.isWalkable(curTile.c, curTile.r)) {
-              const safe = wm.findNearestWalkable(p.x, p.y);
-              const udx = safe.wx - p.x;
-              const udy = safe.wy - p.y;
-              const udist = Math.hypot(udx, udy) || 1;
-              p.x += (udx / udist) * 2.5;
-              p.y += (udy / udist) * 2.5;
-            }
+          const edx = enemy.x - p.x;
+          const edy = enemy.y - p.y;
+          const edist = Math.hypot(edx, edy);
+          if (edist <= 55) {
+            p.angle = Math.atan2(edy, edx);
+            if (!p.isAttacking) triggerAttack();
+            moveX = 0;
+            moveY = 0;
+          } else {
+            moveX = edx;
+            moveY = edy;
           }
         }
+      } else if (p.moveTarget.type === 'station') {
+        const sdx = p.moveTarget.x - p.x;
+        const sdy = p.moveTarget.y - p.y;
+        if (Math.hypot(sdx, sdy) <= 42) {
+          if (p.moveTarget.targetEntity && p.moveTarget.targetEntity.action) {
+            p.moveTarget.targetEntity.action();
+          }
+          p.moveTarget = null;
+        } else {
+          moveX = sdx; moveY = sdy;
+        }
+      } else if (p.moveTarget.type === 'portal') {
+        const pdx = p.moveTarget.x - p.x;
+        const pdy = p.moveTarget.y - p.y;
+        if (Math.hypot(pdx, pdy) <= 50) {
+          if (p.moveTarget.targetEntity && p.moveTarget.targetEntity.hasDungeon) {
+            enterNeighborhoodDungeon(p.moveTarget.targetEntity.dungeonId);
+          }
+          p.moveTarget = null;
+        } else {
+          moveX = pdx; moveY = pdy;
+        }
+      } else if (p.moveTarget.type === 'stairs') {
+        const sdx = p.moveTarget.x - p.x;
+        const sdy = p.moveTarget.y - p.y;
+        if (Math.hypot(sdx, sdy) <= 50) {
+          checkDungeonStairsInteraction();
+          p.moveTarget = null;
+        } else {
+          moveX = sdx; moveY = sdy;
+        }
+      } else if (p.moveTarget.type === 'porta_potty') {
+        const sdx = p.moveTarget.x - p.x;
+        const sdy = p.moveTarget.y - p.y;
+        if (Math.hypot(sdx, sdy) <= 50) {
+          warpBackToPortlandSurface();
+          p.moveTarget = null;
+        } else {
+          moveX = sdx; moveY = sdy;
+        }
+      } else if (p.moveTarget.type === 'multiverse_portal') {
+        const sdx = p.moveTarget.x - p.x;
+        const sdy = p.moveTarget.y - p.y;
+        if (Math.hypot(sdx, sdy) <= 50) {
+          enterMultiverseCowLevel();
+          p.moveTarget = null;
+        } else {
+          moveX = sdx; moveY = sdy;
+        }
+      } else {
+        // Walkable Ground Waypoint
+        const gdx = p.moveTarget.x - p.x;
+        const gdy = p.moveTarget.y - p.y;
+        if (Math.hypot(gdx, gdy) <= 8) {
+          p.moveTarget = null;
+        } else {
+          moveX = gdx;
+          moveY = gdy;
+        }
+      }
+    }
+
+    const len = Math.hypot(moveX, moveY);
+    const isMoving = len > 0;
+
+    // 3. Diablo 2 Run / Walk Stamina System
+    if (p.isRunning === undefined) p.isRunning = true;
+    if (p.stamina === undefined) p.stamina = 100;
+    if (p.maxStamina === undefined) p.maxStamina = 100;
+
+    let runSpeedMult = 1.0;
+    if (isMoving) {
+      if (p.isRunning && p.stamina > 0) {
+        runSpeedMult = 1.0; // Full Diablo 2 Run Speed
+        p.stamina = Math.max(0, p.stamina - (10 * dt));
+      } else {
+        runSpeedMult = 0.52; // Diablo 2 Walk Speed
+        p.stamina = Math.min(p.maxStamina, p.stamina + (12 * dt));
+      }
+    } else {
+      // Rapid Stamina Recovery when Standing Still
+      p.stamina = Math.min(p.maxStamina, p.stamina + (25 * dt));
+    }
+
+    if (p.isDodging) {
+      p.dodgeTimer -= dt;
+      p.x += p.dodgeDirX * (p.speed * 2.8);
+      p.y += p.dodgeDirY * (p.speed * 2.8);
+      if (p.dodgeTimer <= 0) p.isDodging = false;
+    } else {
+      if (len > 0) {
+        const hasteMult = gameState.skills[2].activeTimer > 0 ? 1.6 : 1.0;
+        const chillMult = p.isChilled > 0 ? 0.60 : 1.0;
+        const shrineSpeedMult = (p.activeShrines && p.activeShrines.fleeting > 0) ? 1.40 : 1.0;
+        const currentSpeed = p.speed * runSpeedMult * hasteMult * chillMult * shrineSpeedMult;
+        p.vx = (moveX / (len > 1 ? len : 1)) * currentSpeed;
+        p.vy = (moveY / (len > 1 ? len : 1)) * currentSpeed;
+
+        // Mode-Aware Collision: Safehouse Sanctuary vs Urban Overworld vs Dungeon
+        if (gameState.mode === 'residence') {
+          // Sanctuary room bounds (720x580): [-340, 340] x [-270, 270]
+          p.x = Math.max(-340, Math.min(340, p.x + p.vx));
+          p.y = Math.max(-270, Math.min(270, p.y + p.vy));
+
+          // Stepping on southern exit portal ring at (0, 240)
+          if (Math.hypot(p.x - 0, p.y - 240) < 42) {
+            exitSanctuaryToPortlandStreetGrid();
+          }
+        } else if (gameState.mode !== 'residence' && gameState.worldMap) {
+          const wm = gameState.worldMap;
+          const curTile = wm.worldToTile(p.x, p.y);
+          const curWalkable = wm.isWalkable(curTile.c, curTile.r);
+
+          if (!curWalkable) {
+            const safe = wm.findNearestWalkable(p.x, p.y);
+            const udx = safe.wx - p.x;
+            const udy = safe.wy - p.y;
+            const udist = Math.hypot(udx, udy) || 1;
+            p.x += (udx / udist) * (currentSpeed * 1.5);
+            p.y += (udy / udist) * (currentSpeed * 1.5);
+          } else {
+            // Smooth 2-Axis Collision Sliding
+            const nextX = p.x + p.vx;
+            if (wm.isWorldWalkable(nextX, p.y, 8)) {
+              p.x = nextX;
+            }
+            const nextY = p.y + p.vy;
+            if (wm.isWorldWalkable(p.x, nextY, 8)) {
+              p.y = nextY;
+            }
+          }
+        } else {
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+      } else {
+        p.vx = 0;
+        p.vy = 0;
+
+        // Auto-unstick even when standing still if pushed inside a building
+        if (gameState.worldMap) {
+          const wm = gameState.worldMap;
+          const curTile = wm.worldToTile(p.x, p.y);
+          if (!wm.isWalkable(curTile.c, curTile.r)) {
+            const safe = wm.findNearestWalkable(p.x, p.y);
+            const udx = safe.wx - p.x;
+            const udy = safe.wy - p.y;
+            const udist = Math.hypot(udx, udy) || 1;
+            p.x += (udx / udist) * 2.5;
+            p.y += (udy / udist) * 2.5;
+          }
+        }
+      }
 
         // Active Shrine Buff Timers
         if (p.activeShrines) {
@@ -7566,240 +7841,244 @@
         }
       }
 
-      // Ground Hazards update (Magma pools from Molten elites)
-      if (gameState.groundHazards) {
-        for (let ghIdx = gameState.groundHazards.length - 1; ghIdx >= 0; ghIdx--) {
-          const gh = gameState.groundHazards[ghIdx];
-          gh.life -= dt;
-          if (gh.type === 'magma') {
-            const distToP = Math.hypot(p.x - gh.x, p.y - gh.y);
-            if (distToP < p.radius + gh.radius) {
-              gh.tick = (gh.tick || 0) + dt;
-              if (gh.tick >= 0.5) {
-                gh.tick = 0;
-                if (!p.isDodging && !(p.invulnerableTimer > 0)) {
-                  const taken = Math.max(2, Math.round(gh.damage - (p.armor * 0.3)));
-                  p.hp -= taken;
-                  addFloatingText(`BURNING -${taken}`, p.x, p.y - 12, '#f97316', 13);
-                  playSound('hit');
+      // Ground Hazards & Enemy AI Updates (Active in Overworld & Dungeon, Inactive in Safehouse Sanctuary)
+      if (gameState.mode !== 'residence') {
+        if (gameState.groundHazards) {
+          for (let ghIdx = gameState.groundHazards.length - 1; ghIdx >= 0; ghIdx--) {
+            const gh = gameState.groundHazards[ghIdx];
+            gh.life -= dt;
+            if (gh.type === 'magma') {
+              const distToP = Math.hypot(p.x - gh.x, p.y - gh.y);
+              if (distToP < p.radius + gh.radius) {
+                gh.tick = (gh.tick || 0) + dt;
+                if (gh.tick >= 0.5) {
+                  gh.tick = 0;
+                  if (!p.isDodging && !(p.invulnerableTimer > 0)) {
+                    const taken = Math.max(2, Math.round(gh.damage - (p.armor * 0.3)));
+                    p.hp -= taken;
+                    addFloatingText(`BURNING -${taken}`, p.x, p.y - 12, '#f97316', 13);
+                    playSound('hit');
+                  }
                 }
               }
             }
-          }
-          if (gh.life <= 0) gameState.groundHazards.splice(ghIdx, 1);
-        }
-      }
-
-      for (let idx = gameState.enemies.length - 1; idx >= 0; idx--) {
-        const enemy = gameState.enemies[idx];
-        if (enemy.hitFlash > 0) enemy.hitFlash -= dt;
-
-        // Burn DoT from Dragon Set
-        if (enemy.burnTimer > 0) {
-          enemy.burnTimer -= dt;
-          enemy.burnTick = (enemy.burnTick || 0) + dt;
-          if (enemy.burnTick >= 0.5) {
-            enemy.burnTick = 0;
-            enemy.hp -= (enemy.burnDmg || 12);
-            createImpactParticles(enemy.x, enemy.y, '#f97316', 3);
-            addFloatingText(`-${enemy.burnDmg || 12}`, enemy.x, enemy.y - 14, '#f97316', 12);
+            if (gh.life <= 0) gameState.groundHazards.splice(ghIdx, 1);
           }
         }
 
-        // Chill & Freeze status effects
-        let speedFactor = 1.0;
-        if (enemy.isChilled > 0) {
-          enemy.isChilled -= dt;
-          speedFactor *= 0.60;
-        }
-        if (enemy.freezeTimer > 0) {
-          enemy.freezeTimer -= dt;
-          speedFactor = 0;
-        }
+        if (gameState.enemies && gameState.enemies.length > 0) {
+          for (let idx = gameState.enemies.length - 1; idx >= 0; idx--) {
+            const enemy = gameState.enemies[idx];
+            if (enemy.hitFlash > 0) enemy.hitFlash -= dt;
 
-        // Elite Affixes periodic behaviors
-        if (enemy.isElite) {
-          enemy.affixTimer = (enemy.affixTimer || 0) + dt;
-          if (enemy.affix === 'molten' && enemy.affixTimer >= 1.8) {
-            enemy.affixTimer = 0;
-            gameState.groundHazards = gameState.groundHazards || [];
-            gameState.groundHazards.push({
-              x: enemy.x,
-              y: enemy.y,
-              radius: 24,
-              life: 4.5,
-              maxLife: 4.5,
-              damage: 10,
-              type: 'magma'
-            });
-          } else if (enemy.affix === 'electrified' && enemy.affixTimer >= 3.0) {
-            enemy.affixTimer = 0;
-            if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 240) {
-              spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.8, 18, '#eab308', 6);
-              createImpactParticles(enemy.x, enemy.y, '#eab308', 6);
-            }
-          } else if (enemy.affix === 'frozen') {
-            // Emits chill field to hero
-            if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 110) {
-              p.isChilled = 0.5;
-            }
-          }
-        }
-
-        const dx = p.x - enemy.x;
-        const dy = p.y - enemy.y;
-        const dist = Math.hypot(dx, dy) || 1;
-
-        // If enemy is beyond active range (> 1400px), idle to save performance
-        if (dist > 1400) {
-          continue;
-        }
-
-        // Apex Boss Engagement Announcement
-        if (enemy.isBoss && !gameState.bossActive && dist < 500) {
-          gameState.bossActive = true;
-          triggerWaveAnnouncement(`⚠️ ${enemy.name.toUpperCase()} ENGAGED!`, enemy.title || 'Apex Landmark Guardian');
-          playSound('special');
-        }
-
-        const effectiveSpeed = enemy.speed * speedFactor;
-
-        if (enemy.role === 'ranged') {
-          if (dist < enemy.preferredDist - 40) {
-            enemy.x -= (dx / (dist || 1)) * effectiveSpeed;
-            enemy.y -= (dy / (dist || 1)) * effectiveSpeed;
-          } else if (dist > enemy.preferredDist + 40) {
-            enemy.x += (dx / (dist || 1)) * effectiveSpeed;
-            enemy.y += (dy / (dist || 1)) * effectiveSpeed;
-          }
-
-          if (speedFactor > 0) {
-            enemy.shootTimer = (enemy.shootTimer || 0) + dt;
-            if (enemy.shootTimer >= enemy.shootCooldown) {
-              enemy.shootTimer = 0;
-              spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.2, enemy.damage, '#38bdf8', 6, false);
-            }
-          }
-        } 
-        else if (enemy.role === 'brute') {
-          if (enemy.isCharging) {
-            enemy.x += enemy.chargeDirX * (effectiveSpeed * 3.4);
-            enemy.y += enemy.chargeDirY * (effectiveSpeed * 3.4);
-            enemy.chargeDuration -= dt;
-            if (enemy.chargeDuration <= 0) {
-              enemy.isCharging = false;
-            }
-          } else {
-            enemy.x += (dx / (dist || 1)) * effectiveSpeed;
-            enemy.y += (dy / (dist || 1)) * effectiveSpeed;
-            if (speedFactor > 0) {
-              enemy.chargeTimer = (enemy.chargeTimer || 0) + dt;
-
-              if (enemy.chargeTimer >= enemy.chargeCooldown && dist < 280) {
-                enemy.chargeTimer = 0;
-                enemy.isCharging = true;
-                enemy.chargeDuration = 0.65;
-                enemy.chargeDirX = dx / (dist || 1);
-                enemy.chargeDirY = dy / (dist || 1);
-                createImpactParticles(enemy.x, enemy.y, '#10b981');
+            // Burn DoT from Dragon Set
+            if (enemy.burnTimer > 0) {
+              enemy.burnTimer -= dt;
+              enemy.burnTick = (enemy.burnTick || 0) + dt;
+              if (enemy.burnTick >= 0.5) {
+                enemy.burnTick = 0;
+                enemy.hp -= (enemy.burnDmg || 12);
+                createImpactParticles(enemy.x, enemy.y, '#f97316', 3);
+                addFloatingText(`-${enemy.burnDmg || 12}`, enemy.x, enemy.y - 14, '#f97316', 12);
               }
             }
-          }
-        } 
-        else if (enemy.role === 'exploder') {
-          enemy.x += (dx / (dist || 1)) * (effectiveSpeed * 1.2);
-          enemy.y += (dy / (dist || 1)) * (effectiveSpeed * 1.2);
 
-          if (dist < p.radius + enemy.radius + 10) {
-            if (!p.isDodging && !(p.invulnerableTimer > 0)) {
-              const dmg = Math.max(8, enemy.damage - Math.round(p.armor * 0.4));
-              p.hp -= dmg;
-              addFloatingText(`SPORE BLAST -${dmg}`, p.x, p.y - 15, '#e879f9', 16);
-            } else if (p.invulnerableTimer > 0) {
-              addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
+            // Chill & Freeze status effects
+            let speedFactor = 1.0;
+            if (enemy.isChilled > 0) {
+              enemy.isChilled -= dt;
+              speedFactor *= 0.60;
             }
-            createImpactParticles(enemy.x, enemy.y, '#e879f9');
-            enemy.hp = 0;
-          }
-        } 
-        else if (enemy.role === 'boss') {
-          enemy.x += (dx / (dist || 1)) * effectiveSpeed;
-          enemy.y += (dy / (dist || 1)) * effectiveSpeed;
-
-          if (speedFactor > 0) {
-            enemy.specialAttackTimer = (enemy.specialAttackTimer || 0) - dt;
-            if (enemy.specialAttackTimer <= 0) {
-              enemy.specialAttackTimer = 3.8;
-              const bulletCount = 8;
-              for (let b = 0; b < bulletCount; b++) {
-                const bAngle = (Math.PI * 2 / bulletCount) * b;
-                const bx = enemy.x + Math.cos(bAngle) * 200;
-                const by = enemy.y + Math.sin(bAngle) * 200;
-                spawnProjectile(enemy.x, enemy.y, bx, by, 3.8, enemy.damage * 0.65, enemy.accentColor, 7, false);
-              }
-              createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
+            if (enemy.freezeTimer > 0) {
+              enemy.freezeTimer -= dt;
+              speedFactor = 0;
             }
-          }
-        } 
-        else {
-          enemy.x += (dx / (dist || 1)) * effectiveSpeed;
-          enemy.y += (dy / (dist || 1)) * effectiveSpeed;
-        }
 
-        if (dist < p.radius + enemy.radius && !p.isDodging && speedFactor > 0) {
-          enemy.attackCd = (enemy.attackCd || 0) - dt;
-          if (enemy.attackCd <= 0) {
-            if (p.invulnerableTimer > 0) {
-              addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
-              playSound('dodge');
-              enemy.attackCd = 0.8;
-            } else {
-              let taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
-              // (2) Sentinel Kinetic Shield Barrier absorbs 15% damage
-              if (p.activeSetBonuses && p.activeSetBonuses['sentinel_2']) {
-                taken = Math.max(1, Math.round(taken * 0.85));
-              }
-              p.hp -= taken;
-              addFloatingText(`-${taken}`, p.x, p.y - 15, '#f43f5e', 14);
-              playSound('hit');
-              enemy.attackCd = 1.0;
-
-              // Elite Vampiric affix heals enemy on hit
-              if (enemy.isElite && enemy.affix === 'vampiric') {
-                enemy.hp = Math.min(enemy.maxHp, enemy.hp + taken);
-                addFloatingText(`+${taken} HP`, enemy.x, enemy.y - 16, '#dc2626', 13);
-              }
-
-              // (6) Cascade Cryomancer: Defensive Frost Nova on taking hit
-              if (p.activeSetBonuses && p.activeSetBonuses['cryo_6'] && (!p.cryoNovaCd || p.cryoNovaCd <= 0)) {
-                p.cryoNovaCd = 7.0;
-                addFloatingText('FROST NOVA!', p.x, p.y - 25, '#38bdf8', 16);
-                playSound('parry');
-                gameState.enemies.forEach(e => {
-                  if (Math.hypot(e.x - p.x, e.y - p.y) < 190) {
-                    e.freezeTimer = 2.0;
-                    e.hp -= 42;
-                    e.hitFlash = 0.22;
-                    createImpactParticles(e.x, e.y, '#38bdf8', 8);
-                    addFloatingText('FROZEN -42', e.x, e.y - 14, '#38bdf8', 14);
-                  }
+            // Elite Affixes periodic behaviors
+            if (enemy.isElite) {
+              enemy.affixTimer = (enemy.affixTimer || 0) + dt;
+              if (enemy.affix === 'molten' && enemy.affixTimer >= 1.8) {
+                enemy.affixTimer = 0;
+                gameState.groundHazards = gameState.groundHazards || [];
+                gameState.groundHazards.push({
+                  x: enemy.x,
+                  y: enemy.y,
+                  radius: 24,
+                  life: 4.5,
+                  maxLife: 4.5,
+                  damage: 10,
+                  type: 'magma'
                 });
+              } else if (enemy.affix === 'electrified' && enemy.affixTimer >= 3.0) {
+                enemy.affixTimer = 0;
+                if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 240) {
+                  spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.8, 18, '#eab308', 6);
+                  createImpactParticles(enemy.x, enemy.y, '#eab308', 6);
+                }
+              } else if (enemy.affix === 'frozen') {
+                // Emits chill field to hero
+                if (Math.hypot(p.x - enemy.x, p.y - enemy.y) < 110) {
+                  p.isChilled = 0.5;
+                }
+              }
+            }
+
+            const dx = p.x - enemy.x;
+            const dy = p.y - enemy.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            // If enemy is beyond active range (> 1400px), idle to save performance
+            if (dist > 1400) {
+              continue;
+            }
+
+            // Apex Boss Engagement Announcement
+            if (enemy.isBoss && !gameState.bossActive && dist < 500) {
+              gameState.bossActive = true;
+              triggerWaveAnnouncement(`⚠️ ${enemy.name.toUpperCase()} ENGAGED!`, enemy.title || 'Apex Landmark Guardian');
+              playSound('special');
+            }
+
+            const effectiveSpeed = enemy.speed * speedFactor;
+
+            if (enemy.role === 'ranged') {
+              if (dist < enemy.preferredDist - 40) {
+                enemy.x -= (dx / (dist || 1)) * effectiveSpeed;
+                enemy.y -= (dy / (dist || 1)) * effectiveSpeed;
+              } else if (dist > enemy.preferredDist + 40) {
+                enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+                enemy.y += (dy / (dist || 1)) * effectiveSpeed;
               }
 
-              // Retaliatory Thorns from Hood Obsidian, Armor & Rose Set
-              if (p.thornsDamage > 0) {
-                enemy.hp -= p.thornsDamage;
-                addFloatingText(`THORNS -${p.thornsDamage}`, enemy.x, enemy.y - 12, '#c084fc', 13);
-                createImpactParticles(enemy.x, enemy.y, '#c084fc');
+              if (speedFactor > 0) {
+                enemy.shootTimer = (enemy.shootTimer || 0) + dt;
+                if (enemy.shootTimer >= enemy.shootCooldown) {
+                  enemy.shootTimer = 0;
+                  spawnProjectile(enemy.x, enemy.y, p.x, p.y, 4.2, enemy.damage, '#38bdf8', 6, false);
+                }
               }
+            } 
+            else if (enemy.role === 'brute') {
+              if (enemy.isCharging) {
+                enemy.x += enemy.chargeDirX * (effectiveSpeed * 3.4);
+                enemy.y += enemy.chargeDirY * (effectiveSpeed * 3.4);
+                enemy.chargeDuration -= dt;
+                if (enemy.chargeDuration <= 0) {
+                  enemy.isCharging = false;
+                }
+              } else {
+                enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+                enemy.y += (dy / (dist || 1)) * effectiveSpeed;
+                if (speedFactor > 0) {
+                  enemy.chargeTimer = (enemy.chargeTimer || 0) + dt;
 
-              if (checkPlayerFatalDamage()) return;
+                  if (enemy.chargeTimer >= enemy.chargeCooldown && dist < 280) {
+                    enemy.chargeTimer = 0;
+                    enemy.isCharging = true;
+                    enemy.chargeDuration = 0.65;
+                    enemy.chargeDirX = dx / (dist || 1);
+                    enemy.chargeDirY = dy / (dist || 1);
+                    createImpactParticles(enemy.x, enemy.y, '#10b981');
+                  }
+                }
+              }
+            } 
+            else if (enemy.role === 'exploder') {
+              enemy.x += (dx / (dist || 1)) * (effectiveSpeed * 1.2);
+              enemy.y += (dy / (dist || 1)) * (effectiveSpeed * 1.2);
+
+              if (dist < p.radius + enemy.radius + 10) {
+                if (!p.isDodging && !(p.invulnerableTimer > 0)) {
+                  const dmg = Math.max(8, enemy.damage - Math.round(p.armor * 0.4));
+                  p.hp -= dmg;
+                  addFloatingText(`SPORE BLAST -${dmg}`, p.x, p.y - 15, '#e879f9', 16);
+                } else if (p.invulnerableTimer > 0) {
+                  addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
+                }
+                createImpactParticles(enemy.x, enemy.y, '#e879f9');
+                enemy.hp = 0;
+              }
+            } 
+            else if (enemy.role === 'boss') {
+              enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+              enemy.y += (dy / (dist || 1)) * effectiveSpeed;
+
+              if (speedFactor > 0) {
+                enemy.specialAttackTimer = (enemy.specialAttackTimer || 0) - dt;
+                if (enemy.specialAttackTimer <= 0) {
+                  enemy.specialAttackTimer = 3.8;
+                  const bulletCount = 8;
+                  for (let b = 0; b < bulletCount; b++) {
+                    const bAngle = (Math.PI * 2 / bulletCount) * b;
+                    const bx = enemy.x + Math.cos(bAngle) * 200;
+                    const by = enemy.y + Math.sin(bAngle) * 200;
+                    spawnProjectile(enemy.x, enemy.y, bx, by, 3.8, enemy.damage * 0.65, enemy.accentColor, 7, false);
+                  }
+                  createImpactParticles(enemy.x, enemy.y, enemy.accentColor);
+                }
+              }
+            } 
+            else {
+              enemy.x += (dx / (dist || 1)) * effectiveSpeed;
+              enemy.y += (dy / (dist || 1)) * effectiveSpeed;
+            }
+
+            if (dist < p.radius + enemy.radius && !p.isDodging && speedFactor > 0) {
+              enemy.attackCd = (enemy.attackCd || 0) - dt;
+              if (enemy.attackCd <= 0) {
+                if (p.invulnerableTimer > 0) {
+                  addFloatingText(`PHASED`, p.x, p.y - 15, '#d946ef', 14);
+                  playSound('dodge');
+                  enemy.attackCd = 0.8;
+                } else {
+                  let taken = Math.max(2, Math.round(enemy.damage - (p.armor * 0.5)));
+                  // (2) Sentinel Kinetic Shield Barrier absorbs 15% damage
+                  if (p.activeSetBonuses && p.activeSetBonuses['sentinel_2']) {
+                    taken = Math.max(1, Math.round(taken * 0.85));
+                  }
+                  p.hp -= taken;
+                  addFloatingText(`-${taken}`, p.x, p.y - 15, '#f43f5e', 14);
+                  playSound('hit');
+                  enemy.attackCd = 1.0;
+
+                  // Elite Vampiric affix heals enemy on hit
+                  if (enemy.isElite && enemy.affix === 'vampiric') {
+                    enemy.hp = Math.min(enemy.maxHp, enemy.hp + taken);
+                    addFloatingText(`+${taken} HP`, enemy.x, enemy.y - 16, '#dc2626', 13);
+                  }
+
+                  // (6) Cascade Cryomancer: Defensive Frost Nova on taking hit
+                  if (p.activeSetBonuses && p.activeSetBonuses['cryo_6'] && (!p.cryoNovaCd || p.cryoNovaCd <= 0)) {
+                    p.cryoNovaCd = 7.0;
+                    addFloatingText('FROST NOVA!', p.x, p.y - 25, '#38bdf8', 16);
+                    playSound('parry');
+                    gameState.enemies.forEach(e => {
+                      if (Math.hypot(e.x - p.x, e.y - p.y) < 190) {
+                        e.freezeTimer = 2.0;
+                        e.hp -= 42;
+                        e.hitFlash = 0.22;
+                        createImpactParticles(e.x, e.y, '#38bdf8', 8);
+                        addFloatingText('FROZEN -42', e.x, e.y - 14, '#38bdf8', 14);
+                      }
+                    });
+                  }
+
+                  // Retaliatory Thorns from Hood Obsidian, Armor & Rose Set
+                  if (p.thornsDamage > 0) {
+                    enemy.hp -= p.thornsDamage;
+                    addFloatingText(`THORNS -${p.thornsDamage}`, enemy.x, enemy.y - 12, '#c084fc', 13);
+                    createImpactParticles(enemy.x, enemy.y, '#c084fc');
+                  }
+
+                  if (checkPlayerFatalDamage()) return;
+                }
+              }
+            }
+
+            if (enemy.hp <= 0) {
+              killEnemy(enemy, idx);
             }
           }
-        }
-
-        if (enemy.hp <= 0) {
-          killEnemy(enemy, idx);
         }
       }
 
@@ -8024,6 +8303,36 @@
       isWalkable(c, r) {
         const t = this.getTile(c, r);
         return t !== 1 && t !== 2;
+      }
+
+      isWorldWalkable(wx, wy, radius = 8) {
+        const t1 = this.worldToTile(wx - radius, wy - radius);
+        const t2 = this.worldToTile(wx + radius, wy - radius);
+        const t3 = this.worldToTile(wx - radius, wy + radius);
+        const t4 = this.worldToTile(wx + radius, wy + radius);
+        return this.isWalkable(t1.c, t1.r) &&
+               this.isWalkable(t2.c, t2.r) &&
+               this.isWalkable(t3.c, t3.r) &&
+               this.isWalkable(t4.c, t4.r);
+      }
+
+      findNearestWalkable(wx, wy) {
+        const { c, r } = this.worldToTile(wx, wy);
+        if (this.isWalkable(c, r)) {
+          return this.tileToWorld(c, r);
+        }
+        for (let d = 1; d <= 15; d++) {
+          for (let dc = -d; dc <= d; dc++) {
+            for (let dr = -d; dr <= d; dr++) {
+              if (Math.abs(dc) === d || Math.abs(dr) === d) {
+                if (this.isWalkable(c + dc, r + dr)) {
+                  return this.tileToWorld(c + dc, r + dr);
+                }
+              }
+            }
+          }
+        }
+        return { wx, wy };
       }
 
       worldToTile(wx, wy) {
@@ -10381,6 +10690,53 @@
       ctx.restore();
     }
 
+    // =========================================================================
+    // 📍 DIABLO 2 CLICK WAYPOINT RIPPLE & RUNE GLYPH RENDERER
+    // =========================================================================
+    function drawClickWaypoints() {
+      if (!gameState.clickWaypoints || gameState.clickWaypoints.length === 0) return;
+      const now = performance.now() * 0.001;
+      for (let i = gameState.clickWaypoints.length - 1; i >= 0; i--) {
+        const wp = gameState.clickWaypoints[i];
+        const alpha = Math.max(0, wp.life / wp.maxLife);
+        ctx.save();
+        ctx.translate(wp.x, wp.y);
+        ctx.rotate(now * 2.5);
+
+        // Diablo 2 golden/crimson diamond waypoint
+        ctx.strokeStyle = `rgba(245, 158, 11, ${alpha * 0.9})`;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        const size = 12 * (1.3 - alpha * 0.3);
+        ctx.moveTo(0, -size);
+        ctx.lineTo(size, 0);
+        ctx.lineTo(0, size);
+        ctx.lineTo(-size, 0);
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner glowing pip
+        ctx.fillStyle = `rgba(251, 191, 36, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4 Cardinal Gothic Pips
+        ctx.strokeStyle = `rgba(239, 68, 68, ${alpha * 0.8})`;
+        for (let a = 0; a < 4; a++) {
+          const ang = (a * Math.PI) / 2;
+          const r1 = size + 3;
+          const r2 = size + 7;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * r1, Math.sin(ang) * r1);
+          ctx.lineTo(Math.cos(ang) * r2, Math.sin(ang) * r2);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+    }
+
     function render() {
       if (gameState.automapActive) renderAutomapOverlay();
       const w = gameState.canvasWidth || window.innerWidth;
@@ -10412,6 +10768,7 @@
         drawFogOfWarPass(w, h);
         drawDungeonInteractables();
       }
+      drawClickWaypoints();
       drawGroundHazards();
       drawGroundLoot();
       drawSlashes();
@@ -10568,9 +10925,15 @@
       if (d2ManaText) d2ManaText.textContent = `${Math.round(p.energy)} / ${p.maxEnergy}`;
 
       const d2StamFill = document.getElementById('d2StaminaBarFill');
+      const d2RunBadge = document.getElementById('d2RunWalkBadge');
       if (d2StamFill) {
         const stamPct = Math.max(0, Math.min(100, ((p.stamina || 100) / (p.maxStamina || 100)) * 100));
         d2StamFill.style.height = `${stamPct}%`;
+      }
+      if (d2RunBadge) {
+        const isRun = (p.isRunning !== false);
+        d2RunBadge.textContent = isRun ? 'RUN' : 'WALK';
+        d2RunBadge.className = `text-[8px] font-black px-1 rounded shadow transition-colors ${isRun ? 'text-emerald-400 bg-emerald-950/80 border border-emerald-500/50' : 'text-amber-400 bg-amber-950/80 border border-amber-500/50'}`;
       }
 
       const d2XpFill = document.getElementById('d2XpBarFill');
@@ -12672,7 +13035,7 @@
       }
 
       p.maxHp = Math.max(80, 120 + extraHp + (p.level * 20));
-      p.hp = Math.min(p.hp, p.maxHp);
+      p.hp = (!p.hp || isNaN(p.hp) || p.hp <= 0) ? p.maxHp : Math.min(p.hp, p.maxHp);
       p.armor = totalArmor;
       p.baseAttack = totalAttack;
       if (!p.baseSpeed || isNaN(p.baseSpeed)) p.baseSpeed = 4.8;
@@ -15502,6 +15865,7 @@
       try {
         const p = gameState.player;
         Object.assign(p, loadedData.player);
+        if (p.hp <= 0) p.hp = p.maxHp || 120;
         gameState.equipped = loadedData.equipped || {};
         if (!gameState.equipped.belt) {
           gameState.equipped.belt = {
@@ -15747,8 +16111,27 @@
       try { startNextWave(); } catch (e) { console.warn(e); }
       try { checkOrientation(); } catch (e) { console.warn(e); }
       try { initMultiplayer(); } catch (e) { console.warn(e); }
+
+      // Ensure game is actively unpaused and player is alive and responsive
       gameState.isPaused = false;
+      gameState.isReviveOpen = false;
       gameState.intermissionActive = false;
+      const revModal = document.getElementById('emergencyReviveModal');
+      if (revModal) {
+        revModal.style.display = 'none';
+        revModal.classList.add('hidden');
+      }
+      const p = gameState.player;
+      if (p) {
+        if (!p.hp || isNaN(p.hp) || p.hp <= 0) p.hp = p.maxHp || 120;
+        if (!p.energy || isNaN(p.energy)) p.energy = p.maxEnergy || 80;
+        if (!p.stamina || isNaN(p.stamina)) p.stamina = p.maxStamina || 100;
+        p.isRunning = true;
+        p.moveTarget = null;
+        p.vx = 0;
+        p.vy = 0;
+      }
+      updateHUD();
 
       requestAnimationFrame(gameLoop);
 
@@ -16019,13 +16402,17 @@
 
       const modal = document.getElementById('emergencyReviveModal');
       if (modal) {
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
       }
     }
 
     function triggerSponsorRevive() {
       const modal = document.getElementById('emergencyReviveModal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+      }
 
       const overlay = document.getElementById('sponsorBroadcastOverlay');
       const timerText = document.getElementById('sponsorTimerText');
@@ -16088,27 +16475,24 @@
 
     function declineReviveAndRespawn() {
       const modal = document.getElementById('emergencyReviveModal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.add('hidden');
+      }
       gameState.isReviveOpen = false;
 
       const p = gameState.player;
       p.beans = Math.max(0, p.beans - 50);
       p.hp = p.maxHp;
       p.energy = p.maxEnergy;
+      p.stamina = p.maxStamina || 100;
+      p.isRunning = true;
+      p.moveTarget = null;
       p.invulnerableTimer = 2.0;
-      p.x = 0;
-      p.y = 0;
-      gameState.camera.x = - (gameState.canvasWidth || 800) / 2;
-      gameState.camera.y = - (gameState.canvasHeight || 600) / 2;
 
-      gameState.enemies = [];
-      gameState.projectiles = [];
-      gameState.groundHazards = [];
-      gameState.slashes = [];
-      gameState.waveInProgress = false;
-
-      triggerWaveIntermission();
-      showToast("Retreated to Safehouse Leylines (-50 Beans).", "info", true);
+      enterSafehouse();
+      gameState.isPaused = false;
+      showToast("Retreated to Safehouse Sanctuary (-50 Beans).", "info", true);
       triggerTelegramHaptic('notification', 'warning');
       updateHUD();
     }
@@ -17319,57 +17703,10 @@
       triggerAttack();
     }
 
-    // Desktop Hotkeys (Q, LMB, RMB, 1-4, TAB, T, X, I, B, E, R, F)
-    window.addEventListener('keydown', (e) => {
-      const key = e.key.toLowerCase();
-      if (e.repeat) return;
-
-      if (key === 'q') {
-        e.preventDefault();
-        openQuestLogModal();
-      } else if (key === 'tab') {
-        e.preventDefault();
-        toggleAutomap();
-      } else if (key === 't') {
-        e.preventDefault();
-        castTownPortal();
-      } else if (key === 'x') {
-        e.preventDefault();
-        swapGearLoadout();
-      } else if (key === '1') {
-        usePotion(1);
-      } else if (key === '2') {
-        usePotion(2);
-      } else if (key === '3') {
-        usePotion(3);
-      } else if (key === '4') {
-        usePotion(4);
-      } else if (key === 'i' || key === 'b') {
-        toggleModal('inventoryModal');
-      } else if (key === 'e') {
-        if (gameState.mode === 'residence') { interactWithSanctuaryStation(); return; }
-        checkDungeonStairsInteraction();
-        triggerSkill(2);
-      } else if (key === 'r') {
-        triggerSkill(3);
-      } else if (key === 'f') {
-        triggerTrinket();
-      }
-    });
-
-    if (typeof canvas !== 'undefined' && canvas) {
-      canvas.addEventListener('mousedown', (e) => {
-        if (e.button === 2) {
-          e.preventDefault();
-          triggerSkill(1);
-        }
-      });
-    }
-
   </script>
 
   <!-- EMERGENCY SPONSOR REVIVE MODAL -->
-  <div id="emergencyReviveModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
+  <div id="emergencyReviveModal" style="display: none; z-index: 90;" class="fixed inset-0 z-90 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4">
     <div class="max-w-md w-full rounded-3xl bg-gradient-to-b from-rose-950/90 via-slate-950 to-slate-900 border-2 border-rose-500/80 shadow-[0_0_50px_rgba(244,63,94,0.4)] p-6 text-center space-y-4 font-mono">
       <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-500/20 border border-rose-500/60 flex items-center justify-center text-rose-400 text-3xl animate-pulse">
         ⚡
