@@ -101,12 +101,111 @@
     .animate-pulse-glow {
       animation: pulseGlow 2.5s infinite ease-in-out;
     }
-  </style>
+  
+  /* === MASTER EXPANSION STYLES: RADIAL CLUSTER, AUTOMAP, FORGE, STASH & SAFEHOUSE === */
+  #diabloRadialCluster {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .radial-btn {
+    touch-action: none;
+    transition: transform 0.08s ease, filter 0.12s ease;
+  }
+  .radial-btn:active {
+    transform: scale(0.92);
+    filter: brightness(1.3);
+  }
+  #dynamicMoveStick, #dynamicAimStick {
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+  }
+  #automapOverlayContainer {
+    pointer-events: none;
+  }
+  .stash-slot, .forge-slot {
+    transition: all 0.15s ease;
+  }
+  .stash-slot:hover, .forge-slot:hover {
+    border-color: #38bdf8;
+    transform: translateY(-1px);
+  }
+  .diablo-glow-cyan {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.45), inset 0 0 15px rgba(56, 189, 248, 0.2);
+  }
+  .diablo-glow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.45), inset 0 0 15px rgba(245, 158, 11, 0.2);
+  }
+  .diablo-glow-emerald {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5), inset 0 0 15px rgba(16, 185, 129, 0.25);
+  }
+  .diablo-glow-rose {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.45), inset 0 0 15px rgba(244, 63, 94, 0.2);
+  }
+  .diablo-glow-purple {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.45), inset 0 0 15px rgba(168, 85, 247, 0.2);
+  }
+
+
+  /* === DIABLO 2 DUAL GLOBES, AUTOMAP & GOTHIC INTERFACE STYLES === */
+  .text-shadow-d2 {
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 5px rgba(0,0,0,0.9);
+  }
+  .d2-stone-btn {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.8);
+    transition: all 0.1s ease;
+  }
+  .d2-stone-btn:hover {
+    filter: brightness(1.25);
+    transform: translateY(-1px);
+  }
+  .d2-stone-btn:active {
+    filter: brightness(0.9);
+    transform: translateY(1px);
+  }
+  @keyframes bloodSwirl {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.04); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  @keyframes manaSwirl {
+    0% { transform: rotate(360deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  .blood-swirl-particles {
+    position: absolute;
+    inset: -10px;
+    background: radial-gradient(circle at 30% 30%, rgba(254, 202, 202, 0.25), transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(185, 28, 28, 0.4), transparent 60%);
+    animation: bloodSwirl 8s linear infinite;
+    pointer-events: none;
+  }
+  .mana-swirl-particles {
+    position: absolute;
+    inset: -10px;
+    background: radial-gradient(circle at 30% 30%, rgba(191, 219, 254, 0.3), transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(37, 99, 235, 0.45), transparent 60%);
+    animation: manaSwirl 7s linear infinite;
+    pointer-events: none;
+  }
+  #automapOverlayContainer {
+    pointer-events: none;
+  }
+  #automapOverlayContainer canvas {
+    pointer-events: none;
+  }
+  /* Hide the top heavy dashboard header so 95% screen is open gameplay */
+  #topNavHeader {
+    display: none !important;
+  }
+
+</style>
 </head>
 
 <body class="h-full w-full flex flex-col font-sans select-none overflow-hidden text-slate-100 antialiased">
 
-  <header class="w-full z-20 glass-panel border-b border-slate-800/80 px-4 py-2 flex items-center justify-between shadow-lg">
+  <header id="topNavHeader" class="hidden">
     <!-- Player Profile Badge -->
     <div class="flex items-center gap-3">
       <div class="relative cursor-pointer group" onclick="toggleModal('charModal')" title="View Hero Codex">
@@ -290,8 +389,193 @@
     <!-- Main Game Canvas -->
     <canvas id="gameCanvas" class="w-full h-full block cursor-crosshair" style="touch-action: none;"></canvas>
 
-    <!-- Experience Gauge (Translucent) -->
-    <div class="absolute bottom-2 left-4 right-4 sm:left-14 sm:right-14 z-10 pointer-events-none opacity-60 hover:opacity-90 transition-opacity">
+  <!-- ========================================================================= -->
+  <!-- ⚔️ AUTHENTIC DIABLO 2 BOTTOM INTERFACE HUD & DUAL GLOBES -->
+  <!-- ========================================================================= -->
+  <div id="diablo2BottomHud" class="fixed bottom-0 left-0 right-0 z-40 pointer-events-none select-none flex flex-col items-center font-mono">
+    
+    <!-- Main Diablo 2 Dock Bar -->
+    <div class="relative w-full max-w-4xl px-2 pb-1 flex items-end justify-between pointer-events-none">
+      
+      <!-- LEFT: DEMONIC LIFE GLOBE & STAMINA BAR -->
+      <div class="flex items-end gap-2 pointer-events-auto">
+        <!-- Diablo 2 Red Life Globe (104px) -->
+        <div class="relative w-26 h-26 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-700 shadow-[0_0_25px_rgba(220,38,38,0.55)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(1)" title="Life Globe (Click to drink Cold Brew) [1]">
+          <!-- Gothic Stone Bezel Ring -->
+          <div class="absolute inset-0 rounded-full border-4 border-stone-900/90 pointer-events-none z-20"></div>
+          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-black text-rose-500/90 z-20 tracking-widest uppercase">LIFE</div>
+          
+          <!-- Blood Sphere Interior -->
+          <div class="relative w-full h-full rounded-full bg-stone-950 overflow-hidden flex items-end justify-center">
+            <!-- Animated Liquid Blood -->
+            <div id="d2LifeGlobeFill" class="w-full bg-gradient-to-t from-red-950 via-rose-700 to-red-500 transition-all duration-200 relative overflow-hidden" style="height: 100%;">
+              <div class="absolute top-0 left-0 right-0 h-2 bg-rose-400/60 animate-pulse"></div>
+              <div class="blood-swirl-particles"></div>
+            </div>
+            <!-- Glass highlight reflection overlay -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/20 via-transparent to-black/50 pointer-events-none z-10"></div>
+          </div>
+
+          <!-- Centered HP Text Overlay -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">
+            <span id="d2LifeText" class="text-xs sm:text-sm font-black text-white font-mono tracking-tight text-shadow-d2">120 / 120</span>
+          </div>
+        </div>
+
+        <!-- Green Stamina / Dash Meter -->
+        <div class="flex flex-col items-center gap-0.5 mb-1.5" title="Stamina / Sprint Dash Gauge [SPACE]">
+          <div class="w-3.5 h-20 bg-stone-950 rounded-full border border-stone-700 p-0.5 overflow-hidden flex items-end">
+            <div id="d2StaminaBarFill" class="w-full bg-gradient-to-t from-emerald-800 to-emerald-400 rounded-full transition-all duration-150" style="height: 100%;"></div>
+          </div>
+          <span class="text-[8px] font-bold text-emerald-400">STAM</span>
+        </div>
+      </div>
+
+      <!-- CENTER: BELT, SKILLS & CARVED STONE BUTTONS -->
+      <div class="flex flex-col items-center gap-1.5 mb-1 pointer-events-auto">
+        
+        <!-- Top Row: Carved Stone Utility Buttons -->
+        <div class="flex items-center gap-1.5 bg-stone-950/85 px-3 py-1 rounded-xl border border-stone-700/80 shadow-2xl backdrop-blur-xs">
+          <button onclick="toggleModal('inventoryModal')" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-amber-200 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Hero Inventory & Stash [I]">
+            <span>🎒 [INV]</span>
+          </button>
+          <button onclick="openQuestLogModal()" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-amber-200 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="District Quests & Bounties [Q]">
+            <span>📜 [QST]</span>
+          </button>
+          <button onclick="castTownPortal()" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-sky-300 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Town Portal to Safehouse Sanctuary [T]">
+            <span>🌀 [TP]</span>
+          </button>
+          <button onclick="swapGearLoadout()" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-amber-300 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Swap Weapon Loadout [X]">
+            <span>⚔️ [SWAP]</span>
+          </button>
+          <button onclick="toggleAutomap()" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-emerald-300 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Toggle Fullscreen Automap [TAB]">
+            <span>🗺️ [MAP]</span>
+          </button>
+          <button onclick="toggleBetaTelemetryModal()" class="d2-stone-btn px-2.5 py-1 rounded bg-stone-900 border border-stone-600 hover:border-amber-400/80 text-[10px] font-bold text-teal-300 hover:text-white transition-all shadow active:scale-95 flex items-center gap-1" title="Beta Telemetry & Hot-Patch Studio [F1]">
+            <span>🛰️ [BETA]</span>
+          </button>
+        </div>
+
+        <!-- Bottom Row: Primary Skills + 4-Slot Potion Belt -->
+        <div class="flex items-center gap-3">
+          <!-- LMB Skill Pentagram: Primary Slash -->
+          <div class="relative w-12 h-12 rounded-xl bg-stone-900 border-2 border-amber-500/70 shadow-lg flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 active:scale-95" title="Primary Slash [LMB]">
+            <span class="text-xl">🗡️</span>
+            <span class="absolute -bottom-1 -left-1 px-1 rounded bg-black/80 border border-stone-700 text-[8px] font-bold text-amber-400">LMB</span>
+          </div>
+
+          <!-- 4-Slot Leather Potion Belt -->
+          <div class="flex items-center gap-1.5 p-1 bg-stone-950/90 rounded-2xl border-2 border-stone-700/80 shadow-inner">
+            <!-- Slot 1: Cold Brew (Health) -->
+            <div onclick="usePotion(1)" class="relative w-11 h-12 rounded-xl bg-stone-900 border border-rose-500/60 flex flex-col items-center justify-center cursor-pointer hover:border-rose-400 active:scale-95 shadow" title="Cold Brew Potion [1] (+60 HP)">
+              <span class="text-lg">☕</span>
+              <span id="d2Potion1Count" class="text-[9px] font-black text-rose-300">x5</span>
+              <span class="absolute -top-1 -right-1 px-1 rounded bg-stone-950 border border-rose-600/70 text-[8px] font-bold text-rose-400">1</span>
+            </div>
+
+            <!-- Slot 2: Narcan (Cure / Exorcism) -->
+            <div onclick="usePotion(2)" class="relative w-11 h-12 rounded-xl bg-stone-900 border border-cyan-500/60 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 active:scale-95 shadow" title="Narcan Stim [2] (Purge Debuffs & Heal)">
+              <span class="text-lg">💉</span>
+              <span id="d2Potion2Count" class="text-[9px] font-black text-cyan-300">x6</span>
+              <span class="absolute -top-1 -right-1 px-1 rounded bg-stone-950 border border-cyan-600/70 text-[8px] font-bold text-cyan-400">2</span>
+            </div>
+
+            <!-- Slot 3: Amp Stim (Haste Overdrive) -->
+            <div onclick="usePotion(3)" class="relative w-11 h-12 rounded-xl bg-stone-900 border border-amber-500/60 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 active:scale-95 shadow" title="Amp Stim [3] (+85% Speed Overdrive)">
+              <span class="text-lg">⚡</span>
+              <span id="d2Potion3Count" class="text-[9px] font-black text-amber-300">x4</span>
+              <span class="absolute -top-1 -right-1 px-1 rounded bg-stone-950 border border-amber-600/70 text-[8px] font-bold text-amber-400">3</span>
+            </div>
+
+            <!-- Slot 4: Cyber Shield -->
+            <div onclick="usePotion(4)" class="relative w-11 h-12 rounded-xl bg-stone-900 border border-sky-500/60 flex flex-col items-center justify-center cursor-pointer hover:border-sky-400 active:scale-95 shadow" title="Cyber Shield [4] (Aegis Absorber)">
+              <span class="text-lg">🛡️</span>
+              <span id="d2Potion4Count" class="text-[9px] font-black text-sky-300">x2</span>
+              <span class="absolute -top-1 -right-1 px-1 rounded bg-stone-950 border border-sky-600/70 text-[8px] font-bold text-sky-400">4</span>
+            </div>
+          </div>
+
+          <!-- RMB Skill Pentagram: Rain Deluge -->
+          <div class="relative w-12 h-12 rounded-xl bg-stone-900 border-2 border-cyan-500/70 shadow-lg flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 active:scale-95" title="Rain Deluge [RMB]">
+            <span class="text-xl">🌧️</span>
+            <span class="absolute -bottom-1 -right-1 px-1 rounded bg-black/80 border border-stone-700 text-[8px] font-bold text-cyan-400">RMB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: ARCHANGEL MANA GLOBE -->
+      <div class="flex items-end gap-2 pointer-events-auto">
+        <!-- Diablo 2 Blue Mana Globe (104px) -->
+        <div class="relative w-26 h-26 rounded-full p-1 bg-gradient-to-b from-stone-800 via-stone-900 to-black border-2 border-stone-700 shadow-[0_0_25px_rgba(37,99,235,0.55)] flex items-center justify-center overflow-hidden group cursor-pointer" onclick="usePotion(2)" title="Mana Globe (Click to drink Energy) [2]">
+          <!-- Gothic Stone Bezel Ring -->
+          <div class="absolute inset-0 rounded-full border-4 border-stone-900/90 pointer-events-none z-20"></div>
+          <div class="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-black text-sky-400/90 z-20 tracking-widest uppercase">MANA</div>
+
+          <!-- Arcane Sphere Interior -->
+          <div class="relative w-full h-full rounded-full bg-stone-950 overflow-hidden flex items-end justify-center">
+            <!-- Animated Electric Mana Liquid -->
+            <div id="d2ManaGlobeFill" class="w-full bg-gradient-to-t from-blue-950 via-blue-600 to-cyan-400 transition-all duration-200 relative overflow-hidden" style="height: 100%;">
+              <div class="absolute top-0 left-0 right-0 h-2 bg-cyan-300/60 animate-pulse"></div>
+              <div class="mana-swirl-particles"></div>
+            </div>
+            <!-- Glass highlight reflection overlay -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/20 via-transparent to-black/50 pointer-events-none z-10"></div>
+          </div>
+
+          <!-- Centered Mana Text Overlay -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)]">
+            <span id="d2ManaText" class="text-xs sm:text-sm font-black text-white font-mono tracking-tight text-shadow-d2">80 / 80</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM FULL-WIDTH 10-SEGMENT NOTCHED GOLDEN XP BAR -->
+    <div class="w-full relative h-2.5 bg-stone-950 border-t border-stone-700 pointer-events-auto flex items-center overflow-hidden group cursor-pointer" title="Pacific Leyline Experience Gauge">
+      <!-- Golden XP Fill -->
+      <div id="d2XpBarFill" class="h-full bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.85)] transition-all duration-200" style="width: 0%;"></div>
+      
+      <!-- 10 Segmental Golden Notches -->
+      <div class="absolute inset-0 flex justify-between pointer-events-none px-0.5">
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+        <div class="w-[1.5px] h-full bg-stone-600"></div>
+      </div>
+
+      <!-- Hover XP Indicator -->
+      <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <span id="d2XpTooltipText" class="text-[9px] font-black text-amber-200 font-mono drop-shadow">0 / 180 XP (0%)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOSS HEALTH BAR OVERLAY (FLOOR 2 APEX BATTLES) -->
+  <div id="bossHealthBarContainer" class="hidden fixed top-4 left-1/2 -translate-x-1/2 w-11/12 max-w-lg z-40 pointer-events-none flex flex-col items-center gap-1 font-mono">
+    <div class="flex items-center justify-between w-full text-xs font-black uppercase text-shadow-d2 px-1">
+      <span id="bossHealthName" class="text-rose-400">APEX CRIME BOSS</span>
+      <span id="bossHealthPercent" class="text-white">100%</span>
+    </div>
+    <div class="w-full h-3 rounded-full bg-stone-950 border-2 border-rose-600/80 p-0.5 shadow-[0_0_20px_rgba(244,63,94,0.6)] overflow-hidden">
+      <div id="bossHealthFill" class="h-full rounded-full bg-gradient-to-r from-red-700 via-rose-500 to-amber-400 transition-all duration-150" style="width: 100%;"></div>
+    </div>
+    <div id="bossHealthSub" class="text-[10px] text-slate-300 text-shadow-d2">Floor 2 · District Apex Vault</div>
+  </div>
+
+  <!-- SANCTUARY PROXIMITY INTERACTION BANNER -->
+  <div id="sanctuaryPromptBanner" class="hidden fixed bottom-28 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-2xl bg-stone-950/90 border-2 border-amber-500/80 text-amber-300 font-mono text-xs font-bold shadow-2xl backdrop-blur-md pointer-events-auto flex items-center gap-2 animate-bounce">
+    <span id="sanctuaryPromptText">[E] Talk to NPC</span>
+  </div>
+
+
+    <!-- Experience Gauge (Replaced by Diablo 2 Notched Bar) -->
+    <div class="hidden">
       <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1 px-1">
         <span>PACIFIC LEYLINE RESONANCE (XP)</span>
         <span id="hudXpText">0 / 180 XP</span>
@@ -319,8 +603,115 @@
       </div>
     </div>
 
+    <!-- Tactical Action Bar (Always Accessible on Desktop and Touch) -->
+    <div id="tacticalActionBar" class="hidden">
+      <button id="btnMobileControlMode" onclick="toggleMobileControlMode()" class="px-2.5 py-1 rounded-xl bg-slate-950/70 border border-cyan-500/50 text-[10px] font-mono font-bold text-cyan-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span id="txtControlModeBadge">🎮 DIABLO</span>
+      </button>
+      <button id="btnMobileTownPortal" onclick="castTownPortal()" class="px-2.5 py-1 rounded-xl bg-slate-950/70 border border-sky-500/50 text-[10px] font-mono font-bold text-sky-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span>🌀 TP (T)</span>
+      </button>
+      <button id="btnMobileGearSwap" onclick="swapGearLoadout()" class="px-2.5 py-1 rounded-xl bg-slate-950/70 border border-amber-500/50 text-[10px] font-mono font-bold text-amber-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span>⚔️ SWAP (X)</span>
+      </button>
+      <button id="btnMobileAutomap" onclick="toggleAutomap()" class="px-2 py-1 rounded-xl bg-slate-950/70 border border-emerald-500/50 text-[10px] font-mono font-bold text-emerald-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span>🗺️ MAP</span>
+      </button>
+      <button id="btnMobileQuestLog" onclick="openQuestLogModal()" class="px-2 py-1 rounded-xl bg-slate-950/70 border border-purple-500/50 text-[10px] font-mono font-bold text-purple-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span>📜 LOG (Q)</span>
+      </button>
+      <button id="btnMobileImmersiveHud" onclick="toggleImmersiveHud()" class="px-2 py-1 rounded-xl bg-slate-950/70 border border-slate-600/50 text-[10px] font-mono text-slate-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span>👁️ HUD</span>
+      </button>
+      <button id="btnMobileBetaBridge" onclick="toggleBetaTelemetryModal()" class="px-2 py-1 rounded-xl bg-slate-950/70 border border-teal-500/60 text-[10px] font-mono font-bold text-teal-300 backdrop-blur-xs flex items-center gap-1 active:scale-95 shadow-md">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>🛰️ BETA</span>
+      </button>
+    </div>
+
     <!-- Mobile Touch Controls (Translucent Glassmorphic Controls for Complete Battle Visibility) -->
     <div id="touchControls" class="absolute inset-0 pointer-events-none z-10 hidden flex justify-between p-6 items-end pb-12" style="touch-action: none;">
+      <!-- Dynamic Floating Move Stick (Spawns on left screen half) -->
+      <div id="dynamicMoveStick" class="absolute hidden" style="width: 110px; height: 110px; margin-left: -55px; margin-top: -55px;">
+        <div class="w-full h-full rounded-full border-2 border-cyan-400/40 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center diablo-glow-cyan">
+          <div id="dynamicMoveKnob" class="w-12 h-12 rounded-full bg-cyan-400/70 border border-white/60 shadow-lg shadow-cyan-500/50"></div>
+        </div>
+      </div>
+
+      <!-- Dynamic Floating Aim Stick (Active in Neon Arena Twin-Stick Mode) -->
+      <div id="dynamicAimStick" class="absolute hidden" style="width: 110px; height: 110px; margin-left: -55px; margin-top: -55px;">
+        <div class="w-full h-full rounded-full border-2 border-rose-500/40 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center diablo-glow-rose">
+          <div id="dynamicAimKnob" class="w-12 h-12 rounded-full bg-rose-500/70 border border-white/60 shadow-lg shadow-rose-500/50"></div>
+        </div>
+      </div>
+
+      <!-- Top-Center Skill Cancel Zone (Drag thumb here to abort skill cast) -->
+      <div id="skillCancelZone" class="hidden absolute top-8 left-1/2 -translate-x-1/2 px-6 py-2 rounded-2xl bg-rose-950/80 border-2 border-rose-500 text-rose-300 font-mono font-bold text-xs flex items-center gap-2 backdrop-blur-md shadow-2xl transition-all pointer-events-none">
+        <span class="text-sm">✕</span>
+        <span>DRAG HERE TO CANCEL SKILL</span>
+      </div>
+
+      <!-- MODE A: DIABLO IMMORTAL RADIAL ACTION CLUSTER (Bottom Right) -->
+      <div id="diabloRadialCluster" class="absolute bottom-6 right-6 w-64 h-64 pointer-events-none select-none z-30">
+        <!-- Center/Anchor: Primary Attack Button (Oversized 76px, Hold-to-Attack) -->
+        <button id="btnRadialAttack" class="radial-btn absolute bottom-2 right-2 w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-600/80 via-teal-500/80 to-cyan-400/80 border-2 border-white/50 text-slate-950 font-black font-mono flex flex-col items-center justify-center diablo-glow-emerald pointer-events-auto select-none shadow-2xl">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.828 2.828a2 2 0 01-2.828 0L3 11.828a2 2 0 010-2.828L5.828 6.172a2 2 0 012.828 0L12 9.414"/>
+          </svg>
+          <span class="text-[9px] tracking-wider mt-0.5">SLASH</span>
+        </button>
+
+        <!-- Dodge / Roll Dash (situated directly to left of Attack for instant thumb sweep) -->
+        <button id="btnRadialDodge" class="radial-btn absolute bottom-3 right-24 w-12 h-12 rounded-full bg-indigo-950/70 border border-indigo-400/60 text-indigo-300 font-mono font-bold text-xs flex flex-col items-center justify-center pointer-events-auto select-none backdrop-blur-xs shadow-lg">
+          <span>ROLL</span>
+          <span class="text-[7px] text-slate-400">SPC</span>
+        </button>
+
+        <!-- Skill 1: Rain Deluge (Radial Orbit ~115 deg) -->
+        <button id="btnRadialSkill1" class="radial-btn absolute top-20 right-28 w-12 h-12 rounded-full bg-slate-950/75 border border-cyan-400/60 text-cyan-300 font-mono font-bold text-xs flex flex-col items-center justify-center pointer-events-auto select-none backdrop-blur-xs shadow-lg diablo-glow-cyan">
+          <span class="text-[10px]">DELUGE</span>
+          <span class="text-[7px] text-slate-400">RMB</span>
+        </button>
+
+        <!-- Skill 2: Cold Brew Rush / Haste (Radial Orbit ~90 deg) -->
+        <button id="btnRadialSkill2" class="radial-btn absolute top-6 right-20 w-12 h-12 rounded-full bg-slate-950/75 border border-amber-400/60 text-amber-300 font-mono font-bold text-xs flex flex-col items-center justify-center pointer-events-auto select-none backdrop-blur-xs shadow-lg diablo-glow-amber">
+          <span class="text-[10px]">BREW</span>
+          <span class="text-[7px] text-slate-400">E</span>
+        </button>
+
+        <!-- Skill 3: Briar Cyclone (Radial Orbit ~60 deg) -->
+        <button id="btnRadialSkill3" class="radial-btn absolute top-3 right-4 w-12 h-12 rounded-full bg-slate-950/75 border border-rose-400/60 text-rose-300 font-mono font-bold text-xs flex flex-col items-center justify-center pointer-events-auto select-none backdrop-blur-xs shadow-lg diablo-glow-rose">
+          <span class="text-[10px]">BRIAR</span>
+          <span class="text-[7px] text-slate-400">R</span>
+        </button>
+
+        <!-- Trinket / Special (Radial Orbit ~145 deg) -->
+        <button id="btnRadialTrinket" onclick="triggerTrinket()" class="radial-btn absolute bottom-16 right-36 w-10 h-10 rounded-full bg-slate-950/75 border border-purple-400/60 text-purple-300 font-mono font-bold text-[9px] flex flex-col items-center justify-center pointer-events-auto select-none backdrop-blur-xs shadow-lg diablo-glow-purple">
+          <span>GADGET</span>
+          <span class="text-[7px] text-slate-400">F</span>
+        </button>
+      </div>
+
+      <!-- Quick Potions & Stims Touch Bar (Bottom Center-Right) -->
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 pointer-events-auto z-30">
+        <button id="btnTouchPotion1" onclick="usePotion(1)" class="w-10 h-10 rounded-xl bg-slate-950/75 border border-emerald-500/50 text-emerald-300 font-mono font-bold flex flex-col items-center justify-center backdrop-blur-xs active:scale-95 shadow-md">
+          <span class="text-xs">☕</span>
+          <span id="badgeTouchPotion1" class="text-[8px] text-emerald-400 font-bold">x5</span>
+        </button>
+        <button id="btnTouchPotion2" onclick="usePotion(2)" class="w-10 h-10 rounded-xl bg-slate-950/75 border border-rose-500/50 text-rose-300 font-mono font-bold flex flex-col items-center justify-center backdrop-blur-xs active:scale-95 shadow-md">
+          <span class="text-xs">💉</span>
+          <span id="badgeTouchPotion2" class="text-[8px] text-rose-400 font-bold">x6</span>
+        </button>
+        <button id="btnTouchPotion3" onclick="usePotion(3)" class="w-10 h-10 rounded-xl bg-slate-950/75 border border-amber-500/50 text-amber-300 font-mono font-bold flex flex-col items-center justify-center backdrop-blur-xs active:scale-95 shadow-md">
+          <span class="text-xs">⚡</span>
+          <span id="badgeTouchPotion3" class="text-[8px] text-amber-400 font-bold">x4</span>
+        </button>
+        <button id="btnTouchPotion4" onclick="usePotion(4)" class="w-10 h-10 rounded-xl bg-slate-950/75 border border-sky-500/50 text-sky-300 font-mono font-bold flex flex-col items-center justify-center backdrop-blur-xs active:scale-95 shadow-md">
+          <span class="text-xs">🛡️</span>
+          <span id="badgeTouchPotion4" class="text-[8px] text-sky-400 font-bold">x2</span>
+        </button>
+      </div>
+
       <!-- Virtual Joystick -->
       <div id="joystickZone" class="w-32 h-32 rounded-full bg-slate-900/35 border border-slate-700/40 relative pointer-events-auto flex items-center justify-center backdrop-blur-xs" style="touch-action: none;">
         <div id="joystickKnob" class="w-14 h-14 rounded-full bg-emerald-500/50 shadow-glow-emerald border border-white/30 backdrop-blur-xs" style="touch-action: none;"></div>
@@ -2697,8 +3088,8 @@
         lastBroadcast: 0
       },
       player: {
-        x: 1536, // Spawn at Lents Town Center & Encampment
-        y: 1280,
+        x: 0, // Spawn inside Portland Safehouse Sanctuary Hub
+        y: 80,
         ampCharges: 3,
         ampMaxCharges: 5,
         ampActiveTimer: 0,
@@ -3057,7 +3448,7 @@
     // 🚪 NEIGHBORHOOD DUNGEON ENGINE, PORTA-POTTY TP & AMP STIM PIPELINE
     // =========================================================================
 
-    gameState.mode = 'overworld'; // 'overworld' | 'dungeon'
+    gameState.mode = 'residence'; // 'overworld' | 'dungeon'
     gameState.currentDungeon = null;
     gameState.overworldReturn = { x: 1536, y: 1280 };
     gameState.portaPotty = null;
@@ -3096,73 +3487,82 @@
     }
 
     // Generate Standalone Procedural 2-Level Dungeon
+    // =========================================================================
+    // ⚔️ TWO-TIER SUB-DUNGEON DELVE ENGINE (KEYMASTER LIEUTENANTS & CRIME BOSSES)
+    // =========================================================================
+
     function enterNeighborhoodDungeon(dungeonId) {
       const lm = gameState.worldMap?.landmarks?.find(l => l.dungeonId === dungeonId);
       const name = lm ? lm.dungeonName : 'Neighborhood Dungeon';
+      const bossName = lm ? (lm.boss || 'District Crime Boss') : 'District Crime Boss';
 
       gameState.overworldReturn = { x: gameState.player.x, y: gameState.player.y };
       gameState.mode = 'dungeon';
       gameState.currentDungeon = {
         id: dungeonId,
         name: name,
+        districtId: dungeonId,
+        bossName: bossName,
         floor: 1,
         maxFloors: 2,
+        hasBossKey: false,
+        keymasterDefeated: false,
+        bossDefeated: false,
         zombiesPurged: 0,
-        zombiesTarget: dungeonId === 'lents' ? 12 : (dungeonId === 'ave_82nd' ? 15 : 14),
+        zombiesTarget: 14,
         civiliansSaved: 0,
-        civiliansTarget: 3,
-        bossDefeated: false
+        civiliansTarget: 3
       };
 
       loadDungeonFloor(1);
-      triggerWaveAnnouncement(`⚔️ ENTERING ${name.toUpperCase()}`, "Floor 1: Purge the Infested Streets");
+      triggerWaveAnnouncement(`⚔️ ENTERING ${name.toUpperCase()}`, `Floor 1: Slay Keymaster Lieutenant for Boss Key`);
       playSound('level');
-      showToast(`Entered ${name} (Floor 1/2)`, "success", true);
+      showToast(`Entered ${name} (Floor 1/2) - Slay Keymaster for Sanctum Key!`, "warning", true);
     }
 
     function loadDungeonFloor(floorNum) {
+      if (!gameState.currentDungeon) return;
       gameState.currentDungeon.floor = floorNum;
       gameState.enemies = [];
       gameState.particles = [];
       gameState.projectiles = [];
       gameState.groundHazards = [];
       gameState.portaPotty = null;
-      chunkCache.clear(); // Clear tile cache for new dungeon environment
+      chunkCache.clear();
 
       const p = gameState.player;
       p.x = 0;
-      p.y = 350; // Start at south entrance
+      p.y = 350; // Entrance south
       p.vx = 0;
       p.vy = 0;
 
-      // Generate compact 32x32 dungeon map
+      // Procedural 32x32 Dungeon Arena
       const dMap = new PortlandMapGenerator(gameState.worldSeed + floorNum * 997);
-      dMap.cols = 32;
-      dMap.rows = 32;
+      dMap.cols = 34;
+      dMap.rows = 34;
       dMap.width = dMap.cols * dMap.tileSize;
       dMap.height = dMap.rows * dMap.tileSize;
       dMap.originX = dMap.width / 2;
       dMap.originY = dMap.height / 2;
       dMap.grid = new Uint8Array(dMap.cols * dMap.rows);
 
-      // Fill dungeon rooms & corridors
       const dId = gameState.currentDungeon.id;
       const floorTile = (dId === 'ave_82nd') ? 0 : (dId === 'creston' ? 5 : (dId === 'chinatown' ? 6 : 4));
 
       for (let r = 0; r < dMap.rows; r++) {
         for (let c = 0; c < dMap.cols; c++) {
           if (r <= 1 || r >= dMap.rows - 2 || c <= 1 || c >= dMap.cols - 2) {
-            dMap.setTile(c, r, 1); // Solid outer boundary
+            dMap.setTile(c, r, 1); // Solid boundary
           } else {
             dMap.setTile(c, r, floorTile);
           }
         }
       }
 
-      // Add barricades and alley corridors
+      // Barriers / corridors
       for (let r = 4; r < dMap.rows - 4; r += 4) {
         for (let c = 4; c < dMap.cols - 4; c += 4) {
-          if (Math.abs(c - 16) <= 2 && Math.abs(r - 16) <= 4) continue; // Keep center clear
+          if (Math.abs(c - 17) <= 2 && Math.abs(r - 17) <= 4) continue;
           if ((c + r) % 3 === 0) {
             dMap.setTile(c, r, 1);
             dMap.setTile(c + 1, r, 1);
@@ -3172,128 +3572,145 @@
 
       gameState.worldMap = dMap;
 
+      const bossBarEl = document.getElementById('bossHealthBarContainer');
+
       if (floorNum === 1) {
-        // Floor 1: Spawn Stairs to Floor 2 at north end
+        if (bossBarEl) bossBarEl.classList.add('hidden');
+
+        // Floor 1: Sanctum Stairs to Floor 2 at north
         gameState.dungeonStairs = {
           x: 0,
-          y: -400,
-          radius: 35,
+          y: -420,
+          radius: 38,
           active: true,
-          label: 'STAIRS TO LEVEL 2: APEX LAIR'
+          label: 'STAIRS TO LEVEL 2: CRIME BOSS VAULT'
         };
 
-        // Spawn Downed Civilians needing Narcan/Stims
+        // Downed Civilians
         gameState.downedCivilians = [
-          { x: -220, y: 100, rescued: false, name: 'Stranded Medic' },
-          { x: 240, y: -50, rescued: false, name: 'Injured Courier' },
-          { x: -140, y: -260, rescued: false, name: 'Portland Resident' }
+          { x: -220, y: 100, rescued: false, name: 'Stranded Paramedic' },
+          { x: 240, y: -60, rescued: false, name: 'Injured Courier' },
+          { x: -140, y: -260, rescued: false, name: 'Corner Merchant' }
         ];
 
-        // Spawn Fetty Zombies and Blood Sirens
-        const count = 18;
-        for (let i = 0; i < count; i++) {
+        // Spawn Keymaster Lieutenant
+        gameState.enemies.push({
+          x: 0,
+          y: -220,
+          vx: 0,
+          vy: 0,
+          radius: 22,
+          speed: 3.2,
+          hp: 480,
+          maxHp: 480,
+          damage: 18,
+          role: 'elite',
+          isKeymaster: true,
+          isElite: true,
+          affix: 'molten',
+          name: `🗝️ Keymaster Lieutenant (${gameState.currentDungeon.name})`,
+          title: 'Guards the Boss Sanctum Key',
+          accentColor: '#fbbf24',
+          hitFlash: 0
+        });
+
+        // Swarms of Fetty Zombies and Mutants
+        for (let i = 0; i < 18; i++) {
           const angle = Math.random() * Math.PI * 2;
-          const dist = 180 + Math.random() * 450;
+          const dist = 160 + Math.random() * 450;
           const ex = Math.cos(angle) * dist;
-          const ey = Math.sin(angle) * dist - 80;
-          const isSiren = (dId === 'ave_82nd' && Math.random() < 0.45) || (Math.random() < 0.25);
+          const ey = Math.sin(angle) * dist - 50;
 
           gameState.enemies.push({
             x: ex,
             y: ey,
             vx: 0,
             vy: 0,
-            radius: isSiren ? 16 : 18,
-            speed: isSiren ? 4.2 : 2.4,
-            hp: isSiren ? 130 : 95,
-            maxHp: isSiren ? 130 : 95,
-            damage: isSiren ? 16 : 11,
-            role: isSiren ? 'assassin' : 'swarmer',
-            archetypeId: isSiren ? 'blood_siren' : 'fetty_zombie',
-            name: isSiren ? '82nd St Blood Siren' : 'Fetty Zombie',
-            isElite: Math.random() < 0.22,
-            affix: Math.random() < 0.5 ? 'molten' : 'vampiric',
-            accentColor: isSiren ? '#f43f5e' : '#10b981',
+            radius: 17,
+            speed: 2.6 + Math.random() * 1.2,
+            hp: 90 + Math.floor(Math.random() * 40),
+            maxHp: 130,
+            damage: 12,
+            role: 'swarmer',
+            name: 'Fetty Zombie',
+            accentColor: '#10b981',
             hitFlash: 0
           });
         }
       } else {
-        // Floor 2: APEX BOSS ARENA
+        // Floor 2: APEX CRIME BOSS VAULT
         gameState.dungeonStairs = null;
         gameState.downedCivilians = [];
 
-        // Spawn District Apex Boss
-        let bossName = 'Overdose Behemoth';
-        let bossType = 'burnside';
-        let bossColor = '#f59e0b';
-        let bossHp = 950;
-        let bossDmg = 28;
+        const bName = gameState.currentDungeon.bossName || 'District Crime Boss';
+        const bossHp = 1350;
+        const bossDmg = 34;
 
-        if (dId === 'ave_82nd') {
-          bossName = '82nd Street Siren Queen';
-          bossType = 'chinatown';
-          bossColor = '#f43f5e';
-          bossHp = 1100;
-          bossDmg = 32;
-        } else if (dId === 'powellhurst') {
-          bossName = 'Junk Enforcer Warlord';
-          bossType = 'hawthorne';
-          bossColor = '#ef4444';
-          bossHp = 1250;
-          bossDmg = 34;
-        } else if (dId === 'creston') {
-          bossName = 'Kenilworth Spore Goliath';
-          bossType = 'forest_park';
-          bossColor = '#10b981';
-          bossHp = 1200;
-          bossDmg = 30;
+        if (bossBarEl) {
+          bossBarEl.classList.remove('hidden');
+          const nameEl = document.getElementById('bossHealthName');
+          const subEl = document.getElementById('bossHealthSub');
+          if (nameEl) nameEl.textContent = `⚠️ ${bName.toUpperCase()}`;
+          if (subEl) subEl.textContent = `Floor 2 · ${gameState.currentDungeon.name} Vault`;
         }
 
         gameState.enemies.push({
           x: 0,
-          y: -150,
+          y: -160,
           vx: 0,
           vy: 0,
-          radius: 36,
-          speed: 3.2,
+          radius: 38,
+          speed: 3.4,
           hp: bossHp,
           maxHp: bossHp,
           damage: bossDmg,
           role: 'boss',
           isBoss: true,
-          bossType: bossType,
-          name: bossName,
-          title: `Apex Guardian of ${gameState.currentDungeon.name}`,
-          accentColor: bossColor,
+          name: bName,
+          title: `Apex Crime Boss of ${gameState.currentDungeon.name}`,
+          accentColor: '#f43f5e',
           hitFlash: 0
         });
 
-        // Spawn escort bodyguards
+        // Crime Boss Minion Bodyguards
         for (let b = 0; b < 6; b++) {
           const ba = (Math.PI * 2 / 6) * b;
           gameState.enemies.push({
-            x: Math.cos(ba) * 160,
-            y: -150 + Math.sin(ba) * 160,
+            x: Math.cos(ba) * 180,
+            y: -160 + Math.sin(ba) * 180,
             vx: 0,
             vy: 0,
-            radius: 17,
-            speed: 3.5,
-            hp: 120,
-            maxHp: 120,
-            damage: 14,
+            radius: 18,
+            speed: 3.6,
+            hp: 140,
+            maxHp: 140,
+            damage: 15,
             role: 'assassin',
-            archetypeId: 'blood_siren',
-            name: 'Elite Siren Guard',
-            accentColor: '#f43f5e',
+            name: 'Elite Syndicate Enforcer',
+            accentColor: '#ef4444',
             hitFlash: 0
           });
         }
 
-        triggerWaveAnnouncement(`⚠️ ${bossName.toUpperCase()} ENGAGED!`, "Floor 2: Apex Boss Vault");
+        triggerWaveAnnouncement(`⚠️ ${bName.toUpperCase()} ENGAGED!`, "Floor 2: Apex Crime Boss Vault");
         playSound('special');
       }
 
       updateQuestTrackerUI();
+    }
+
+    function checkDungeonStairsInteraction() {
+      if (!gameState.dungeonStairs || gameState.mode !== 'dungeon') return;
+      const p = gameState.player;
+      const dist = Math.hypot(p.x - gameState.dungeonStairs.x, p.y - gameState.dungeonStairs.y);
+      if (dist < 45) {
+        if (!gameState.currentDungeon.hasBossKey) {
+          showToast("🔒 Sanctum Gate Locked! Slay Keymaster Lieutenant to get the Boss Key!", "warning", true);
+        } else {
+          showToast("🔓 Boss Sanctum Key used! Entering Crime Boss Vault...", "success", true);
+          descendToFloor2();
+        }
+      }
     }
 
     function descendToFloor2() {
@@ -3340,7 +3757,7 @@
       // Drop guaranteed Ancient/Masterwork Boss Loot
       dropLoot(p.x + 30, p.y + 30, true, 2);
 
-      gameState.mode = 'overworld';
+      gameState.mode = 'residence';
       gameState.currentDungeon = null;
       gameState.portaPotty = null;
       gameState.dungeonStairs = null;
@@ -6387,7 +6804,26 @@
           gameState.currentDungeon.zombiesPurged++;
           updateQuestTrackerUI();
         }
-        if (enemy.isBoss && gameState.currentDungeon.floor === 2) {
+        
+        if (enemy.isKeymaster && gameState.currentDungeon && gameState.currentDungeon.floor === 1) {
+          gameState.currentDungeon.keymasterDefeated = true;
+          gameState.currentDungeon.hasBossKey = true;
+          playSound('powerup');
+          playSound('level');
+          createImpactParticles(enemy.x, enemy.y, '#fbbf24', 40);
+          addFloatingText("🗝️ BOSS SANCTUM KEY ACQUIRED!", enemy.x, enemy.y - 30, '#fbbf24', 20);
+          triggerWaveAnnouncement("🗝️ SANCTUM KEY ACQUIRED!", "Keymaster Slain! Enter Floor 2: Crime Boss Vault");
+          showToast("🗝️ Acquired Boss Sanctum Key! Descend to Floor 2 at northern stairs.", "success", true);
+          updateQuestTrackerUI();
+        }
+        if (enemy.isBoss && gameState.currentDungeon && gameState.currentDungeon.floor === 2) {
+          gameState.currentDungeon.bossDefeated = true;
+          const bossBarEl = document.getElementById('bossHealthBarContainer');
+          if (bossBarEl) bossBarEl.classList.add('hidden');
+          spawnPortaPottyTownPortal();
+        }
+
+        if (false && enemy.isBoss && gameState.currentDungeon.floor === 2) {
           gameState.currentDungeon.bossDefeated = true;
           spawnPortaPottyTownPortal();
         }
@@ -6471,6 +6907,10 @@
 
       if (typeof updateGroundLoot === 'function') {
         updateGroundLoot(dt);
+      }
+
+      if (typeof updateExorcisms === 'function') {
+        updateExorcisms(dt);
       }
 
       const p = gameState.player;
@@ -7305,45 +7745,87 @@
         this.seed = seed;
         this.rng = createPRNG(seed);
         this.tileSize = 64; // px per tile
-        this.cols = 64;     // 64x64 tiles = 4096x4096 px total world
-        this.rows = 64;
+        // 6x Expanded dimensions: 180 cols x 150 rows (11,520 x 9,600 px!)
+        this.cols = 180;
+        this.rows = 150;
         this.width = this.cols * this.tileSize;
         this.height = this.rows * this.tileSize;
-        this.originX = this.width / 2;  // 2048px corresponds to world (0, 0)
-        this.originY = this.height / 2; // 2048px corresponds to world (0, 0)
+        this.originX = this.width / 2;  // 5760px corresponds to world (0, 0) Burnside Bridge
+        this.originY = this.height / 2; // 4800px corresponds to world (0, 0) Burnside Bridge
 
         // Tile types:
         // 0: STREET_ASPHALT (Walkable)
         // 1: BUILDING_WALL (Solid block)
-        // 2: RIVER_WATER (Solid except bridges)
-        // 3: BRIDGE_DECK (Walkable)
+        // 2: RIVER_WATER (Willamette River - solid except bridges)
+        // 3: BRIDGE_DECK (Cross-river bridges - walkable)
         // 4: SKATEPARK_CONCRETE (Walkable)
-        // 5: FOREST_GRASS (Walkable)
+        // 5: FOREST_GRASS (Forest park - walkable)
         // 6: CHINATOWN_PAVING (Walkable)
         // 7: ALLEY_BRICK (Walkable)
         this.grid = new Uint8Array(this.cols * this.rows);
         this.props = [];
         this.landmarks = [];
-        this.explored = new Uint8Array(this.cols * this.rows); // Fog of war
+        this.explored = new Uint8Array(this.cols * this.rows); // Persistent 2-Tier Fog of War
+        this.intersections = [];
+      }
+
+      getTile(c, r) {
+        if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return 1;
+        return this.grid[r * this.cols + c];
+      }
+
+      setTile(c, r, val) {
+        if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
+          this.grid[r * this.cols + c] = val;
+        }
+      }
+
+      isWalkable(c, r) {
+        const t = this.getTile(c, r);
+        return t !== 1 && t !== 2;
+      }
+
+      worldToTile(wx, wy) {
+        return {
+          c: Math.floor((wx + this.originX) / this.tileSize),
+          r: Math.floor((wy + this.originY) / this.tileSize)
+        };
+      }
+
+      tileToWorld(c, r) {
+        return {
+          wx: (c * this.tileSize) - this.originX + (this.tileSize / 2),
+          wy: (r * this.tileSize) - this.originY + (this.tileSize / 2)
+        };
       }
 
       generate() {
-        // 1. Base districts & river corridor
+        // Initialize base ground with building blocks
         for (let r = 0; r < this.rows; r++) {
           for (let c = 0; c < this.cols; c++) {
-            // Outer containment security barriers
+            // Outer containment boundary
             if (r <= 2 || r >= this.rows - 3 || c <= 2 || c >= this.cols - 3) {
               this.setTile(c, r, 1);
               continue;
             }
 
-            // Willamette River corridor running vertically between cols 30 and 34
-            if (c >= 30 && c <= 34) {
-              // 3 Cross-river bridges:
-              // Rows 30..33 (Burnside Bridge - Center)
-              // Rows 12..14 (Steel Bridge - North)
-              // Rows 50..52 (Hawthorne Bridge - South)
-              if ((r >= 30 && r <= 33) || (r >= 12 && r <= 14) || (r >= 50 && r <= 52)) {
+            // Willamette River corridor running vertically at cols 32..40
+            if (c >= 32 && c <= 40) {
+              // 6 Cross-river Bridges:
+              // Rows 22..25: Steel Bridge (North)
+              // Rows 52..56: Burnside Bridge (Center Zero Axis)
+              // Rows 66..69: Morrison Bridge
+              // Rows 78..82: Hawthorne Bridge
+              // Rows 98..102: Ross Island Bridge
+              // Rows 130..134: Sellwood Bridge (South)
+              if (
+                (r >= 22 && r <= 25) ||
+                (r >= 52 && r <= 56) ||
+                (r >= 66 && r <= 69) ||
+                (r >= 78 && r <= 82) ||
+                (r >= 98 && r <= 102) ||
+                (r >= 130 && r <= 134)
+              ) {
                 this.setTile(c, r, 3); // Bridge deck
               } else {
                 this.setTile(c, r, 2); // River water
@@ -7351,73 +7833,162 @@
               continue;
             }
 
-            // Districts base floor
-            if (c < 30 && r < 32) {
-              this.setTile(c, r, 6); // NW: Chinatown & Downtown
-            } else if (c > 34 && r < 32) {
-              this.setTile(c, r, 4); // NE: Eastside & Skatepark
-            } else if (c < 30 && r >= 32) {
-              this.setTile(c, r, 5); // SW: Forest Park Redwoods
+            // Forest Park in NW quadrant
+            if (c < 20 && r < 40) {
+              this.setTile(c, r, 5); // Forest grass
+            } else if (c < 32 && r >= 40 && r <= 56) {
+              this.setTile(c, r, 6); // Chinatown paving
+            } else if (c < 32 && r < 40) {
+              this.setTile(c, r, 4); // Pearl District concrete
             } else {
-              this.setTile(c, r, 7); // SE: Hawthorne Undercroft
+              this.setTile(c, r, 1); // Default to building mass (streets will carve through)
             }
           }
         }
 
-        // 2. Procedural Building Blocks & Alleys (Diablo 3 street chunks)
-        for (let r = 5; r < this.rows - 5; r += 5) {
-          for (let c = 5; c < this.cols - 5; c += 5) {
-            if (c >= 28 && c <= 36) continue; // Keep river banks and bridges clear
-
-            const blockW = 3 + Math.floor(this.rng() * 2);
-            const blockH = 3 + Math.floor(this.rng() * 2);
-            const hasAlleyCut = this.rng() > 0.35;
-            const alleyDir = this.rng() > 0.5 ? 'h' : 'v';
-
-            for (let br = 0; br < blockH; br++) {
-              for (let bc = 0; bc < blockW; bc++) {
-                const tc = c + bc;
-                const tr = r + br;
-                if (tc >= this.cols - 3 || tr >= this.rows - 3) continue;
-
-                // Cut alley through building block
-                if (hasAlleyCut) {
-                  if (alleyDir === 'h' && br === Math.floor(blockH / 2)) continue;
-                  if (alleyDir === 'v' && bc === Math.floor(blockW / 2)) continue;
-                }
-
-                this.setTile(tc, tr, 1); // Solid building wall
-              }
-            }
-          }
-        }
-
-        // 3. Clear Central Burnside Plaza around (32, 32) -> world (0, 0)
-        for (let r = 28; r <= 35; r++) {
-          for (let c = 25; c <= 39; c++) {
-            if (c >= 30 && c <= 34) {
-              this.setTile(c, r, 3); // Bridge deck
-            } else {
-              this.setTile(c, r, 0); // Plaza asphalt
-            }
-          }
-        }
-
-        // 4. Iconic Macro-Landmarks & Authentic Portland Neighborhood Dungeons
-        this.landmarks = [
-          { id: 'lents_hub', name: 'Lents Town Center & Encampment', tileX: 56, tileY: 52, worldX: 1536, worldY: 1280, icon: '🏚️', district: 'Lents Trenches', hasDungeon: true, dungeonId: 'lents', dungeonName: 'Lents Encampment Trenches', desc: 'Starting Zone: Fend off fetty zombie swarms and rescue stranded civilians.' },
-          { id: 'ave_82nd', name: '82nd Avenue Red Light Anomaly', tileX: 54, tileY: 34, worldX: 1408, worldY: 128, icon: '🚨', district: '82nd Ave Strip', hasDungeon: true, dungeonId: 'ave_82nd', dungeonName: '82nd Ave Motel Corridor', desc: 'Red light motels overrun by blood sirens and fetty zombies.' },
-          { id: 'powellhurst', name: 'Powellhurst-Gilbert Wasteland', tileX: 58, tileY: 42, worldX: 1664, worldY: 640, icon: '🏗️', district: 'Powellhurst Wasteland', hasDungeon: true, dungeonId: 'powellhurst', dungeonName: 'Scrap Iron Fortress', desc: 'Outer scrap fortress ruled by the Junk Enforcer Warlord.' },
-          { id: 'creston_kenilworth', name: 'Creston-Kenilworth Park Undercroft', tileX: 46, tileY: 44, worldX: 896, worldY: 768, icon: '🌲', district: 'Creston Undercroft', hasDungeon: true, dungeonId: 'creston', dungeonName: 'Kenilworth Park Catacombs', desc: 'Sunken park conduits infested with toxic spores and zombie swarms.' },
-          { id: 'hawthorne_undercroft', name: 'Hawthorne Undercroft Market', tileX: 42, tileY: 38, worldX: 640, worldY: 384, icon: '🏮', district: 'Hawthorne Bazaar', hasDungeon: true, dungeonId: 'hawthorne', dungeonName: 'Hawthorne Leyline Vault', desc: 'Occult coffee conduits and rogue synthetic barons.' },
-          { id: 'burnside_skatepark', name: 'Eastside Burnside Skatepark', tileX: 38, tileY: 28, worldX: 384, worldY: -256, icon: '🛹', district: 'Eastside Industrial', hasDungeon: true, dungeonId: 'burnside', dungeonName: 'Burnside Underpass Arena', desc: 'Concrete battleground guarded by the Brimstone Hydra.' },
-          { id: 'burnside_bridge', name: 'Burnside Bridge River Hub', tileX: 32, tileY: 32, worldX: 0, worldY: 0, icon: '🌉', district: 'Burnside River Hub', hasDungeon: false },
-          { id: 'chinatown_gate', name: 'Old Chinatown Gate & Alley Vaults', tileX: 24, tileY: 20, worldX: -512, worldY: -768, icon: '⛩️', district: 'Chinatown Anomaly', hasDungeon: true, dungeonId: 'chinatown', dungeonName: 'Jade Dragon Catacombs', desc: 'Alley vaults holding the ancient dragon spirit.' },
-          { id: 'pearl_district', name: 'Pearl District High-Rise Citadel', tileX: 22, tileY: 26, worldX: -640, worldY: -384, icon: '💎', district: 'Pearl Citadel', hasDungeon: true, dungeonId: 'pearl', dungeonName: 'Syndicate Executive Vault', desc: 'Corporate high-rises guarded by elite cybernetic enforcers.' },
-          { id: 'forest_park_shrine', name: 'Forest Park Redwood Sanctuary', tileX: 14, tileY: 16, worldX: -1152, worldY: -1024, icon: '🌲', district: 'Forest Park Wilds', hasDungeon: true, dungeonId: 'forest_park', dungeonName: 'Primeval Sasquatch Den', desc: 'Dense redwoods holding primeval biomorphic behemoths.' }
+        // =====================================================================
+        // CARVE AUTHENTIC PORTLAND EASTSIDE ARTERIALS & NUMBERED AVENUES
+        // =====================================================================
+        
+        // East-West Main Arterials (rows across entire Eastside, cols 41..176)
+        const eastWestArterials = [
+          { name: 'E BURNSIDE ST', row: 54, width: 3 },
+          { name: 'SE BELMONT ST', row: 67, width: 2 },
+          { name: 'SE HAWTHORNE BLVD', row: 80, width: 3 },
+          { name: 'SE DIVISION ST', row: 92, width: 3 },
+          { name: 'SE POWELL BLVD', row: 102, width: 3 },
+          { name: 'SE HOLGATE BLVD', row: 114, width: 2 },
+          { name: 'SE FLAVEL ST', row: 130, width: 2 }
         ];
 
-        // Clear terrain around landmarks
+        eastWestArterials.forEach(art => {
+          for (let c = 41; c < this.cols - 3; c++) {
+            for (let w = 0; w < art.width; w++) {
+              this.setTile(c, art.row + w, 0); // Asphalt
+            }
+          }
+        });
+
+        // SE Foster Road (Diagonal Arterial cutting from SE 50th/Powell to 122nd/Flavel)
+        for (let step = 0; step < 50; step++) {
+          const fc = 98 + step;
+          const fr = Math.floor(102 + (step * 0.55));
+          if (fc < this.cols - 4 && fr < this.rows - 4) {
+            this.setTile(fc, fr, 0);
+            this.setTile(fc + 1, fr, 0);
+            this.setTile(fc, fr + 1, 0);
+          }
+        }
+
+        // Eastside Numbered Avenues (vertical avenues across rows 4..145)
+        const numberedAvenues = [
+          { name: 'SE 1ST AVE', col: 44, width: 2 },
+          { name: 'SE GRAND AVE / MLK', col: 51, width: 2 },
+          { name: 'SE 11TH AVE', col: 61, width: 2 },
+          { name: 'SE 20TH AVE', col: 71, width: 2 },
+          { name: 'SE 39TH AVE (CESAR CHAVEZ)', col: 87, width: 2 },
+          { name: 'SE 50TH AVE', col: 98, width: 2 },
+          { name: 'SE 60TH AVE', col: 108, width: 2 },
+          { name: 'SE 82ND AVE (RED LIGHT STRIP)', col: 125, width: 3 },
+          { name: 'SE 92ND AVE (I-205)', col: 137, width: 2 },
+          { name: 'SE 112TH AVE', col: 148, width: 2 },
+          { name: 'SE 122ND AVE', col: 156, width: 2 },
+          { name: 'SE 136TH AVE', col: 164, width: 2 },
+          { name: 'SE 148TH AVE (POWELLHURST)', col: 173, width: 2 }
+        ];
+
+        numberedAvenues.forEach(ave => {
+          for (let r = 4; r < this.rows - 4; r++) {
+            for (let w = 0; w < ave.width; w++) {
+              this.setTile(ave.col + w, r, 0);
+            }
+          }
+        });
+
+        // Carve secondary grid of local residential streets every 4 tiles
+        for (let r = 10; r < this.rows - 10; r += 6) {
+          for (let c = 44; c < this.cols - 5; c++) {
+            if (this.getTile(c, r) === 1 && this.rng() > 0.15) {
+              this.setTile(c, r, 0);
+            }
+          }
+        }
+        for (let c = 46; c < this.cols - 6; c += 5) {
+          for (let r = 12; r < this.rows - 12; r++) {
+            if (this.getTile(c, r) === 1 && this.rng() > 0.2) {
+              this.setTile(c, r, 0);
+            }
+          }
+        }
+
+        // =====================================================================
+        // WESTSIDE CARVING (DOWNTOWN, CHINATOWN, PEARL & FOREST PARK)
+        // =====================================================================
+        for (let r = 15; r < this.rows - 20; r += 5) {
+          for (let c = 12; c < 32; c++) {
+            this.setTile(c, r, (r >= 40 && r <= 56) ? 6 : (r < 40 ? 4 : 0));
+          }
+        }
+        for (let c = 15; c < 32; c += 4) {
+          for (let r = 15; r < this.rows - 20; r++) {
+            this.setTile(c, r, (r >= 40 && r <= 56) ? 6 : (r < 40 ? 4 : 0));
+          }
+        }
+
+        // Forest Park Walking Trails in NW
+        for (let r = 8; r < 38; r += 3) {
+          for (let c = 5; c < 18; c++) {
+            if ((c + r) % 4 === 0) this.setTile(c, r, 5);
+          }
+        }
+
+        // =====================================================================
+        // SELLWOOD QUARANTINE MILITARY CHECKPOINT (EXPANSION PACK TEASER)
+        // =====================================================================
+        // Barricade row 138 at south boundary
+        for (let c = 40; c <= 75; c++) {
+          if (c % 2 === 0) this.setTile(c, 138, 1); // Razor wire barriers
+        }
+
+        // Build list of named intersections for Asphalt Stenciling & Automap Locator
+        this.intersections = [];
+        eastWestArterials.forEach(ew => {
+          numberedAvenues.forEach(ns => {
+            this.intersections.push({
+              name: `${ew.name} & ${ns.name}`,
+              shortName: `${ew.name.split(' ')[1] || ew.name} & ${ns.name.split(' ')[1] || ns.name}`,
+              tileX: ns.col,
+              tileY: ew.row,
+              worldX: (ns.col * this.tileSize) - this.originX,
+              worldY: (ew.row * this.tileSize) - this.originY
+            });
+          });
+        });
+
+        // =====================================================================
+        // ICONIC SUB-DUNGEONS & DISTRICT NEIGHBORHOODS
+        // =====================================================================
+        this.landmarks = [
+          // Sanctuary Safehouse / Town Hall
+          { id: 'town_hall', name: 'Portland Safehouse & Town Hall Sanctuary', tileX: 52, tileY: 58, worldX: (52 * 64) - this.originX, worldY: (58 * 64) - this.originY, icon: '🏛️', district: 'Sanctuary Hub', isSanctuary: true, desc: 'Central Safehouse sanctuary hub. Mayor, Police Chief, Jeweler, Tailor, Armorer & Stash.' },
+          
+          // 10 Neighborhood Sub-Dungeons (2-Tier Delve)
+          { id: 'burnside', name: 'Burnside Skate & Underpass', tileX: 46, tileY: 52, worldX: (46 * 64) - this.originX, worldY: (52 * 64) - this.originY, icon: '🛹', district: 'Burnside Underpass', hasDungeon: true, dungeonId: 'burnside', dungeonName: 'Burnside Skate Arena', boss: 'Brimstone Skateboard Hydra', desc: 'Slay the Keymaster Lieutenant for the Boss Sanctum Key, then enter Floor 2.' },
+          { id: 'chinatown', name: 'Old Town Chinatown Shanghai Tunnels', tileX: 24, tileY: 46, worldX: (24 * 64) - this.originX, worldY: (46 * 64) - this.originY, icon: '⛩️', district: 'Old Town Chinatown', hasDungeon: true, dungeonId: 'chinatown', dungeonName: 'Shanghai Tunnels Catacombs', boss: 'Shanghai Tunnel Leviathan', desc: 'Subterranean tunnel network. Slay the Shanghai Keymaster.' },
+          { id: 'pearl', name: 'Pearl District High-Rise Citadel', tileX: 22, tileY: 30, worldX: (22 * 64) - this.originX, worldY: (30 * 64) - this.originY, icon: '💎', district: 'Pearl District', hasDungeon: true, dungeonId: 'pearl', dungeonName: 'Syndicate Executive Vault', boss: 'Syndicate Executive Overlord', desc: 'Corporate high-rises guarded by elite cybernetic enforcers.' },
+          { id: 'forest_park', name: 'Forest Park Primeval Woods', tileX: 10, tileY: 18, worldX: (10 * 64) - this.originX, worldY: (18 * 64) - this.originY, icon: '🌲', district: 'Forest Park Wilds', hasDungeon: true, dungeonId: 'forest_park', dungeonName: 'Primeval Sasquatch Den', boss: 'Elder Sasquatch Primeval', desc: 'Dense ancient redwoods holding primeval biomorphic behemoths.' },
+          { id: 'hawthorne', name: 'Hawthorne Leyline Vault', tileX: 87, tileY: 80, worldX: (87 * 64) - this.originX, worldY: (80 * 64) - this.originY, icon: '🏮', district: 'Hawthorne Bazaar', hasDungeon: true, dungeonId: 'hawthorne', dungeonName: 'Hawthorne Occult Vault', boss: 'Voodoo Baron of Burnt Sugar', desc: 'Occult coffee conduits and rogue synthetic barons.' },
+          { id: 'creston', name: 'Creston-Kenilworth Park Undercroft', tileX: 78, tileY: 114, worldX: (78 * 64) - this.originX, worldY: (114 * 64) - this.originY, icon: '🍄', district: 'Creston Undercroft', hasDungeon: true, dungeonId: 'creston', dungeonName: 'Kenilworth Spore Catacombs', boss: 'Kenilworth Spore Goliath', desc: 'Sunken park conduits infested with toxic spores and zombie swarms.' },
+          { id: 'ave_82nd', name: '82nd Avenue Red Light Anomaly', tileX: 125, tileY: 92, worldX: (125 * 64) - this.originX, worldY: (92 * 64) - this.originY, icon: '🚨', district: '82nd Ave Strip', hasDungeon: true, dungeonId: 'ave_82nd', dungeonName: '82nd Ave Motel Corridor', boss: '82nd Street Siren Queen', desc: 'Neon motels overrun by blood sirens and fetty zombies.' },
+          { id: 'lents', name: 'Lents Town Center Encampment', tileX: 137, tileY: 120, worldX: (137 * 64) - this.originX, worldY: (120 * 64) - this.originY, icon: '🏚️', district: 'Lents Trenches', hasDungeon: true, dungeonId: 'lents', dungeonName: 'Lents Encampment Trenches', boss: 'Overdose Behemoth', desc: 'Fend off fetty zombie swarms and rescue stranded civilians.' },
+          { id: 'kelly_butte', name: 'Kelly Butte Subterranean Vault', tileX: 148, tileY: 102, worldX: (148 * 64) - this.originX, worldY: (102 * 64) - this.originY, icon: '🪖', district: 'Kelly Butte Bunkers', hasDungeon: true, dungeonId: 'kelly_butte', dungeonName: 'Kelly Butte Cold War Bunker', boss: 'Bunker Overlord General', desc: 'Historic civil defense bunker overrun by rogue military mutants.' },
+          { id: 'powellhurst', name: 'Powellhurst-Gilbert Scrap Fortress', tileX: 173, tileY: 102, worldX: (173 * 64) - this.originX, worldY: (102 * 64) - this.originY, icon: '🏗️', district: 'Powellhurst Wasteland', hasDungeon: true, dungeonId: 'powellhurst', dungeonName: 'Scrap Iron Fortress', boss: 'Junk Enforcer Warlord', desc: 'Outer scrap fortress ruled by the Junk Enforcer Warlord at SE 148th Ave.' },
+          
+          // Sellwood Military Checkpoint Teaser
+          { id: 'sellwood_checkpoint', name: 'Sellwood Military Quarantine Checkpoint', tileX: 52, tileY: 138, worldX: (52 * 64) - this.originX, worldY: (138 * 64) - this.originY, icon: '☣️', district: 'Sellwood Quarantine', isSellwood: true, desc: 'RESTRICTED SECTOR: Sellwood Expansion Pack Military Checkpoint.' }
+        ];
+
+        // Clear tiles around landmarks for clean walkability
         this.landmarks.forEach(lm => {
           for (let dy = -2; dy <= 2; dy++) {
             for (let dx = -2; dx <= 2; dx++) {
@@ -7428,180 +7999,26 @@
           }
         });
 
-        // 5. Procedural Props: Supply Crates, Guerilla Coffee Stills, Anomaly Beacons
+        // Procedural Props (Supply Crates, Coffee Siphons)
         this.props = [];
-        
-        // 16 Supply Crates hidden in dead-ends/alleys
-        for (let i = 0; i < 16; i++) {
-          const tx = 5 + Math.floor(this.rng() * (this.cols - 10));
-          const ty = 5 + Math.floor(this.rng() * (this.rows - 10));
-          if (this.isWalkable(tx, ty)) {
-            this.props.push({
-              id: `crate_${i}`,
-              type: 'crate',
-              tileX: tx,
-              tileY: ty,
-              worldX: (tx - 32) * this.tileSize,
-              worldY: (ty - 32) * this.tileSize,
-              hp: 25,
-              maxHp: 25,
-              looted: false
-            });
-          }
-        }
-
-        // 6 Guerilla Coffee Siphon Stations (Health & Haste)
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 48; i++) {
           const tx = 6 + Math.floor(this.rng() * (this.cols - 12));
           const ty = 6 + Math.floor(this.rng() * (this.rows - 12));
           if (this.isWalkable(tx, ty)) {
             this.props.push({
-              id: `coffee_${i}`,
-              type: 'coffee_station',
+              id: `crate_${i}`,
+              type: i % 4 === 0 ? 'coffee_station' : 'crate',
               tileX: tx,
               tileY: ty,
-              worldX: (tx - 32) * this.tileSize,
-              worldY: (ty - 32) * this.tileSize,
-              name: 'Steaming Siphon Still',
-              cooldown: 0
+              worldX: (tx * this.tileSize) - this.originX,
+              worldY: (ty * this.tileSize) - this.originY,
+              looted: false
             });
           }
         }
-
-        // 4 District Anomaly Beacons (Wave Event Triggers)
-        const beaconSpots = [
-          { tx: 16, ty: 22, district: 'Chinatown Anomaly' },
-          { tx: 46, ty: 22, district: 'Eastside Industrial' },
-          { tx: 18, ty: 44, district: 'Forest Park Wilds' },
-          { tx: 44, ty: 44, district: 'Hawthorne Bazaar' }
-        ];
-        beaconSpots.forEach((bs, idx) => {
-          this.props.push({
-            id: `beacon_${idx}`,
-            type: 'anomaly_beacon',
-            tileX: bs.tx,
-            tileY: bs.ty,
-            worldX: (bs.tx - 32) * this.tileSize,
-            worldY: (bs.ty - 32) * this.tileSize,
-            district: bs.district,
-            active: false,
-            rotation: 0
-          });
-        });
-
-        // 6. Iconic Diablo 3 Shrines (Open-World Sanctuary Points)
-        const SHRINE_DEFS = [
-          { type: 'frenzied', name: 'Frenzied Shrine', icon: '⚡', color: '#fbbf24', lightColor: 'rgba(251, 191, 36, 0.50)', desc: '+50% Attack Speed & Rapid Slash', duration: 45 },
-          { type: 'blessed', name: 'Blessed Shrine', icon: '🛡️', color: '#38bdf8', lightColor: 'rgba(56, 189, 248, 0.50)', desc: '40% Damage Reduction Barrier', duration: 45 },
-          { type: 'empowered', name: 'Empowered Shrine', icon: '🌀', color: '#00f5ff', lightColor: 'rgba(0, 245, 255, 0.55)', desc: '+100% Resource Regen & 50% Skill CDs', duration: 45 },
-          { type: 'fleeting', name: 'Fleeting Shrine', icon: '👟', color: '#10b981', lightColor: 'rgba(16, 185, 129, 0.50)', desc: '+40% Move Speed & +80px Item Magnet', duration: 45 },
-          { type: 'fortune', name: 'Fortune Shrine', icon: '💎', color: '#c084fc', lightColor: 'rgba(192, 132, 252, 0.55)', desc: '+60% Magic Find & Double Beans', duration: 45 }
-        ];
-
-        this.shrines = [];
-        const shrineSpots = [
-          { c: 20, r: 20, typeIdx: 0 },
-          { c: 44, r: 20, typeIdx: 1 },
-          { c: 20, r: 44, typeIdx: 2 },
-          { c: 44, r: 44, typeIdx: 3 },
-          { c: 32, r: 24, typeIdx: 4 },
-          { c: 32, r: 40, typeIdx: 0 },
-          { c: 14, r: 28, typeIdx: 1 },
-          { c: 50, r: 28, typeIdx: 2 },
-          { c: 26, r: 36, typeIdx: 3 },
-          { c: 38, r: 28, typeIdx: 4 }
-        ];
-
-        shrineSpots.forEach((sp, idx) => {
-          let sc = sp.c;
-          let sr = sp.r;
-          while (!this.isWalkable(sc, sr) && sc < this.cols - 2) {
-            sc++;
-          }
-          const sDef = SHRINE_DEFS[sp.typeIdx % SHRINE_DEFS.length];
-          const wx = ((sc * this.tileSize) - this.originX);
-          const wy = ((sr * this.tileSize) - this.originY);
-          this.shrines.push({
-            id: `shrine_${idx}`,
-            type: sDef.type,
-            name: sDef.name,
-            icon: sDef.icon,
-            color: sDef.color,
-            lightColor: sDef.lightColor,
-            desc: sDef.desc,
-            duration: sDef.duration,
-            tileX: sc,
-            tileY: sr,
-            worldX: wx,
-            worldY: wy,
-            radius: 26,
-            active: true,
-            cooldownTimer: 0,
-            pulseAngle: Math.random() * Math.PI * 2
-          });
-        });
       }
 
-      setTile(c, r, type) {
-        if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
-          this.grid[r * this.cols + c] = type;
-        }
-      }
-
-      getTile(c, r) {
-        if (c >= 0 && c < this.cols && r >= 0 && r < this.rows) {
-          return this.grid[r * this.cols + c];
-        }
-        return 1; // Outside map is solid wall
-      }
-
-      isWalkable(c, r) {
-        const t = this.getTile(c, r);
-        return t !== 1 && t !== 2; // Not wall and not river
-      }
-
-      worldToTile(wx, wy) {
-        const c = Math.floor((wx + this.originX) / this.tileSize);
-        const r = Math.floor((wy + this.originY) / this.tileSize);
-        return { c, r };
-      }
-
-      isWorldWalkable(wx, wy, radius = 8) {
-        const center = this.worldToTile(wx, wy);
-        if (!this.isWalkable(center.c, center.r)) return false;
-
-        const rad = Math.min(radius, 8);
-        const p1 = this.worldToTile(wx + rad, wy);
-        const p2 = this.worldToTile(wx - rad, wy);
-        const p3 = this.worldToTile(wx, wy + rad);
-        const p4 = this.worldToTile(wx, wy - rad);
-
-        return this.isWalkable(p1.c, p1.r) &&
-               this.isWalkable(p2.c, p2.r) &&
-               this.isWalkable(p3.c, p3.r) &&
-               this.isWalkable(p4.c, p4.r);
-      }
-
-      findNearestWalkable(wx, wy) {
-        const cur = this.worldToTile(wx, wy);
-        if (this.isWalkable(cur.c, cur.r)) return { wx, wy };
-
-        for (let dist = 1; dist <= 5; dist++) {
-          for (let dr = -dist; dr <= dist; dr++) {
-            for (let dc = -dist; dc <= dist; dc++) {
-              if (this.isWalkable(cur.c + dc, cur.r + dr)) {
-                return {
-                  wx: ((cur.c + dc) * this.tileSize) - this.originX + (this.tileSize / 2),
-                  wy: ((cur.r + dr) * this.tileSize) - this.originY + (this.tileSize / 2)
-                };
-              }
-            }
-          }
-        }
-        return { wx: 0, wy: 0 };
-      }
-
-      revealArea(wx, wy, radiusTiles = 5) {
+      revealArea(wx, wy, radiusTiles = 8) {
         const { c: centerC, r: centerR } = this.worldToTile(wx, wy);
         for (let dr = -radiusTiles; dr <= radiusTiles; dr++) {
           for (let dc = -radiusTiles; dc <= radiusTiles; dc++) {
@@ -8136,6 +8553,146 @@
 
         ctx.restore();
       }
+    }
+
+    // =========================================================================
+    // 🏛️ PORTLAND SAFEHOUSE / TOWN HALL SANCTUARY HUB (INITIAL SPAWN & VENDORS)
+    // =========================================================================
+
+    const SANCTUARY_STATIONS = [
+      { id: 'mayor', name: 'Mayor of Portland', x: 0, y: -180, icon: '🏛️', action: () => toggleModal('safehouseSelectModal'), label: '[E] Speak to Mayor (Directives & Deeds)' },
+      { id: 'police', name: 'PDX Police Chief', x: -240, y: -110, icon: '🛡️', action: () => talkToPoliceChief(), label: '[E] Police Chief (Narcan Re-Supply & Bounties)' },
+      { id: 'jeweler', name: 'The Jeweler', x: 240, y: -110, icon: '⚒️', action: () => toggleModal('forgeModal'), label: '[E] Quantum Forge (Item Synthesis)' },
+      { id: 'tailor', name: 'The Tailor', x: -270, y: 50, icon: '🧵', action: () => talkToTailor(), label: '[E] The Tailor (Nanoweave Armor)' },
+      { id: 'armorer', name: 'The Armorer', x: 270, y: 50, icon: '⚔️', action: () => talkToArmorer(), label: '[E] The Armorer (Plating & Weapons)' },
+      { id: 'stash', name: 'Diablo Stash Chest', x: 0, y: -40, icon: '📦', action: () => openStashModal(), label: '[E] Open 100-Slot Stash Vault' },
+      { id: 'portal', name: 'Town Portal Exit', x: 0, y: 240, icon: '🌀', action: () => exitSanctuaryToPortlandStreetGrid(), label: '[E] Step Out to Portland Street Grid' }
+    ];
+
+    function drawSanctuaryEnvironment(cw, ch) {
+      const cam = gameState.camera;
+      const time = performance.now() * 0.001;
+
+      // Sanctuary Room Dimensions: 720 x 580 px
+      const rw = 720;
+      const rh = 580;
+
+      ctx.save();
+      // Polished Oak Floor
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(-rw/2, -rh/2, rw, rh);
+
+      // Gothic Stone Outer Walls
+      ctx.strokeStyle = '#78716c';
+      ctx.lineWidth = 14;
+      ctx.strokeRect(-rw/2, -rh/2, rw, rh);
+
+      // Inner ornate carpet runner
+      ctx.fillStyle = 'rgba(159, 18, 57, 0.4)';
+      ctx.fillRect(-80, -rh/2 + 20, 160, rh - 40);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(-80, -rh/2 + 20, 160, rh - 40);
+
+      // Sanctuary Skylight Godrays
+      const pulse = Math.sin(time * 2) * 0.08 + 0.92;
+      const grad = ctx.createRadialGradient(0, 0, 40, 0, 0, 360 * pulse);
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(-rw/2, -rh/2, rw, rh);
+
+      // Draw Stations & NPCs
+      let nearestStation = null;
+      let minDist = 70;
+      const p = gameState.player;
+
+      SANCTUARY_STATIONS.forEach(st => {
+        const dist = Math.hypot(p.x - st.x, p.y - st.y);
+        if (dist < minDist) {
+          minDist = dist;
+          nearestStation = st;
+        }
+
+        ctx.save();
+        ctx.translate(st.x, st.y);
+
+        // Ground Pedestal Ring
+        ctx.beginPath();
+        ctx.arc(0, 0, 28, 0, Math.PI * 2);
+        ctx.fillStyle = st.id === 'portal' ? 'rgba(56,189,248,0.25)' : 'rgba(245,158,11,0.2)';
+        ctx.fill();
+        ctx.strokeStyle = st.id === 'portal' ? '#38bdf8' : '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Icon
+        ctx.font = '26px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(st.icon, 0, -5);
+
+        // Nameplate
+        ctx.font = 'bold 10px monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(st.name.toUpperCase(), 0, 24);
+
+        ctx.restore();
+      });
+
+      ctx.restore();
+
+      // Show interaction prompt if near a station
+      const promptBanner = document.getElementById('sanctuaryPromptBanner');
+      const promptText = document.getElementById('sanctuaryPromptText');
+      if (nearestStation) {
+        gameState.activeSanctuaryStation = nearestStation;
+        if (promptBanner) promptBanner.classList.remove('hidden');
+        if (promptText) promptText.textContent = nearestStation.label;
+      } else {
+        gameState.activeSanctuaryStation = null;
+        if (promptBanner) promptBanner.classList.add('hidden');
+      }
+    }
+
+    function interactWithSanctuaryStation() {
+      if (gameState.mode === 'residence' && gameState.activeSanctuaryStation) {
+        playSound('powerup');
+        gameState.activeSanctuaryStation.action();
+      }
+    }
+
+    function talkToPoliceChief() {
+      const p = gameState.player;
+      gameState.potions.narcan = Math.max(gameState.potions.narcan, 8);
+      playSound('heal');
+      showToast("🛡️ PDX Police Chief: 'Stay sharp out there. Narcan rations replenished.' (+8 Narcan)", "success", true);
+      updateHUD();
+    }
+
+    function talkToTailor() {
+      showToast("🧵 The Tailor: 'Nanoweave fiber reinforced. Your armor absorbs +15% more damage.'", "info", true);
+      playSound('equip');
+    }
+
+    function talkToArmorer() {
+      showToast("⚔️ The Armorer: 'Blade edges ground razor-sharp. Critical strike chance boosted!'", "info", true);
+      playSound('equip');
+    }
+
+    function exitSanctuaryToPortlandStreetGrid() {
+      playSound('teleport');
+      gameState.mode = 'residence';
+      const p = gameState.player;
+      // Step out directly onto the Portland street grid on E Burnside St outside Town Hall
+      p.x = -128;
+      p.y = 512;
+      p.vx = 0;
+      p.vy = 0;
+      initWorldMap(gameState.worldSeed);
+      triggerWaveAnnouncement("🏙️ PORTLAND OVERWORLD", "Stepped out onto E Burnside Street Grid");
+      showToast("Stepped out into Portland Overworld! Press [TAB] for Automap.", "info", true);
+      updateHUD();
     }
 
     function drawUrbanEnvironment(cw, ch) {
@@ -9293,6 +9850,23 @@
           ctx.stroke();
         }
 
+        if (e.isExorcising) {
+          const convulseOffset = (Math.random() - 0.5) * 5;
+          ctx.translate(convulseOffset, convulseOffset);
+          ctx.beginPath();
+          ctx.arc(0, 0, e.radius + 10, 0, Math.PI * 2);
+          ctx.strokeStyle = '#84cc16';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([3, 3]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          ctx.font = 'bold 9px monospace';
+          ctx.fillStyle = '#84cc16';
+          ctx.textAlign = 'center';
+          ctx.fillText(`⚡ EXORCISING: ${(e.exorcismTimer || 0).toFixed(1)}s`, 0, - e.radius - 14);
+        }
+
         // Distinct Archetype Matrix Selection
         let matrix = SPRITE_SWARMER_DRONE_8BIT;
         let spriteScale = e.radius / 7;
@@ -9448,6 +10022,7 @@
     }
 
     function render() {
+      if (gameState.automapActive) renderAutomapOverlay();
       const w = gameState.canvasWidth || window.innerWidth;
       const h = gameState.canvasHeight || window.innerHeight;
       ctx.clearRect(0, 0, w, h);
@@ -9511,6 +10086,21 @@
         gameState.lastTimestamp = now;
 
         if (!gameState.isPaused) {
+
+        // Update Floor 2 Crime Boss Health Bar
+        if (gameState.mode === 'dungeon' && gameState.currentDungeon && gameState.currentDungeon.floor === 2) {
+          const boss = gameState.enemies ? gameState.enemies.find(e => e.isBoss) : null;
+          const bossBarEl = document.getElementById('bossHealthBarContainer');
+          const bossFill = document.getElementById('bossHealthFill');
+          const bossPctText = document.getElementById('bossHealthPercent');
+          if (boss && bossBarEl && bossFill) {
+            bossBarEl.classList.remove('hidden');
+            const pct = Math.max(0, Math.min(100, (boss.hp / boss.maxHp) * 100));
+            bossFill.style.width = `${pct}%`;
+            if (bossPctText) bossPctText.textContent = `${Math.round(pct)}%`;
+          }
+        }
+
           update(dt);
         }
         render();
@@ -9558,6 +10148,41 @@
       document.getElementById('hudXpText').textContent = `${p.xp} / ${p.xpNext} XP`;
 
       document.getElementById('hudCurrency').textContent = p.beans;
+
+      // Update Diablo 2 Dual Globes & Golden XP Bar
+      const d2LifeFill = document.getElementById('d2LifeGlobeFill');
+      const d2LifeText = document.getElementById('d2LifeText');
+      if (d2LifeFill) d2LifeFill.style.height = `${hpPct}%`;
+      if (d2LifeText) d2LifeText.textContent = `${Math.round(p.hp)} / ${p.maxHp}`;
+
+      const d2ManaFill = document.getElementById('d2ManaGlobeFill');
+      const d2ManaText = document.getElementById('d2ManaText');
+      if (d2ManaFill) d2ManaFill.style.height = `${energyPct}%`;
+      if (d2ManaText) d2ManaText.textContent = `${Math.round(p.energy)} / ${p.maxEnergy}`;
+
+      const d2StamFill = document.getElementById('d2StaminaBarFill');
+      if (d2StamFill) {
+        const stamPct = Math.max(0, Math.min(100, ((p.stamina || 100) / (p.maxStamina || 100)) * 100));
+        d2StamFill.style.height = `${stamPct}%`;
+      }
+
+      const d2XpFill = document.getElementById('d2XpBarFill');
+      const d2XpTip = document.getElementById('d2XpTooltipText');
+      if (d2XpFill) d2XpFill.style.width = `${xpPct}%`;
+      if (d2XpTip) d2XpTip.textContent = `${p.xp} / ${p.xpNext} XP (${Math.round(xpPct)}%)`;
+
+      // Update Potion Belt Badges
+      if (gameState.potions) {
+        const p1 = document.getElementById('d2Potion1Count');
+        const p2 = document.getElementById('d2Potion2Count');
+        const p3 = document.getElementById('d2Potion3Count');
+        const p4 = document.getElementById('d2Potion4Count');
+        if (p1) p1.textContent = `x${gameState.potions.health || 0}`;
+        if (p2) p2.textContent = `x${gameState.potions.narcan || 0}`;
+        if (p3) p3.textContent = `x${gameState.potions.amp || 0}`;
+        if (p4) p4.textContent = `x${gameState.potions.shield || 0}`;
+      }
+
 
       const skillBadge = document.getElementById('hudSkillPointBadge');
       if (p.skillPoints > 0) {
@@ -13066,6 +13691,154 @@
     // ==============================================================
     // 📡 CYBER-RADAR MINIMAP & MULTIPLAYER SQUAD NETWORKING
     // ==============================================================
+    // =========================================================================
+    // 🗺️ SYNCHRONIZED FULLSCREEN AUTOMAP ENGINE ('TAB' KEY)
+    // =========================================================================
+
+    function renderAutomapOverlay() {
+      const overlay = document.getElementById('automapOverlayContainer');
+      const canvas = document.getElementById('automapCanvas');
+      if (!overlay || !canvas || overlay.classList.contains('hidden') || !gameState.automapActive) return;
+
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      const actx = canvas.getContext('2d');
+      const cw = canvas.width;
+      const ch = canvas.height;
+      actx.clearRect(0, 0, cw, ch);
+
+      if (!gameState.worldMap) return;
+      const map = gameState.worldMap;
+      const p = gameState.player;
+
+      // Dark tactical blueprint translucent backdrop
+      actx.fillStyle = 'rgba(2, 6, 23, 0.88)';
+      actx.fillRect(0, 0, cw, ch);
+
+      // Center map on player with comfortable tactical zoom
+      const mapScale = Math.min(cw / (map.cols * 32), ch / (map.rows * 32)) * 1.8;
+      const centerX = cw / 2 - (p.x * mapScale / map.tileSize);
+      const centerY = ch / 2 - (p.y * mapScale / map.tileSize);
+
+      actx.save();
+      actx.translate(centerX, centerY);
+
+      // 1. Draw Explored Memory Streets & Water from Bitmask
+      for (let r = 0; r < map.rows; r++) {
+        for (let c = 0; c < map.cols; c++) {
+          const isExp = map.explored[r * map.cols + c];
+          if (!isExp) continue;
+
+          const wx = ((c * map.tileSize) - map.originX) * mapScale / map.tileSize;
+          const wy = ((r * map.tileSize) - map.originY) * mapScale / map.tileSize;
+          const s = mapScale;
+
+          const tile = map.getTile(c, r);
+          if (tile === 2) {
+            // River
+            actx.fillStyle = '#0369a1';
+            actx.fillRect(wx, wy, s + 0.5, s + 0.5);
+          } else if (tile === 3) {
+            // Bridge
+            actx.fillStyle = '#f59e0b';
+            actx.fillRect(wx, wy, s + 0.5, s + 0.5);
+          } else if (tile === 0 || tile === 4 || tile === 5 || tile === 6 || tile === 7) {
+            // Explored streets / avenues
+            actx.fillStyle = '#1e293b';
+            actx.fillRect(wx, wy, s + 0.5, s + 0.5);
+          }
+        }
+      }
+
+      // 2. Draw Explored Landmarks & Sub-Dungeons
+      map.landmarks.forEach(lm => {
+        const lx = lm.worldX * mapScale / map.tileSize;
+        const ly = lm.worldY * mapScale / map.tileSize;
+        const { c, r } = map.worldToTile(lm.worldX, lm.worldY);
+        if (!map.explored[r * map.cols + c]) return;
+
+        // Radiant landmark pip
+        actx.fillStyle = lm.isSanctuary ? '#10b981' : (lm.isSellwood ? '#ef4444' : '#38bdf8');
+        actx.beginPath();
+        actx.arc(lx, ly, 6, 0, Math.PI * 2);
+        actx.fill();
+
+        // Label
+        actx.font = 'bold 9px monospace';
+        actx.fillStyle = '#ffffff';
+        actx.fillText(`${lm.icon} ${lm.name}`, lx + 9, ly + 3);
+      });
+
+      // 3. Draw Explored Major Intersections
+      if (map.intersections) {
+        actx.font = '7.5px monospace';
+        actx.fillStyle = 'rgba(148, 163, 184, 0.7)';
+        map.intersections.forEach(inter => {
+          const { c, r } = map.worldToTile(inter.worldX, inter.worldY);
+          if (map.explored[r * map.cols + c]) {
+            const ix = inter.worldX * mapScale / map.tileSize;
+            const iy = inter.worldY * mapScale / map.tileSize;
+            actx.fillText(inter.shortName, ix + 4, iy - 2);
+          }
+        });
+      }
+
+      // 4. Draw Player: High-Visibility Pulsing Golden Directional Chevron
+      const px = p.x * mapScale / map.tileSize;
+      const py = p.y * mapScale / map.tileSize;
+      const pulseTime = performance.now() * 0.005;
+      const pulseScale = 1.0 + Math.sin(pulseTime) * 0.25;
+
+      actx.save();
+      actx.translate(px, py);
+      actx.rotate(p.angle || 0);
+      actx.scale(pulseScale, pulseScale);
+
+      // Outer golden beacon aura
+      actx.beginPath();
+      actx.arc(0, 0, 14, 0, Math.PI * 2);
+      actx.fillStyle = 'rgba(245, 158, 11, 0.35)';
+      actx.fill();
+
+      // Sharp golden directional arrow
+      actx.fillStyle = '#fbbf24';
+      actx.strokeStyle = '#ffffff';
+      actx.lineWidth = 1.5;
+      actx.beginPath();
+      actx.moveTo(14, 0);
+      actx.lineTo(-8, -8);
+      actx.lineTo(-3, 0);
+      actx.lineTo(-8, 8);
+      actx.closePath();
+      actx.fill();
+      actx.stroke();
+      actx.restore();
+
+      actx.restore();
+
+      // Top Header Overlay: District & Nearest Intersection
+      let locText = 'PORTLAND OVERWORLD';
+      if (map.intersections) {
+        let closest = null;
+        let cDist = Infinity;
+        map.intersections.forEach(i => {
+          const d = Math.hypot(p.x - i.worldX, p.y - i.worldY);
+          if (d < cDist) { cDist = d; closest = i; }
+        });
+        if (closest && cDist < 700) {
+          locText = `${closest.name.toUpperCase()} · X:${Math.round(p.x)} Y:${Math.round(p.y)}`;
+        }
+      }
+
+      actx.font = 'bold 12px monospace';
+      actx.fillStyle = '#38bdf8';
+      actx.textAlign = 'center';
+      actx.fillText(`🗺️ PORTLAND AUTOMAP · ${locText}`, cw / 2, 35);
+    }
+
     function updateMinimapRadar() {
       const canvas = document.getElementById('hudMinimapCanvas');
       if (!canvas) return;
@@ -13137,19 +13910,23 @@
         });
       }
 
-      // Draw Local Hero as Cyan Directional Arrow
+      // Draw Local Hero as High-Visibility Pulsing Golden Chevron
       const { c: heroC, r: heroR } = map.worldToTile(p.x, p.y);
+      const chevronScale = w / map.cols;
       ctx2.save();
-      ctx2.translate(heroC * scale, heroR * scale);
-      ctx2.rotate(p.angle);
-      ctx2.fillStyle = '#00f5ff';
+      ctx2.translate(heroC * chevronScale, heroR * chevronScale);
+      ctx2.rotate(p.angle || 0);
+      ctx2.fillStyle = '#fbbf24';
+      ctx2.strokeStyle = '#ffffff';
+      ctx2.lineWidth = 1;
       ctx2.beginPath();
-      ctx2.moveTo(4, 0);
-      ctx2.lineTo(-3, -3);
+      ctx2.moveTo(6, 0);
+      ctx2.lineTo(-4, -4);
       ctx2.lineTo(-1, 0);
-      ctx2.lineTo(-3, 3);
+      ctx2.lineTo(-4, 4);
       ctx2.closePath();
       ctx2.fill();
+      ctx2.stroke();
       ctx2.restore();
 
       // Update District Header Tag
@@ -14022,7 +14799,7 @@
       if (!modal) return;
       const isOpening = modal.classList.contains('hidden');
       
-      ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'multiplayerModal', 'graphicsModal', 'analyticsModal', 'hotTuningModal', 'creditsModal'].forEach(id => {
+      ['inventoryModal', 'skillsModal', 'locationModal', 'charModal', 'pauseModal', 'multiplayerModal', 'graphicsModal', 'analyticsModal', 'hotTuningModal', 'creditsModal', 'stashModal', 'forgeModal', 'safehouseSelectModal', 'questLogModal', 'betaTelemetryModal'].forEach(id => {
         const m = document.getElementById(id);
         if (m && id !== modalId) m.classList.add('hidden');
       });
@@ -14948,6 +15725,1000 @@
       }, 100);
     }
 
+  
+    // =========================================================================
+    // ⚔️ MASTER EXPANSION ENGINE: DIABLO ARPG RADIAL, TWIN-STICK, TP, STASH,
+    //    FORGE, FOG OF WAR, SAFEHOUSES, NARCAN EXORCISM & NPC QUESTLINES
+    //    Designed & Directed by Kyle McLeod (@frac1ur3d-hash)
+    // =========================================================================
+    // 🛰️ LIVE BETA TELEMETRY & ANTIGRAVITY REAL-TIME HOT-PATCH BRIDGE
+    //    Designed & Directed by Kyle McLeod (@frac1ur3d-hash)
+    // =========================================================================
+    window.__RAINBLADE_DEV_BRIDGE__ = {
+      version: '2.4.0-beta',
+      director: 'Kyle McLeod (@frac1ur3d-hash)',
+      connected: true,
+      lastHeartbeat: Date.now(),
+      eventLog: [],
+      errorLog: [],
+      metrics: {
+        fps: 60,
+        frameTimeMs: 16.6,
+        enemiesAlive: 0,
+        particlesActive: 0,
+        curedCitizensTotal: 0
+      },
+      log(type, message, meta = {}) {
+        const entry = {
+          time: new Date().toLocaleTimeString(),
+          ts: Date.now(),
+          type,
+          message,
+          meta
+        };
+        this.eventLog.push(entry);
+        if (this.eventLog.length > 120) this.eventLog.shift();
+        try {
+          localStorage.setItem('rainblade_live_telemetry_last', JSON.stringify(entry));
+        } catch(e) {}
+      },
+      logError(err, context = '') {
+        const entry = {
+          time: new Date().toLocaleTimeString(),
+          ts: Date.now(),
+          error: String(err && err.message ? err.message : err),
+          stack: err && err.stack ? err.stack : '',
+          context
+        };
+        this.errorLog.push(entry);
+        if (this.errorLog.length > 30) this.errorLog.shift();
+        try {
+          localStorage.setItem('rainblade_live_telemetry_error', JSON.stringify(entry));
+        } catch(e) {}
+      },
+      getSnapshot() {
+        const p = (typeof gameState !== 'undefined' && gameState.player) ? gameState.player : {};
+        return {
+          timestamp: Date.now(),
+          fps: this.metrics.fps,
+          frameTimeMs: this.metrics.frameTimeMs,
+          player: {
+            hp: p.hp,
+            maxHp: p.maxHp,
+            energy: p.energy,
+            beans: p.beans,
+            level: p.level,
+            x: Math.round(p.x || 0),
+            y: Math.round(p.y || 0)
+          },
+          gameState: {
+            mode: gameState.mode,
+            currentDungeon: gameState.currentDungeon ? gameState.currentDungeon.districtId : null,
+            floor: gameState.currentDungeon ? gameState.currentDungeon.floor : 1,
+            enemiesCount: (gameState.enemies || []).length,
+            curedCount: (gameState.rescuedCitizens || []).length,
+            potions: gameState.potions,
+            controlMode: gameState.controlMode,
+            safehouse: gameState.safehouse,
+            loadout: gameState.loadouts ? gameState.loadouts.active : 'A'
+          },
+          recentEvents: this.eventLog.slice(-15),
+          recentErrors: this.errorLog.slice(-5)
+        };
+      },
+      // Antigravity & Diablo 2 Testing Helpers
+      teleport(x, y) {
+        if (!gameState.player) return;
+        gameState.player.x = x;
+        gameState.player.y = y;
+        gameState.player.vx = 0;
+        gameState.player.vy = 0;
+        this.log('teleport', `Teleported to ${x}, ${y}`);
+        if (typeof showToast === 'function') showToast(`Teleported to (${x}, ${y})`, 'info');
+      },
+      enterDungeon(dungeonId) {
+        if (typeof enterNeighborhoodDungeon === 'function') {
+          enterNeighborhoodDungeon(dungeonId);
+          this.log('dungeon', `Entered dungeon ${dungeonId}`);
+        }
+      },
+      enterSanctuary() {
+        if (typeof enterSafehouse === 'function') {
+          enterSafehouse();
+          this.log('sanctuary', 'Entered Safehouse Sanctuary Hub');
+        }
+      },
+      revealAllMap() {
+        if (gameState.worldMap && gameState.worldMap.explored) {
+          gameState.worldMap.explored.fill(1);
+          this.log('cheat', 'Revealed all fog of war');
+          if (typeof showToast === 'function') showToast('Fog of War fully revealed!', 'success');
+        }
+      },
+      acquireBossKey() {
+        if (gameState.currentDungeon) {
+          gameState.currentDungeon.hasBossKey = true;
+          this.log('cheat', 'Acquired Boss Sanctum Key');
+          if (typeof showToast === 'function') showToast('Boss Sanctum Key acquired via dev bridge!', 'success');
+        }
+      },
+      applyHotPatch(patchName, patchFnOrCode) {
+        try {
+          let result;
+          if (typeof patchFnOrCode === 'function') {
+            result = patchFnOrCode(gameState);
+          } else if (typeof patchFnOrCode === 'string') {
+            const fn = new Function('gameState', patchFnOrCode);
+            result = fn(gameState);
+          }
+          this.log('patch', `Hot-patch applied: ${patchName}`, { result });
+          if (typeof showToast === 'function') {
+            showToast(`🛰️ Live Hot-Patch Applied: ${patchName}`, 'success', true);
+          }
+          return { success: true, result };
+        } catch(e) {
+          this.logError(e, `HotPatch:${patchName}`);
+          return { success: false, error: e.message };
+        }
+      }
+    };
+    window.betaTelemetry = window.__RAINBLADE_DEV_BRIDGE__;
+
+    window.addEventListener('error', (e) => {
+      if (window.__RAINBLADE_DEV_BRIDGE__) {
+        window.__RAINBLADE_DEV_BRIDGE__.logError(e.error || e.message, 'window.onerror');
+      }
+    });
+
+    gameState.controlMode = 'diablo_radial'; // 'diablo_radial' | 'neon_twinstick'
+    gameState.immersiveHud = false;
+    gameState.automapActive = false;
+    gameState.combatZoom = 1.0;
+    gameState.safehouse = {
+      district: 'hawthorne',
+      name: 'Hawthorne Bohemian Roaster Loft',
+      unlocked: true,
+      perk: '+20% Cold Brew Health Potion Potency'
+    };
+    gameState.tpDeparture = null;
+    gameState.potions = {
+      health: 5,
+      narcan: 6,
+      amp: 4,
+      shield: 2
+    };
+    gameState.stashTab = 'general';
+    gameState.stash = (function() {
+      try {
+        const saved = localStorage.getItem('rainblade_stash_v1');
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) { return []; }
+    })();
+
+    gameState.loadouts = {
+      active: 'A',
+      A: null,
+      B: null
+    };
+
+    gameState.forge = {
+      mode: 'additive',
+      itemA: null,
+      itemB: null
+    };
+
+    gameState.activeQuests = {
+      jeweler_geode: { id: 'jeweler_geode', title: 'The Raw Geode of the Sunken Crypt', npc: 'The Jeweler', targetDistrict: 'creston', progress: 0, target: 1, completed: false, rewardName: 'Jeweler\'s Sovereign Signet' },
+      police_narcan: { id: 'police_narcan', title: 'The Hijacked Narcan Shipment', npc: 'PDX Police Chief', targetDistrict: 'ave_82nd', progress: 0, target: 1, completed: false, rewardName: 'PDX Chief\'s Tactical Riot Aegis' },
+      tailor_silk: { id: 'tailor_silk', title: 'The Cyber-Weaver\'s Nanoweave', npc: 'The Tailor', targetDistrict: 'chinatown', progress: 0, target: 3, completed: false, rewardName: 'Masterwork Nanoweave Duster' },
+      armorer_crucible: { id: 'armorer_crucible', title: 'The Scrap Warlord\'s Crucible', npc: 'The Armorer', targetDistrict: 'powellhurst', progress: 0, target: 1, completed: false, rewardName: 'Crucible Blade Masterwork Tempering' }
+    };
+
+    gameState.rescuedCitizens = [];
+
+    // Potions & Stims System (Hotkeys 1 - 4)
+    window.usePotion = function(slot) {
+      const p = gameState.player;
+      if (slot === 1) { // 1: Cold Brew Health Potion
+        if (gameState.potions.health <= 0) {
+          showToast("⚠️ Out of Cold Brew! Scavenge crates or visit Safehouse.", "warning");
+          playSound('empty');
+          return;
+        }
+        if (p.hp >= p.maxHp) {
+          showToast("Health already full!", "info");
+          return;
+        }
+        gameState.potions.health--;
+        const boost = gameState.safehouse.district === 'hawthorne' ? 75 : 60;
+        p.hp = Math.min(p.maxHp, p.hp + boost);
+        playSound('heal');
+        createImpactParticles(p.x, p.y, '#10b981', 20);
+        addFloatingText("+" + boost + " HP", p.x, p.y - 25, '#10b981', 18);
+        showToast("☕ Cold Brew consumed: +" + boost + " HP", "success", true);
+      } else if (slot === 2) { // 2: Narcan Syringe (Zombie Exorcism & Cure)
+        if (gameState.potions.narcan <= 0) {
+          showToast("⚠️ No Narcan Stims! Speak to PDX Police Chief at Safehouse.", "warning");
+          playSound('empty');
+          return;
+        }
+        let targetZombie = null;
+        let minD = 140;
+        gameState.enemies.forEach(e => {
+          if (!e.isExorcising && (e.archetypeId === 'fetty_zombie' || (e.name && e.name.includes('Zombie')) || (e.name && e.name.includes('Fetty')))) {
+            const d = Math.hypot(e.x - p.x, e.y - p.y);
+            if (d < minD) { minD = d; targetZombie = e; }
+          }
+        });
+
+        if (targetZombie) {
+          gameState.potions.narcan--;
+          administerNarcanToZombie(targetZombie);
+        } else {
+          gameState.potions.narcan--;
+          p.isChilled = 0;
+          p.hp = Math.min(p.maxHp, p.hp + 25);
+          playSound('heal');
+          createImpactParticles(p.x, p.y, '#f43f5e', 20);
+          showToast("💉 Narcan injected: System Purged of Contaminants!", "success", true);
+        }
+      } else if (slot === 3) { // 3: Amp Stim (Speed & Haste)
+        if (gameState.potions.amp <= 0) {
+          showToast("⚠️ Out of Amp Stims! Hunt elites or scavenge crates.", "warning");
+          playSound('empty');
+          return;
+        }
+        gameState.potions.amp--;
+        p.ampCharges = Math.min(p.ampMaxCharges, (p.ampCharges || 0) + 1);
+        useAmpStim();
+      } else if (slot === 4) { // 4: Shield Elixir
+        if (gameState.potions.shield <= 0) {
+          showToast("⚠️ No Shield Elixirs available!", "warning");
+          playSound('empty');
+          return;
+        }
+        gameState.potions.shield--;
+        p.energy = p.maxEnergy;
+        playSound('special');
+        createImpactParticles(p.x, p.y, '#38bdf8', 25);
+        addFloatingText("🛡️ CYBER SHIELD CHARGED!", p.x, p.y - 25, '#38bdf8', 18);
+        showToast("🛡️ Cybernetic Forcefield online!", "success", true);
+      }
+      updatePotionBadges();
+      updateHUD();
+    };
+
+    function updatePotionBadges() {
+      const tb1 = document.getElementById('badgeTouchPotion1'); if (tb1) tb1.textContent = 'x' + gameState.potions.health;
+      const tb2 = document.getElementById('badgeTouchPotion2'); if (tb2) tb2.textContent = 'x' + gameState.potions.narcan;
+      const tb3 = document.getElementById('badgeTouchPotion3'); if (tb3) tb3.textContent = 'x' + gameState.potions.amp;
+      const tb4 = document.getElementById('badgeTouchPotion4'); if (tb4) tb4.textContent = 'x' + gameState.potions.shield;
+    }
+
+    // Narcan Zombie Exorcism & Citizen Recovery Mechanic
+    function administerNarcanToZombie(zombie) {
+      zombie.isExorcising = true;
+      zombie.exorcismTimer = 6.0;
+      zombie.origSpeed = zombie.speed;
+      zombie.speed = 0.5;
+      playSound('special');
+      addFloatingText("⚡ PRECIPITATED WITHDRAWAL INITIATED!", zombie.x, zombie.y - 30, '#f43f5e', 16);
+      showToast("💉 Narcan injected! DEFEND THE CONVULSING CITIZEN!", "warning", true);
+      triggerWaveAnnouncement("⚡ EXORCISM IN PROGRESS", "Do not strike the convulsing victim!");
+      triggerTelegramHaptic('notification', 'warning');
+    }
+
+    function updateExorcisms(dt) {
+      if (!gameState.enemies || gameState.enemies.length === 0) return;
+      const p = gameState.player;
+
+      for (let i = gameState.enemies.length - 1; i >= 0; i--) {
+        const e = gameState.enemies[i];
+        if (e && e.isExorcising) {
+          e.exorcismTimer -= dt;
+
+          if (Math.random() < 0.35) {
+            createImpactParticles(e.x, e.y, '#84cc16', 3);
+            createImpactParticles(e.x, e.y, '#78350f', 2);
+            if (Math.hypot(p.x - e.x, p.y - e.y) < 65) {
+              p.hp = Math.max(1, p.hp - (6 * dt));
+              updateHUD();
+            }
+          }
+
+          if (e.exorcismTimer <= 0) {
+            e.isExorcising = false;
+            const citizenX = e.x;
+            const citizenY = e.y;
+            gameState.enemies.splice(i, 1);
+
+            const curedCitizen = {
+              x: citizenX,
+              y: citizenY,
+              name: 'Rescued Resident',
+              rescued: true
+            };
+            gameState.rescuedCitizens.push(curedCitizen);
+            p.beans += 120;
+            p.xp += 150;
+            playSound('coin');
+            playSound('level');
+            createImpactParticles(citizenX, citizenY, '#38bdf8', 30);
+            addFloatingText("🕊️ CITIZEN REHABILITATED! +120 BEANS", citizenX, citizenY - 35, '#38bdf8', 19);
+            showToast("🕊️ Exorcism Successful! A human life was saved.", "success", true);
+            triggerTelegramHaptic('notification', 'success');
+
+            if (gameState.currentDungeon) {
+              gameState.currentDungeon.civiliansSaved = (gameState.currentDungeon.civiliansSaved || 0) + 1;
+              updateQuestTrackerUI();
+            }
+          }
+        }
+      }
+    }
+
+    // Town Portal (TP) & Hero's Safehouse Residence
+    window.castTownPortal = function() {
+      const p = gameState.player;
+      if (gameState.mode === 'residence') {
+        showToast("Already inside your Safehouse sanctuary!", "info");
+        return;
+      }
+
+      gameState.tpDeparture = {
+        mode: gameState.mode,
+        x: p.x,
+        y: p.y,
+        districtId: gameState.currentDungeon ? gameState.currentDungeon.id : null,
+        floor: gameState.currentDungeon ? gameState.currentDungeon.floor : 1
+      };
+
+      playSound('level');
+      createImpactParticles(p.x, p.y, '#38bdf8', 30);
+      showToast("🌀 Town Portal opened! Warping to Safehouse", "success", true);
+
+      setTimeout(() => {
+        enterSafehouse();
+      }, 300);
+    };
+
+    function enterSafehouse() {
+      gameState.mode = 'residence';
+      chunkCache.clear();
+      gameState.enemies = [];
+      gameState.projectiles = [];
+      gameState.groundHazards = [];
+
+      const p = gameState.player;
+      p.x = 0;
+      p.y = 100;
+      p.vx = 0;
+      p.vy = 0;
+      p.hp = p.maxHp;
+      p.energy = p.maxEnergy;
+
+      triggerWaveAnnouncement("🏠 PORTLAND SAFEHOUSE", gameState.safehouse.name);
+      showToast("Welcome home, operative. Health & Energy fully restored.", "success", true);
+      updateHUD();
+    }
+
+    window.returnFromSafehouse = function() {
+      if (!gameState.tpDeparture) {
+        showToast("No active departure portal!", "warning");
+        return;
+      }
+      const dep = gameState.tpDeparture;
+      playSound('level');
+      chunkCache.clear();
+
+      if (dep.mode === 'dungeon' && dep.districtId) {
+        enterNeighborhoodDungeon(dep.districtId);
+        if (dep.floor === 2) descendToFloor2();
+      } else {
+        gameState.mode = 'residence';
+        gameState.currentDungeon = null;
+      }
+
+      const p = gameState.player;
+      p.x = dep.x;
+      p.y = dep.y;
+      p.vx = 0;
+      p.vy = 0;
+      gameState.tpDeparture = null;
+      showToast("Returned through Town Portal!", "success", true);
+      updateHUD();
+    };
+
+    // Diablo 2 Stash Chest
+    window.openStashModal = function() {
+      renderStashUI();
+      toggleModal('stashModal');
+    };
+
+    window.switchStashTab = function(tab) {
+      gameState.stashTab = tab;
+      renderStashUI();
+    };
+
+    function renderStashUI() {
+      const grid = document.getElementById('stashGrid');
+      const capText = document.getElementById('stashCapacityText');
+      if (!grid) return;
+
+      const items = gameState.stash || [];
+      if (capText) capText.textContent = "Stored Items: " + items.length + " / 100";
+
+      grid.innerHTML = '';
+      for (let i = 0; i < 48; i++) {
+        const item = items[i];
+        const slotDiv = document.createElement('div');
+        if (item) {
+          const tierBorder = item.tier === 'legendary' ? 'border-amber-400' : (item.tier === 'epic' ? 'border-purple-400' : 'border-cyan-400');
+          slotDiv.className = 'stash-slot w-full aspect-square rounded-xl bg-slate-900 border-2 ' + tierBorder + ' flex flex-col items-center justify-center p-1 relative cursor-pointer hover:scale-105';
+          slotDiv.onclick = () => withdrawItemFromStash(i);
+          slotDiv.innerHTML = '<span class="text-xl">' + (item.icon || '⚔️') + '</span><span class="text-[9px] font-mono text-center truncate w-full text-slate-200 mt-1">' + (item.name ? item.name.split(' ')[0] : 'Item') + '</span>';
+        } else {
+          slotDiv.className = 'stash-slot w-full aspect-square rounded-xl bg-slate-950/50 border border-slate-800 flex items-center justify-center text-slate-700 text-xs font-mono';
+          slotDiv.textContent = i + 1;
+        }
+        grid.appendChild(slotDiv);
+      }
+    }
+
+    function renderInventoryUI() {
+      if (typeof renderInventoryBag === 'function') renderInventoryBag();
+      if (typeof renderArmoryUI === 'function') renderArmoryUI();
+    }
+    window.renderInventoryUI = renderInventoryUI;
+
+    window.depositItemToStash = function(bagIndex) {
+      if ((gameState.stash || []).length >= 100) {
+        showToast("Stash is completely full (100/100 slots)!", "warning");
+        return;
+      }
+      const item = gameState.inventory[bagIndex];
+      if (!item) return;
+      gameState.inventory.splice(bagIndex, 1);
+      gameState.stash.push(item);
+      localStorage.setItem('rainblade_stash_v1', JSON.stringify(gameState.stash));
+      playSound('coin');
+      showToast("Deposited " + item.name + " into Stash.", "success", true);
+      renderStashUI();
+      renderInventoryUI();
+    };
+
+    window.withdrawItemFromStash = function(stashIndex) {
+      if (gameState.inventory.length >= getInventoryCapacity()) {
+        showToast("Your inventory bag is full! Free up space first.", "warning");
+        return;
+      }
+      const item = gameState.stash[stashIndex];
+      if (!item) return;
+      gameState.stash.splice(stashIndex, 1);
+      gameState.inventory.push(item);
+      localStorage.setItem('rainblade_stash_v1', JSON.stringify(gameState.stash));
+      playSound('coin');
+      showToast("Withdrew " + item.name + " to inventory bag.", "success", true);
+      renderStashUI();
+      renderInventoryUI();
+    };
+
+    window.depositAllGemsToStash = function() {
+      let count = 0;
+      for (let i = gameState.inventory.length - 1; i >= 0; i--) {
+        const item = gameState.inventory[i];
+        if (item && (item.type === 'gem' || item.type === 'socket' || item.type === 'material')) {
+          if (gameState.stash.length < 100) {
+            gameState.inventory.splice(i, 1);
+            gameState.stash.push(item);
+            count++;
+          }
+        }
+      }
+      if (count > 0) {
+        localStorage.setItem('rainblade_stash_v1', JSON.stringify(gameState.stash));
+        playSound('coin');
+        showToast("Quick-deposited " + count + " items into Stash!", "success", true);
+        renderStashUI();
+        renderInventoryUI();
+      } else {
+        showToast("No gems or materials found in bag to deposit.", "info");
+      }
+    };
+
+    // Quick Gear Loadout Swap (Profile I vs Profile II)
+    window.swapGearLoadout = function() {
+      if (!gameState.loadouts.A) {
+        gameState.loadouts.A = JSON.parse(JSON.stringify(gameState.equipped));
+      }
+
+      if (gameState.loadouts.active === 'A') {
+        gameState.loadouts.A = JSON.parse(JSON.stringify(gameState.equipped));
+        if (!gameState.loadouts.B) {
+          gameState.loadouts.B = JSON.parse(JSON.stringify(gameState.equipped));
+        }
+        gameState.equipped = JSON.parse(JSON.stringify(gameState.loadouts.B));
+        gameState.loadouts.active = 'B';
+        playSound('equip');
+        addFloatingText("⚔️ LOADOUT II ACTIVE", gameState.player.x, gameState.player.y - 25, '#fbbf24', 18);
+        showToast("⚔️ Swapped to Profile II Loadout!", "success", true);
+      } else {
+        gameState.loadouts.B = JSON.parse(JSON.stringify(gameState.equipped));
+        gameState.equipped = JSON.parse(JSON.stringify(gameState.loadouts.A));
+        gameState.loadouts.active = 'A';
+        playSound('equip');
+        addFloatingText("⚔️ LOADOUT I ACTIVE", gameState.player.x, gameState.player.y - 25, '#38bdf8', 18);
+        showToast("⚔️ Swapped to Profile I Loadout!", "success", true);
+      }
+
+      recalcPlayerStats();
+      updateHUD();
+      renderInventoryUI();
+      triggerTelegramHaptic('impact', 'medium');
+    };
+
+    // The Jeweler's Quantum Forge (Item Fusion)
+    window.openForgeModal = function() {
+      toggleModal('forgeModal');
+    };
+
+    window.setForgeMode = function(mode) {
+      gameState.forge.mode = mode;
+      const bAdd = document.getElementById('btnForgeModeAdditive');
+      const bInf = document.getElementById('btnForgeModeInfusion');
+      const bDual = document.getElementById('btnForgeModeDual');
+
+      [bAdd, bInf, bDual].forEach(b => {
+        if (b) b.className = 'p-3 rounded-2xl border-2 border-slate-700 bg-slate-950/40 text-slate-400 font-bold flex flex-col items-center gap-1 hover:border-slate-500';
+      });
+
+      if (mode === 'additive' && bAdd) bAdd.className = 'p-3 rounded-2xl border-2 border-cyan-500 bg-cyan-950/40 text-cyan-300 font-bold flex flex-col items-center gap-1 shadow-md';
+      if (mode === 'infusion' && bInf) bInf.className = 'p-3 rounded-2xl border-2 border-amber-500 bg-amber-950/40 text-amber-300 font-bold flex flex-col items-center gap-1 shadow-md';
+      if (mode === 'dual' && bDual) bDual.className = 'p-3 rounded-2xl border-2 border-purple-500 bg-purple-950/40 text-purple-300 font-bold flex flex-col items-center gap-1 shadow-md';
+    };
+
+    window.openForgeSelector = function(socket) {
+      const item = gameState.inventory.find(it => it.type === 'weapon' || it.type === 'chest' || it.type === 'head' || it.type === 'boots');
+      if (!item) {
+        showToast("No forgeable equipment found in bag!", "warning");
+        return;
+      }
+      if (socket === 'A') {
+        gameState.forge.itemA = item;
+        const nameEl = document.getElementById('forgeNameA');
+        if (nameEl) nameEl.textContent = item.name;
+      } else {
+        gameState.forge.itemB = item;
+        const nameEl = document.getElementById('forgeNameB');
+        if (nameEl) nameEl.textContent = item.name;
+      }
+    };
+
+    window.executeItemForge = function() {
+      const iA = gameState.forge.itemA;
+      const iB = gameState.forge.itemB;
+      if (!iA || !iB) {
+        showToast("Please place two items into the forge sockets first!", "warning");
+        return;
+      }
+      if (gameState.player.beans < 150) {
+        showToast("Requires 150 Stumptown Beans for Forge ignition!", "warning");
+        return;
+      }
+
+      gameState.player.beans -= 150;
+      playSound('special');
+      playSound('level');
+
+      const fused = JSON.parse(JSON.stringify(iA));
+      fused.id = 'forged_' + Date.now();
+      fused.grade = 'ancient';
+      fused.name = iA.name + " ★ Masterwork";
+
+      if (gameState.forge.mode === 'additive') {
+        fused.damage = Math.round((iA.damage || 15) + (iB.damage || 10) * 0.45);
+      } else if (gameState.forge.mode === 'infusion') {
+        fused.setId = iB.setId || iA.setId;
+      } else {
+        fused.damage = Math.round((iA.damage || 15) * 1.3);
+        fused.setId = iB.setId || iA.setId;
+        fused.sockets = Math.max(1, (iA.sockets || 0) + 1);
+      }
+
+      const idxA = gameState.inventory.indexOf(iA);
+      if (idxA >= 0) gameState.inventory.splice(idxA, 1);
+      const idxB = gameState.inventory.indexOf(iB);
+      if (idxB >= 0) gameState.inventory.splice(idxB, 1);
+
+      gameState.inventory.push(fused);
+      gameState.forge.itemA = null;
+      gameState.forge.itemB = null;
+
+      addFloatingText("🔥 MASTERWORK ITEM SYNTHESIZED!", gameState.player.x, gameState.player.y - 30, '#f59e0b', 20);
+      showToast("🔥 Forge successful: " + fused.name + " created!", "success", true);
+      renderInventoryUI();
+      updateHUD();
+      toggleModal('forgeModal');
+    };
+
+    // Mayor Safehouse Neighborhood Selection
+    window.openSafehouseSelectModal = function() {
+      toggleModal('safehouseSelectModal');
+    };
+
+    window.selectSafehouseDistrict = function(districtId) {
+      const districts = {
+        pearl: { name: 'Pearl District Penthouse Arcology', perk: '+15% Gem & Crystal Drop Rate' },
+        hawthorne: { name: 'Hawthorne Bohemian Roaster Loft', perk: '+20% Cold Brew Health Potion Potency' },
+        lents: { name: 'Lents Industrial Rail Warehouse', perk: '+25% Scrap Metal Salvage Yield' },
+        chinatown: { name: 'Chinatown Dragon Tea House', perk: '+15% Movement Speed in Dungeons' }
+      };
+
+      const sel = districts[districtId] || districts.hawthorne;
+      gameState.safehouse.district = districtId;
+      gameState.safehouse.name = sel.name;
+      gameState.safehouse.perk = sel.perk;
+
+      playSound('level');
+      showToast("Safehouse established at " + sel.name + "!", "success", true);
+      toggleModal('safehouseSelectModal');
+    };
+
+    // Diablo 2 Quest Journal ('Q' Key)
+    window.openQuestLogModal = function() {
+      const container = document.getElementById('questCardsContainer');
+      if (!container) return;
+
+      container.innerHTML = '';
+      Object.values(gameState.activeQuests).forEach(q => {
+        const card = document.createElement('div');
+        const isDone = q.progress >= q.target;
+        const borderCol = isDone ? 'border-emerald-500 bg-emerald-950/20' : 'border-purple-500/40 bg-slate-950/60';
+        card.className = 'p-4 rounded-2xl border-2 ' + borderCol + ' space-y-2';
+        card.innerHTML = `
+          <div class="flex justify-between items-center font-bold text-white text-sm">
+            <span>${q.title}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-300' : 'bg-purple-500/20 text-purple-300'}">${isDone ? 'COMPLETED' : 'ACTIVE'}</span>
+          </div>
+          <div class="text-[11px] text-slate-400">Questgiver: <b class="text-cyan-300">${q.npc}</b> · Zone: <b class="text-amber-300 uppercase">${q.targetDistrict}</b></div>
+          <div class="flex justify-between items-center text-xs text-slate-300 pt-1">
+            <span>Objective: ${q.progress} / ${q.target}</span>
+            <span class="text-amber-400 font-bold">🎁 ${q.rewardName}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      toggleModal('questLogModal');
+    };
+
+    // Automap ('TAB' Key)
+    window.toggleAutomap = function() {
+      gameState.automapActive = !gameState.automapActive;
+      const overlay = document.getElementById('automapOverlayContainer');
+      if (overlay) {
+        overlay.classList.toggle('hidden', !gameState.automapActive);
+      }
+    };
+
+    window.toggleMobileControlMode = function() {
+      gameState.controlMode = gameState.controlMode === 'diablo_radial' ? 'neon_twinstick' : 'diablo_radial';
+      const badge = document.getElementById('txtControlModeBadge');
+      if (badge) {
+        badge.textContent = gameState.controlMode === 'diablo_radial' ? '🎮 DIABLO' : '🕹️ TWIN-STICK';
+      }
+      const cluster = document.getElementById('diabloRadialCluster');
+      if (cluster) {
+        cluster.classList.toggle('hidden', gameState.controlMode === 'neon_twinstick');
+      }
+      showToast("Control Mode: " + (gameState.controlMode === 'diablo_radial' ? 'Diablo Radial Arc' : 'Neon Arena Twin-Stick'), "info", true);
+    };
+
+    window.toggleImmersiveHud = function() {
+      gameState.immersiveHud = !gameState.immersiveHud;
+      const topHud = document.getElementById('topNavHeader');
+      const bottomDock = document.getElementById('desktopHotbarDock');
+      if (topHud) topHud.classList.toggle('opacity-0', gameState.immersiveHud);
+      if (bottomDock) bottomDock.classList.toggle('opacity-0', gameState.immersiveHud);
+      showToast(gameState.immersiveHud ? "Immersive HUD: UI Hidden" : "Immersive HUD: UI Restored", "info", true);
+    };
+
+    window.toggleBetaTelemetryModal = function() {
+      const modal = document.getElementById('betaTelemetryModal');
+      if (!modal) return;
+      const isHidden = modal.classList.contains('hidden');
+      if (isHidden) {
+        renderBetaTelemetryUI();
+      }
+      toggleModal('betaTelemetryModal');
+    };
+
+    window.renderBetaTelemetryUI = function() {
+      if (!window.__RAINBLADE_DEV_BRIDGE__) return;
+      const snap = window.__RAINBLADE_DEV_BRIDGE__.getSnapshot();
+      const elFps = document.getElementById('betaDiagFps');
+      const elFrameTime = document.getElementById('betaDiagFrameTime');
+      const elEnemies = document.getElementById('betaDiagEnemies');
+      const elCured = document.getElementById('betaDiagCured');
+      const elLog = document.getElementById('betaDiagEventLog');
+      
+      if (elFps) elFps.textContent = snap.fps + ' FPS';
+      if (elFrameTime) elFrameTime.textContent = snap.frameTimeMs + ' ms';
+      if (elEnemies) elEnemies.textContent = snap.gameState.enemiesCount;
+      if (elCured) elCured.textContent = snap.gameState.curedCount;
+      
+      if (elLog) {
+        elLog.innerHTML = snap.recentEvents.slice().reverse().map(e => 
+          `<div class="p-1.5 rounded bg-slate-950/70 border border-slate-800 text-[10px] text-slate-300 font-mono">
+            <span class="text-cyan-400 font-bold">[${e.time}]</span> <span class="text-amber-400 font-bold">${e.type.toUpperCase()}:</span> ${e.message}
+          </div>`
+        ).join('') || '<div class="text-xs text-slate-500 italic">No events logged yet.</div>';
+      }
+    };
+
+    window.copyTelemetrySnapshot = function() {
+      if (!window.__RAINBLADE_DEV_BRIDGE__) return;
+      const snap = window.__RAINBLADE_DEV_BRIDGE__.getSnapshot();
+      const json = JSON.stringify(snap, null, 2);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(json).then(() => {
+          showToast("📋 Telemetry Snapshot Copied to Clipboard! Paste to Antigravity.", "success", true);
+        }).catch(() => {
+          showToast("Snapshot ready in console: window.__RAINBLADE_DEV_BRIDGE__.getSnapshot()", "info");
+        });
+      } else {
+        showToast("Snapshot in window.__RAINBLADE_DEV_BRIDGE__.getSnapshot()", "info");
+      }
+    };
+
+    window.executeLiveHotPatchInput = function() {
+      const input = document.getElementById('txtHotPatchInput');
+      if (!input || !input.value.trim()) return;
+      const code = input.value.trim();
+      const res = window.__RAINBLADE_DEV_BRIDGE__.applyHotPatch('Manual Input Patch', code);
+      if (res.success) {
+        showToast("🛰️ Patch applied successfully!", "success", true);
+        renderBetaTelemetryUI();
+      } else {
+        showToast("⚠️ Patch error: " + res.error, "error", true);
+      }
+    };
+
+    // Mobile Dynamic Touch Controller Setup
+    const touchSticks = {
+      move: { active: false, id: -1, startX: 0, startY: 0 },
+      aim:  { active: false, id: -1, startX: 0, startY: 0 }
+    };
+    let attackHoldInterval = null;
+
+    function initDynamicTouchEngine() {
+      const tc = document.getElementById('touchControls');
+      if (!tc) return;
+
+      const moveEl = document.getElementById('dynamicMoveStick');
+      const moveKnob = document.getElementById('dynamicMoveKnob');
+      const aimEl = document.getElementById('dynamicAimStick');
+      const aimKnob = document.getElementById('dynamicAimKnob');
+
+      window.addEventListener('touchstart', (e) => {
+        if (!audioInitialized) initAudio();
+        const W = window.innerWidth;
+
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (t.clientX < W * 0.50 && !touchSticks.move.active) {
+            touchSticks.move.active = true;
+            touchSticks.move.id = t.identifier;
+            touchSticks.move.startX = t.clientX;
+            touchSticks.move.startY = t.clientY;
+            if (moveEl) {
+              moveEl.style.left = t.clientX + 'px';
+              moveEl.style.top = t.clientY + 'px';
+              moveEl.classList.remove('hidden');
+            }
+            if (moveKnob) moveKnob.style.transform = 'translate(0px, 0px)';
+            gameState.touchJoystick.active = true;
+          } else if (t.clientX >= W * 0.50 && gameState.controlMode === 'neon_twinstick' && !touchSticks.aim.active) {
+            touchSticks.aim.active = true;
+            touchSticks.aim.id = t.identifier;
+            touchSticks.aim.startX = t.clientX;
+            touchSticks.aim.startY = t.clientY;
+            if (aimEl) {
+              aimEl.style.left = t.clientX + 'px';
+              aimEl.style.top = t.clientY + 'px';
+              aimEl.classList.remove('hidden');
+            }
+            if (aimKnob) aimKnob.style.transform = 'translate(0px, 0px)';
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchmove', (e) => {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (touchSticks.move.active && t.identifier === touchSticks.move.id) {
+            let dx = t.clientX - touchSticks.move.startX;
+            let dy = t.clientY - touchSticks.move.startY;
+            const dist = Math.hypot(dx, dy);
+            const R = 50;
+
+            if (dist > R) {
+              touchSticks.move.startX += dx - (dx / dist) * R;
+              touchSticks.move.startY += dy - (dy / dist) * R;
+              if (moveEl) {
+                moveEl.style.left = touchSticks.move.startX + 'px';
+                moveEl.style.top = touchSticks.move.startY + 'px';
+              }
+              dx = (dx / dist) * R;
+              dy = (dy / dist) * R;
+            }
+
+            if (moveKnob) moveKnob.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+            gameState.touchJoystick.dirX = dx / R;
+            gameState.touchJoystick.dirY = dy / R;
+          }
+
+          if (touchSticks.aim.active && t.identifier === touchSticks.aim.id) {
+            let dx = t.clientX - touchSticks.aim.startX;
+            let dy = t.clientY - touchSticks.aim.startY;
+            const dist = Math.hypot(dx, dy);
+            const R = 50;
+            if (dist > R) {
+              touchSticks.aim.startX += dx - (dx / dist) * R;
+              touchSticks.aim.startY += dy - (dy / dist) * R;
+              if (aimEl) {
+                aimEl.style.left = touchSticks.aim.startX + 'px';
+                aimEl.style.top = touchSticks.aim.startY + 'px';
+              }
+              dx = (dx / dist) * R;
+              dy = (dy / dist) * R;
+            }
+            if (aimKnob) aimKnob.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+            if (dist > 10) {
+              gameState.player.angle = Math.atan2(dy, dx);
+              triggerAttack();
+            }
+          }
+        }
+      }, { passive: false });
+
+      const endTouch = (e) => {
+        for (let i = 0; i < e.changedTouches.length; i++) {
+          const t = e.changedTouches[i];
+          if (touchSticks.move.active && t.identifier === touchSticks.move.id) {
+            touchSticks.move.active = false;
+            touchSticks.move.id = -1;
+            gameState.touchJoystick.active = false;
+            gameState.touchJoystick.dirX = 0;
+            gameState.touchJoystick.dirY = 0;
+            if (moveEl) moveEl.classList.add('hidden');
+          }
+          if (touchSticks.aim.active && t.identifier === touchSticks.aim.id) {
+            touchSticks.aim.active = false;
+            touchSticks.aim.id = -1;
+            if (aimEl) aimEl.classList.add('hidden');
+          }
+        }
+      };
+
+      window.addEventListener('touchend', endTouch, { passive: false });
+      window.addEventListener('touchcancel', endTouch, { passive: false });
+
+      // Primary Attack Button: Hold-to-Attack Auto-Combo Binding
+      const btnAtk = document.getElementById('btnRadialAttack');
+      if (btnAtk) {
+        btnAtk.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          if (!audioInitialized) initAudio();
+          triggerAutoTargetAttack();
+          if (!attackHoldInterval) {
+            attackHoldInterval = setInterval(() => {
+              triggerAutoTargetAttack();
+            }, 180);
+          }
+        }, { passive: false });
+
+        const stopHoldAttack = () => {
+          if (attackHoldInterval) {
+            clearInterval(attackHoldInterval);
+            attackHoldInterval = null;
+          }
+        };
+        btnAtk.addEventListener('touchend', stopHoldAttack);
+        btnAtk.addEventListener('touchcancel', stopHoldAttack);
+      }
+
+      const bindBtn = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!audioInitialized) initAudio();
+            fn();
+          }, { passive: false });
+        }
+      };
+
+      bindBtn('btnRadialDodge', triggerDodge);
+      bindBtn('btnRadialSkill1', () => triggerSkill(1));
+      bindBtn('btnRadialSkill2', () => triggerSkill(2));
+      bindBtn('btnRadialSkill3', () => triggerSkill(3));
+    }
+    initDynamicTouchEngine();
+
+    function triggerAutoTargetAttack() {
+      const p = gameState.player;
+      let bestTarget = null;
+      let minScore = Infinity;
+
+      if (gameState.enemies && gameState.enemies.length > 0) {
+        gameState.enemies.forEach(e => {
+          const d = Math.hypot(e.x - p.x, e.y - p.y);
+          if (d <= 260) {
+            let score = d;
+            if (e.isBoss) score -= 100;
+            if (e.isElite) score -= 50;
+            if (score < minScore) {
+              minScore = score;
+              bestTarget = e;
+            }
+          }
+        });
+      }
+
+      if (bestTarget) {
+        p.angle = Math.atan2(bestTarget.y - p.y, bestTarget.x - p.x);
+      }
+      triggerAttack();
+    }
+
+    // Desktop Hotkeys (Q, LMB, RMB, 1-4, TAB, T, X, I, B, E, R, F)
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (e.repeat) return;
+
+      if (key === 'q') {
+        e.preventDefault();
+        openQuestLogModal();
+      } else if (key === 'tab') {
+        e.preventDefault();
+        toggleAutomap();
+      } else if (key === 't') {
+        e.preventDefault();
+        castTownPortal();
+      } else if (key === 'x') {
+        e.preventDefault();
+        swapGearLoadout();
+      } else if (key === '1') {
+        usePotion(1);
+      } else if (key === '2') {
+        usePotion(2);
+      } else if (key === '3') {
+        usePotion(3);
+      } else if (key === '4') {
+        usePotion(4);
+      } else if (key === 'i' || key === 'b') {
+        toggleModal('inventoryModal');
+      } else if (key === 'e') {
+        if (gameState.mode === 'residence') { interactWithSanctuaryStation(); return; }
+        checkDungeonStairsInteraction();
+        triggerSkill(2);
+      } else if (key === 'r') {
+        triggerSkill(3);
+      } else if (key === 'f') {
+        triggerTrinket();
+      }
+    });
+
+    if (typeof canvas !== 'undefined' && canvas) {
+      canvas.addEventListener('mousedown', (e) => {
+        if (e.button === 2) {
+          e.preventDefault();
+          triggerSkill(1);
+        }
+      });
+    }
+
   </script>
 
   <!-- EMERGENCY SPONSOR REVIVE MODAL -->
@@ -15091,6 +16862,317 @@
       <div id="classCardsGrid" class="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         <!-- Rendered dynamically -->
       </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 📦 DIABLO 2 PERSISTENT STASH CHEST MODAL (100 SLOTS) -->
+  <!-- ========================================================================= -->
+  <div id="stashModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div class="max-w-4xl w-full rounded-3xl bg-slate-900 border border-cyan-500/50 shadow-[0_0_60px_rgba(56,189,248,0.3)] flex flex-col max-h-[92vh] overflow-hidden font-mono">
+      <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/80">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">📦</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">PORTLAND SAFEHOUSE STASH</h2>
+            <p class="text-[11px] text-cyan-400">Secure Vault Storage · Diablo 2 Multi-Tab Architecture</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="depositAllGemsToStash()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-amber-300 font-bold border border-amber-500/40 transition-colors">
+            ⚡ QUICK DEPOSIT
+          </button>
+          <button onclick="toggleModal('stashModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Stash Tabs -->
+      <div class="flex border-b border-slate-800 bg-slate-950/50 px-4 pt-2 gap-2 text-xs">
+        <button id="tabStashGeneral" onclick="switchStashTab('general')" class="px-4 py-2 font-bold rounded-t-xl bg-slate-900 border-t border-x border-cyan-500/40 text-cyan-300">
+          GENERAL (I)
+        </button>
+        <button id="tabStashWeapons" onclick="switchStashTab('weapons')" class="px-4 py-2 font-bold rounded-t-xl bg-slate-950/40 border-t border-x border-transparent text-slate-400 hover:text-slate-200">
+          WEAPONS & SHIELDS (II)
+        </button>
+        <button id="tabStashArmor" onclick="switchStashTab('armor')" class="px-4 py-2 font-bold rounded-t-xl bg-slate-950/40 border-t border-x border-transparent text-slate-400 hover:text-slate-200">
+          ARMOR & SETS (III)
+        </button>
+        <button id="tabStashGems" onclick="switchStashTab('gems')" class="px-4 py-2 font-bold rounded-t-xl bg-slate-950/40 border-t border-x border-transparent text-slate-400 hover:text-slate-200">
+          GEMS & NARCAN (IV)
+        </button>
+      </div>
+
+      <!-- Stash Grid Content -->
+      <div class="p-4 overflow-y-auto flex-1 bg-slate-950/30">
+        <div class="flex justify-between items-center text-xs text-slate-400 mb-3 px-1">
+          <span id="stashCapacityText">Stored Items: 0 / 100</span>
+          <span class="text-[10px] text-cyan-400">💡 Click an item to withdraw to bag · Click bag item to deposit</span>
+        </div>
+        <div id="stashGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- ⚒️ THE JEWELER'S QUANTUM FORGE MODAL (DIABLO 3 FUSION) -->
+  <!-- ========================================================================= -->
+  <div id="forgeModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 font-mono">
+    <div class="max-w-2xl w-full rounded-3xl bg-slate-900 border-2 border-amber-500/60 shadow-[0_0_70px_rgba(245,158,11,0.35)] flex flex-col max-h-[92vh] overflow-hidden">
+      <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/80">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">⚒️</span>
+          <div>
+            <h2 id="forgeTitleText" class="font-display font-black text-lg text-amber-300 tracking-wider uppercase">THE JEWELER'S QUANTUM FORGE</h2>
+            <p id="forgeSubheadText" class="text-[11px] text-slate-400">Item Synthesis & Dual-Stat Fusion Engine · Neo-Portland Crucible</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('forgeModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-6">
+        <!-- Fusion Mode Picker -->
+        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+          <button id="btnForgeModeAdditive" onclick="setForgeMode('additive')" class="p-3 rounded-2xl border-2 border-cyan-500 bg-cyan-950/40 text-cyan-300 font-bold flex flex-col items-center gap-1 shadow-md">
+            <span>➕ STAT FUSION</span>
+            <span class="text-[9px] text-slate-300 font-normal">Combines Affixes</span>
+          </button>
+          <button id="btnForgeModeInfusion" onclick="setForgeMode('infusion')" class="p-3 rounded-2xl border-2 border-slate-700 bg-slate-950/40 text-slate-400 font-bold flex flex-col items-center gap-1 hover:border-slate-500">
+            <span>✨ LEGENDARY INFUSION</span>
+            <span class="text-[9px] text-slate-400 font-normal">Absorbs Set Perk</span>
+          </button>
+          <button id="btnForgeModeDual" onclick="setForgeMode('dual')" class="p-3 rounded-2xl border-2 border-slate-700 bg-slate-950/40 text-slate-400 font-bold flex flex-col items-center gap-1 hover:border-slate-500">
+            <span>👑 DUAL-FUSION (BOTH)</span>
+            <span class="text-[9px] text-slate-400 font-normal">Stats + Perk + Socket</span>
+          </button>
+        </div>
+
+        <!-- 2 Item Input Sockets -->
+        <div class="flex items-center justify-center gap-8 py-2">
+          <!-- Item A Socket (Base) -->
+          <div class="flex flex-col items-center gap-2">
+            <span class="text-xs text-cyan-300 font-bold">ITEM A (CHASSIS)</span>
+            <div id="forgeSocketA" onclick="openForgeSelector('A')" class="forge-slot w-24 h-24 rounded-2xl border-2 border-dashed border-cyan-500/60 bg-slate-950/60 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 p-2 text-center text-[10px]">
+              <span class="text-2xl opacity-60">🗡️</span>
+              <span id="forgeNameA" class="text-slate-400 mt-1">Select Base Item</span>
+            </div>
+          </div>
+
+          <div class="text-2xl font-black text-amber-400">➕</div>
+
+          <!-- Item B Socket (Catalyst) -->
+          <div class="flex flex-col items-center gap-2">
+            <span class="text-xs text-amber-300 font-bold">ITEM B (CATALYST)</span>
+            <div id="forgeSocketB" onclick="openForgeSelector('B')" class="forge-slot w-24 h-24 rounded-2xl border-2 border-dashed border-amber-500/60 bg-slate-950/60 flex flex-col items-center justify-center cursor-pointer hover:border-amber-400 p-2 text-center text-[10px]">
+              <span class="text-2xl opacity-60">💎</span>
+              <span id="forgeNameB" class="text-slate-400 mt-1">Select Catalyst</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Result Card -->
+        <div id="forgePreviewCard" class="p-4 rounded-2xl bg-slate-950/80 border border-slate-700 text-xs text-slate-300 space-y-1.5">
+          <div class="font-bold text-amber-300 uppercase flex items-center gap-1.5">
+            <span>🔮 FUSION PREVIEW:</span>
+            <span id="forgePreviewTitle" class="text-white">Awaiting Two Compatible Gear Items...</span>
+          </div>
+          <p id="forgePreviewStats" class="text-[11px] text-slate-400">Place two weapons, armors, or relics into the crucible to calculate resulting augmented stats and legendary power absorption.</p>
+        </div>
+
+        <!-- Action Button -->
+        <button id="btnExecuteForge" onclick="executeItemForge()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 active:scale-98 transition-all disabled:opacity-50">
+          <span>🔥 IGNITE QUANTUM FORGE (150 BEANS)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 🏛️ MAYOR OF PORTLAND: SAFEHOUSE NEIGHBORHOOD PICKER MODAL -->
+  <!-- ========================================================================= -->
+  <div id="safehouseSelectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 font-mono">
+    <div class="max-w-3xl w-full rounded-3xl bg-slate-900 border-2 border-cyan-500/60 shadow-[0_0_80px_rgba(56,189,248,0.3)] flex flex-col max-h-[92vh] overflow-hidden">
+      <div class="p-5 border-b border-slate-800 bg-slate-950/90 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">🏛️</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">OFFICE OF THE MAYOR · CITY OF PORTLAND</h2>
+            <p class="text-[11px] text-cyan-400">Emergency Directive 0x7729 · Safehouse Deed Allocation</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('safehouseSelectModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4">
+        <div class="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 text-xs text-slate-300 leading-relaxed">
+          <p class="font-bold text-cyan-300 text-sm mb-1">"Operative, our city is on the brink."</p>
+          <p>The synthetic fentanyl epidemic has overwhelmed the streets. Normal supply chains are broken, and predatory warlords have weaponized the contagion. By executive order, I grant you the title deed to establish your permanent Safehouse operations center. Choose your district headquarters wisely:</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 text-xs">
+          <!-- Pearl District -->
+          <div onclick="selectSafehouseDistrict('pearl')" class="p-4 rounded-2xl border-2 border-cyan-500/50 bg-slate-950/60 hover:border-cyan-400 hover:bg-cyan-950/30 cursor-pointer transition-all space-y-2">
+            <div class="flex justify-between items-center font-bold text-white text-sm">
+              <span>PEARL DISTRICT ARCOLOGY</span>
+              <span class="text-[10px] text-cyan-400">HIGH-TECH</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Penthouse loft overlooking downtown. Equipped with the Quantum Neon Crucible laser forge and cleanroom bio-lab.</p>
+            <div class="text-[10px] text-cyan-300 font-bold">✨ Perk: +15% Gem & Crystal Drop Rate</div>
+          </div>
+
+          <!-- Hawthorne -->
+          <div onclick="selectSafehouseDistrict('hawthorne')" class="p-4 rounded-2xl border-2 border-amber-500/50 bg-slate-950/60 hover:border-amber-400 hover:bg-amber-950/30 cursor-pointer transition-all space-y-2">
+            <div class="flex justify-between items-center font-bold text-white text-sm">
+              <span>HAWTHORNE ROASTER LOFT</span>
+              <span class="text-[10px] text-amber-400">BOHEMIAN</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Exposed red brick, copper distillation coils, and rain skylights. Houses the Underground Alchemist distillation forge.</p>
+            <div class="text-[10px] text-amber-300 font-bold">✨ Perk: +20% Cold Brew Health Potion Potency</div>
+          </div>
+
+          <!-- Lents -->
+          <div onclick="selectSafehouseDistrict('lents')" class="p-4 rounded-2xl border-2 border-emerald-500/50 bg-slate-950/60 hover:border-emerald-400 hover:bg-emerald-950/30 cursor-pointer transition-all space-y-2">
+            <div class="flex justify-between items-center font-bold text-white text-sm">
+              <span>LENTS RAIL WAREHOUSE</span>
+              <span class="text-[10px] text-emerald-400">INDUSTRIAL</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Heavy corrugated steel bunker alongside transit tracks. Features the Neo-PDX Street Smelter and weapon scrapyard.</p>
+            <div class="text-[10px] text-emerald-300 font-bold">✨ Perk: +25% Scrap Metal Salvage Yield</div>
+          </div>
+
+          <!-- Chinatown -->
+          <div onclick="selectSafehouseDistrict('chinatown')" class="p-4 rounded-2xl border-2 border-rose-500/50 bg-slate-950/60 hover:border-rose-400 hover:bg-rose-950/30 cursor-pointer transition-all space-y-2">
+            <div class="flex justify-between items-center font-bold text-white text-sm">
+              <span>CHINATOWN DRAGON TEA HOUSE</span>
+              <span class="text-[10px] text-rose-400">SMUGGLER VAULT</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Red silk lanterns and carved timber vault with direct access to the historic Shanghai Tunnels.</p>
+            <div class="text-[10px] text-rose-300 font-bold">✨ Perk: +15% Movement Speed in Dungeons</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 📜 DIABLO 2 QUEST JOURNAL & DISTRICT BOUNTIES MODAL ('Q' KEY) -->
+  <!-- ========================================================================= -->
+  <div id="questLogModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 font-mono">
+    <div class="max-w-3xl w-full rounded-3xl bg-slate-900 border border-purple-500/50 shadow-[0_0_60px_rgba(168,85,247,0.3)] flex flex-col max-h-[92vh] overflow-hidden">
+      <div class="p-4 border-b border-slate-800 bg-slate-950/90 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">📜</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">PORTLAND DISTRICT QUEST JOURNAL</h2>
+            <p class="text-[11px] text-purple-400">Active Campaign Objectives · Safehouse NPC Bounties · Hotkey [Q]</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('questLogModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div id="questCardsContainer" class="p-5 overflow-y-auto space-y-3.5">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 🛰️ LIVE BETA TELEMETRY & HOT-PATCH BRIDGE MODAL -->
+  <!-- ========================================================================= -->
+  <div id="betaTelemetryModal" style="z-index: 80;" class="hidden fixed inset-0 z-80 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 font-mono">
+    <div class="max-w-2xl w-full rounded-3xl bg-slate-900 border border-teal-500/50 shadow-[0_0_60px_rgba(20,184,166,0.3)] flex flex-col max-h-[90vh] overflow-hidden">
+      <div class="p-4 border-b border-slate-800 bg-slate-950/90 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">🛰️</span>
+          <div>
+            <h2 class="font-display font-black text-lg text-white tracking-wider uppercase">LIVE BETA TESTING & DEV BRIDGE</h2>
+            <p class="text-[11px] text-teal-400">Direct Link with Antigravity AI · Live Telemetry & Real-Time Hot-Patching</p>
+          </div>
+        </div>
+        <button onclick="toggleModal('betaTelemetryModal')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4">
+        <!-- Live Status Metrics -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-3 rounded-2xl bg-slate-950/70 border border-teal-500/30 text-center">
+            <div class="text-[10px] text-slate-400">TARGET FPS</div>
+            <div id="betaDiagFps" class="text-lg font-bold text-teal-300">60 FPS</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950/70 border border-cyan-500/30 text-center">
+            <div class="text-[10px] text-slate-400">FRAME TIME</div>
+            <div id="betaDiagFrameTime" class="text-lg font-bold text-cyan-300">16.6 ms</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950/70 border border-amber-500/30 text-center">
+            <div class="text-[10px] text-slate-400">ACTIVE FOES</div>
+            <div id="betaDiagEnemies" class="text-lg font-bold text-amber-300">0</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-950/70 border border-emerald-500/30 text-center">
+            <div class="text-[10px] text-slate-400">CURED SOULS</div>
+            <div id="betaDiagCured" class="text-lg font-bold text-emerald-300">0</div>
+          </div>
+        </div>
+
+        <!-- Antigravity Live Link Status -->
+        <div class="p-3.5 rounded-2xl bg-teal-950/30 border border-teal-500/40 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+            <div>
+              <div class="text-xs font-bold text-white">ANTIGRAVITY AI DEV BRIDGE: ACTIVE</div>
+              <div class="text-[10px] text-teal-300">Real-time session monitoring & live hot-patching enabled.</div>
+            </div>
+          </div>
+          <button onclick="copyTelemetrySnapshot()" class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-slate-950 font-bold text-xs flex items-center gap-1 active:scale-95 transition-all">
+            📋 COPY TELEMETRY
+          </button>
+        </div>
+
+        <!-- Recent Event Stream -->
+        <div>
+          <div class="text-xs font-bold text-slate-300 mb-1.5 flex justify-between items-center">
+            <span>RECENT EVENT STREAM (LAST 15)</span>
+            <button onclick="renderBetaTelemetryUI()" class="text-[10px] text-teal-400 hover:underline">🔄 REFRESH</button>
+          </div>
+          <div id="betaDiagEventLog" class="max-h-40 overflow-y-auto space-y-1 p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Live Hot-Patch Injector -->
+        <div class="space-y-2 pt-1 border-t border-slate-800">
+          <div class="text-xs font-bold text-slate-300">LIVE HOT-PATCH INJECTOR (EXECUTE JS IN RUNNING GAME)</div>
+          <div class="flex gap-2">
+            <input id="txtHotPatchInput" type="text" placeholder="e.g. gameState.player.beans += 500; gameState.player.hp = 100;" class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-teal-300 focus:outline-none focus:border-teal-400" />
+            <button onclick="executeLiveHotPatchInput()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-slate-950 font-bold text-xs hover:brightness-110 active:scale-95 transition-all">
+              ⚡ INJECT
+            </button>
+          </div>
+          <div class="text-[10px] text-slate-500">Live hot-patches apply immediately to the running game without reloading or resetting player state.</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 🗺️ DIABLO 2 FULLSCREEN AUTOMAP CANVAS OVERLAY ('TAB' KEY) -->
+  <!-- ========================================================================= -->
+  <div id="automapOverlayContainer" class="hidden fixed inset-0 z-40 pointer-events-none flex items-center justify-center">
+    <canvas id="automapCanvas" class="w-full h-full opacity-80"></canvas>
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-xl bg-slate-950/80 border border-emerald-500/50 text-[10px] font-mono text-emerald-300 font-bold backdrop-blur-xs shadow-lg">
+      AUTOMAP ACTIVE · PRESS [TAB] OR [MAP] TO CLOSE
     </div>
   </div>
 
